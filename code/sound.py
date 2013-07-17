@@ -15,40 +15,247 @@ import matplotlib.pyplot as pyplot
 
 PI2 = math.pi * 2
 
-def write_wav(ys, filename='sound.wav', sample_rate=11025):
-    nchannels = 1
-    sampwidth = 2
-    fmt = 'h'
+class UnimplementedMethodException(Exception):
+    """Exception if someone calls a method that should be overridden."""
 
-    fp = wave.open(filename, 'w')
-    fp.setnchannels(nchannels)
-    fp.setsampwidth(sampwidth)
-    fp.setframerate(sample_rate)
-    fp.setnframes(len(ys))
 
-    if max(ys) > 32767 or min(ys) < -32768:
-        raise ValueError('Signal does not fit in 16 bits')
+class WavFile(object):
+
+    def __init__(self, filename='sound.wav', framerate=11025):
+        """Initializes the wave.
+        """
+        self.framerate = framerate
+        self.nchannels = 1
+        self.sampwidth = 2
+        self.bits = self.sampwidth * 8
+        self.bound = 2**(self.bits-1) - 1
+        self.fmt = 'h'
+        self.dtype = numpy.int16
+
+        self.fp = wave.open(filename, 'w')
+        self.fp.setnchannels(self.nchannels)
+        self.fp.setsampwidth(self.sampwidth)
+        self.fp.setframerate(self.framerate)
+    
+    def write(self, wave):
+        """Writes the wave.
+
+        wave: Wave
+        """
+        ys = wave.apodize()
+        zs = quantize(ys, self.bound, self.dtype)
+
+        oframes = array.array(self.fmt, zs)
+        self.fp.writeframes(oframes)
+
+    def close(self, silence=3):
+        if silence:
+            self.write(rest(silence))
+
+        self.fp.close()
+
+
+class Wave(object):
+    """Represents a discrete-time waveform."""
+
+    def __init__(self, ys, framerate):
+        """Initializes the wave.
+        """
+        self.ys = ys
+        self.framerate = framerate
+
+    def quantize(self, bound, dtype):
+        """Maps the waveform to quanta.
+
+        ys: signal array
+        bound: maximum amplitude
+        dtype: numpy data type or string
+
+        returns: quantized signal
+        """
+        return quantize(self.ys, bound, dtype)
+
+    def apodize(self, denom=20, duration=0.1):
+        """Tapers the amplitude at the beginning and end of the signal.
+
+        Tapers either the given duration of time or the given
+        fraction of the total duration, whichever is less.
+
+        denom: float fraction of the sample to taper
+        duration: float duration of the taper in seconds
+
+        returns: signal array
+        """
+        return apodize(self.ys, self.framerate, denom, duration)
+
+    def plot(self):
+        """Plots the signal.
+
+        """
+        pyplot.plot(self.ts, self.ys)
+        pyplot.show()
+
+
+def note(midi_num, duration):
+    freq = midi_to_freq(midi_num)
+    signal = CosSignal(freq)
+    wave = signal.make_wave(duration)
+    return wave
+
+
+def rest(duration):
+    signal = SilentSignal()
+    wave = signal.make_wave(duration)
+    return wave
+
+
+def chord(midi_nums, duration):
+    freqs = [midi_to_freq(num) for num in midi_nums]
+    signal = sum(CosSignal(freq) for freq in freqs)
+    wave = signal.make_wave(duration)
+    return wave
+
+
+def midi_to_freq(midi_num):
+    x = (midi_num - 69) / 12.0
+    freq = 440.0 * 2**x
+    return freq
+
+
+def unbias(ys):
+    """
+    """
+    return ys - ys.mean()
+
+
+def normalize(ys):
+    """
+    """
+    high, low = abs(max(ys)), abs(min(ys))
+    return ys / max(high, low)
+
+
+def quantize(ys, bound, dtype):
+    """Maps the waveform to quanta.
+
+    ys: signal array
+    bound: maximum amplitude
+    dtype:
+
+    returns: quantized signal
+    """
+    if max(ys) > 1 or min(ys) < -1:
+        print 'Warning: normalizing before quantizing.'
+        ys = normalize(ys)
         
-    oframes = array.array(fmt, ys)
-    print oframes[:1000]
+    zs = (ys * bound).astype(dtype)
+    return zs
 
-    fp.writeframes(oframes)
-    fp.close()
+def apodize(ys, framerate, denom=20, duration=0.1):
+    """Tapers the amplitude at the beginning and end of the signal.
+
+    Tapers either the given duration of time or the given
+    fraction of the total duration, whichever is less.
+
+    ys: signal array
+    framerate: int frames per second
+    denom: float fraction of the sample to taper
+    duration: float duration of the taper in seconds
+
+    returns: signal array
+    """
+    # a fixed fraction of the sample
+    n = len(ys)
+    k1 = n / denom
+
+    # a fixed duration of time
+    k2 = int(duration * framerate)
+
+    k = min(k1, k2)
+
+    w1 = numpy.linspace(0, 1, k)
+    w2 = numpy.ones(n - 2*k)
+    w3 = numpy.linspace(1, 0, k)
+
+    window = numpy.concatenate((w1, w2, w3))
+    return ys * window
 
 
-def discretize(ys, bits=16):
-    bound = 2**(bits-1) - 1
-    zs = (ys * bound)
-    return zs.astype('int16')
+class Signal(object):
+    """Represents a time-varying signal."""
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        return SumSignal(self, other)
+
+    __radd__ = __add__
+
+    def make_wave(self, duration=1, start=0, framerate=11025):
+        dt = 1.0 / framerate
+        ts = numpy.arange(start, duration, dt)
+        ys = self.evaluate(ts)
+        return Wave(ys, framerate)
 
 
-def sample_times(end=1, sample_rate=11025):
-    dt = 1.0 / sample_rate
-    return numpy.arange(0, end, dt)
+class SumSignal(Signal):
+    """Represents the sum of signals."""
+    
+    def __init__(self, *args):
+        """Initializes the sum.
+
+        args: tuple of signals
+        """
+        self.signals = args
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float signal array
+        """
+        return sum(sig.evaluate(ts) for sig in self.signals)
 
 
-def cos_signal(ts, freq=440, amp=1.0, offset=0):
-    return amp * numpy.cos(PI2 * freq * ts + offset)
+class CosSignal(Signal):
+    """Represents a cosine signal."""
+    
+    def __init__(self, freq=440, amp=1.0, offset=0):
+        """Initializes a cosine signal.
+
+        freq: float frequency in Hz
+        amp: float amplitude, 1.0 is nominal max
+        offset: float phase offset in radians
+        """
+        Signal.__init__(self)
+        self.freq = freq
+        self.amp = amp
+        self.offset = offset
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float signal array
+        """
+        phases = PI2 * self.freq * ts + self.offset
+        ys = self.amp * numpy.cos(phases)
+        return ys
+
+
+class SilentSignal(Signal):
+    """Represents a cosine signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float signal array
+        """
+        return numpy.zeros(len(ts))
 
 
 def sin_signal(ts, freq=440, amp=1.0, offset=0):
@@ -63,52 +270,33 @@ def func_signal(ts, func, freq=440, amp=1.0, offset=0):
     ys = amp * func(phase)
     return ys
 
-
-def apodize(ys, sample_rate=11025):
-    # a fixed fraction of the sample
-    n = len(ys)
-    k1 = n / 20
-
-    # a fixed duration of time
-    k2 = sample_rate / 10
-
-    k = min(k1, k2)
-
-    w1 = numpy.linspace(0, 1, k)
-    w2 = numpy.ones(n - 2*k)
-    w3 = numpy.linspace(1, 0, k)
-    
-    window = numpy.concatenate((w1, w2, w3))
-
-    #pyplot.plot(window)
-    #pyplot.plot(ys)
-    #pyplot.plot(ys * window)
-    #pyplot.show()
-    
     return ys * window
 
 
 def main():
-    ts = sample_times(1)
-    print ts[0], ts[-1], len(ts)
+    wave = note(69, 1)
+    wave = chord([69, 72, 76], 1)
+    wfile = WavFile()
+    wfile.write(wave)
+    wfile.close()
+    return
 
-    def identity(ts): return ts / PI2
+    sig1 = CosSignal(freq=440)
+    sig2 = CosSignal(freq=523.25)
+    sig3 = CosSignal(freq=660)
+    sig4 = CosSignal(freq=880)
+    sig5 = CosSignal(freq=987)
+    sig = sig1 + sig2 + sig3 + sig4
 
-    func = identity
-    func = numpy.cos
+    #wave = Wave(sig, duration=0.02)
+    #wave.plot()
 
-    ys = func_signal(ts, func, freq=440)
-    print ys[0], ys[-1], len(ys)
+    wave = sig.make_wave(duration=1)
+    #wave.normalize()
 
-    #pyplot.plot(ys[:100])
-    #pyplot.show()
+    wfile = WavFile(wave)
+    wfile.write()
 
-    ys = apodize(ys)
-
-    zs = discretize(ys)
-    print zs[0], zs[-1], len(zs), min(zs), max(zs)
-
-    write_wav(zs)
 
 
 if __name__ == '__main__':
