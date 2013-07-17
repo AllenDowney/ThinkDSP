@@ -42,15 +42,18 @@ class WavFile(object):
 
         wave: Wave
         """
-        ys = wave.apodize()
-        zs = quantize(ys, self.bound, self.dtype)
+        zs = wave.quantize(self.bound, self.dtype)
 
         oframes = array.array(self.fmt, zs)
         self.fp.writeframes(oframes)
 
-    def close(self, silence=3):
-        if silence:
-            self.write(rest(silence))
+    def close(self, duration=3):
+        """Closes the file.
+
+        duration: how many seconds of silence to append
+        """
+        if duration:
+            self.write(rest(duration))
 
         self.fp.close()
 
@@ -63,6 +66,15 @@ class Wave(object):
         """
         self.ys = ys
         self.framerate = framerate
+
+    def __or__(self, other):
+        """
+        """
+        if self.framerate != other.framerate:
+            raise ValueError('Wave.__or__: framerates do not agree')
+
+        ys = numpy.concatenate((self.ys, other.ys))
+        return Wave(ys, self.framerate)
 
     def quantize(self, bound, dtype):
         """Maps the waveform to quanta.
@@ -86,7 +98,7 @@ class Wave(object):
 
         returns: signal array
         """
-        return apodize(self.ys, self.framerate, denom, duration)
+        self.ys = apodize(self.ys, self.framerate, denom, duration)
 
     def plot(self):
         """Plots the signal.
@@ -96,16 +108,17 @@ class Wave(object):
         pyplot.show()
 
 
-def note(midi_num, duration):
-    freq = midi_to_freq(midi_num)
-    signal = CosSignal(freq)
+def rest(duration):
+    signal = SilentSignal()
     wave = signal.make_wave(duration)
     return wave
 
 
-def rest(duration):
-    signal = SilentSignal()
+def note(midi_num, duration):
+    freq = midi_to_freq(midi_num)
+    signal = CosSignal(freq)
     wave = signal.make_wave(duration)
+    wave.apodize()
     return wave
 
 
@@ -113,6 +126,7 @@ def chord(midi_nums, duration):
     freqs = [midi_to_freq(num) for num in midi_nums]
     signal = sum(CosSignal(freq) for freq in freqs)
     wave = signal.make_wave(duration)
+    wave.apodize()
     return wave
 
 
@@ -246,7 +260,7 @@ class CosSignal(Signal):
 
 
 class SilentSignal(Signal):
-    """Represents a cosine signal."""
+    """Represents silence."""
     
     def evaluate(self, ts):
         """Evaluates the signal at the given times.
@@ -274,8 +288,16 @@ def func_signal(ts, func, freq=440, amp=1.0, offset=0):
 
 
 def main():
-    wave = note(69, 1)
-    wave = chord([69, 72, 76], 1)
+    wfile = WavFile()
+    for m in range(69, 89):
+        wfile.write(note(m, 0.25))
+    wfile.close()
+    return
+
+    wave1 = note(69, 1)
+    wave2 = chord([69, 72, 76], 1)
+    wave = wave1 | wave2
+
     wfile = WavFile()
     wfile.write(wave)
     wfile.close()
