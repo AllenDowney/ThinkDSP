@@ -43,7 +43,6 @@ class WavFile(object):
         wave: Wave
         """
         zs = wave.quantize(self.bound, self.dtype)
-
         oframes = array.array(self.fmt, zs)
         self.fp.writeframes(oframes)
 
@@ -289,7 +288,7 @@ def func_signal(ts, func, freq=440, amp=1.0, offset=0):
 
 def main():
     wfile = WavFile()
-    for m in range(69, 89):
+    for m in range(20, 120, 5):
         wfile.write(note(m, 0.25))
     wfile.close()
     return
