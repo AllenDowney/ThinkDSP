@@ -43,10 +43,9 @@ class WavFile(object):
         wave: Wave
         """
         zs = wave.quantize(self.bound, self.dtype)
-        oframes = array.array(self.fmt, zs)
-        self.fp.writeframes(oframes)
+        self.fp.writeframes(zs.tostring())
 
-    def close(self, duration=3):
+    def close(self, duration=0):
         """Closes the file.
 
         duration: how many seconds of silence to append
@@ -55,6 +54,12 @@ class WavFile(object):
             self.write(rest(duration))
 
         self.fp.close()
+
+
+def write_wave(wave, filename='sound.wav'):
+    wfile = WavFile(filename, wave.framerate)
+    wfile.write(wave)
+    wfile.close()
 
 
 class Wave(object):
@@ -78,7 +83,7 @@ class Wave(object):
     def quantize(self, bound, dtype):
         """Maps the waveform to quanta.
 
-        ys: signal array
+        ys: wave array
         bound: maximum amplitude
         dtype: numpy data type or string
 
@@ -95,7 +100,7 @@ class Wave(object):
         denom: float fraction of the sample to taper
         duration: float duration of the taper in seconds
 
-        returns: signal array
+        returns: wave array
         """
         self.ys = apodize(self.ys, self.framerate, denom, duration)
 
@@ -103,57 +108,40 @@ class Wave(object):
         """Plots the signal.
 
         """
-        pyplot.plot(self.ts, self.ys)
-        pyplot.show()
-
-
-def rest(duration):
-    signal = SilentSignal()
-    wave = signal.make_wave(duration)
-    return wave
-
-
-def note(midi_num, duration):
-    freq = midi_to_freq(midi_num)
-    signal = CosSignal(freq)
-    wave = signal.make_wave(duration)
-    wave.apodize()
-    return wave
-
-
-def chord(midi_nums, duration):
-    freqs = [midi_to_freq(num) for num in midi_nums]
-    signal = sum(CosSignal(freq) for freq in freqs)
-    wave = signal.make_wave(duration)
-    wave.apodize()
-    return wave
-
-
-def midi_to_freq(midi_num):
-    x = (midi_num - 69) / 12.0
-    freq = 440.0 * 2**x
-    return freq
+        n = len(self.ys)
+        duration = float(n) / self.framerate
+        ts = numpy.linspace(0, duration, n)
+        pyplot.plot(ts, self.ys)
 
 
 def unbias(ys):
-    """
+    """Shifts a wave array so it has mean 0.
+
+    ys: wave array
+
+    returns: wave array
     """
     return ys - ys.mean()
 
 
-def normalize(ys):
-    """
+def normalize(ys, amp=1):
+    """Normalizes a wave array so the maximum amplitude is +amp or -amp.
+
+    ys: wave array
+    amp: max amplitude (pos or neg) in result
+
+    returns: wave array
     """
     high, low = abs(max(ys)), abs(min(ys))
-    return ys / max(high, low)
+    return amp * ys / max(high, low)
 
 
 def quantize(ys, bound, dtype):
     """Maps the waveform to quanta.
 
-    ys: signal array
+    ys: wave array
     bound: maximum amplitude
-    dtype:
+    dtype: numpy data type of the result
 
     returns: quantized signal
     """
@@ -164,18 +152,19 @@ def quantize(ys, bound, dtype):
     zs = (ys * bound).astype(dtype)
     return zs
 
+
 def apodize(ys, framerate, denom=20, duration=0.1):
     """Tapers the amplitude at the beginning and end of the signal.
 
     Tapers either the given duration of time or the given
     fraction of the total duration, whichever is less.
 
-    ys: signal array
+    ys: wave array
     framerate: int frames per second
     denom: float fraction of the sample to taper
     duration: float duration of the taper in seconds
 
-    returns: signal array
+    returns: wave array
     """
     # a fixed fraction of the sample
     n = len(ys)
@@ -204,7 +193,29 @@ class Signal(object):
 
     __radd__ = __add__
 
+    def period(self):
+        """Period of the signal in seconds.
+
+        For non-periodic signals, use the default, 0.1 seconds
+
+        returns: float seconds
+        """
+        return 0.1
+
+    def plot(self, framerate=11025):
+        duration = self.period() * 3
+        wave = self.make_wave(duration, start=0, framerate=framerate)
+        wave.plot()
+    
     def make_wave(self, duration=1, start=0, framerate=11025):
+        """Makes a Wave object.
+
+        duration: float seconds
+        start: float seconds
+        framerate: int frames per second
+
+        returns: Wave
+        """
         dt = 1.0 / framerate
         ts = numpy.arange(start, duration, dt)
         ys = self.evaluate(ts)
@@ -221,40 +232,164 @@ class SumSignal(Signal):
         """
         self.signals = args
 
+    def period(self):
+        """Period of the signal in seconds.
+
+        returns: float seconds
+        """
+        return max(sig.period() for sig in self.signals)
+
     def evaluate(self, ts):
         """Evaluates the signal at the given times.
 
         ts: float array of times
         
-        returns: float signal array
+        returns: float wave array
         """
         return sum(sig.evaluate(ts) for sig in self.signals)
 
 
-class CosSignal(Signal):
+class Sinusoid(Signal):
     """Represents a cosine signal."""
     
-    def __init__(self, freq=440, amp=1.0, offset=0):
+    def __init__(self, freq=440, amp=1.0, offset=0, func=numpy.sin):
         """Initializes a cosine signal.
 
         freq: float frequency in Hz
         amp: float amplitude, 1.0 is nominal max
         offset: float phase offset in radians
+        func: function that maps phase to amplitude
         """
         Signal.__init__(self)
         self.freq = freq
         self.amp = amp
         self.offset = offset
+        self.func = func
+
+    def period(self):
+        """Period of the signal in seconds.
+
+        returns: float seconds
+        """
+        return 1.0 / self.freq
 
     def evaluate(self, ts):
         """Evaluates the signal at the given times.
 
         ts: float array of times
         
-        returns: float signal array
+        returns: float wave array
         """
         phases = PI2 * self.freq * ts + self.offset
-        ys = self.amp * numpy.cos(phases)
+        ys = self.amp * self.func(phases)
+        return ys
+
+
+def CosSignal(freq=440, amp=1.0, offset=0):
+    """Makes a consine Sinusoid.
+
+    freq: float frequency in Hz
+    amp: float amplitude, 1.0 is nominal max
+    offset: float phase offset in radians
+    
+    returns: Sinusoid object
+    """
+    return Sinusoid(freq, amp, offset, func=numpy.cos)
+
+
+def SinSignal(freq=440, amp=1.0, offset=0):
+    """Makes a sine Sinusoid.
+
+    freq: float frequency in Hz
+    amp: float amplitude, 1.0 is nominal max
+    offset: float phase offset in radians
+    
+    returns: Sinusoid object
+    """
+    return Sinusoid(freq, amp, offset, func=numpy.sin)
+
+
+class SquareSignal(Sinusoid):
+    """Represents a square signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = self.amp * numpy.sign(unbias(frac))
+        return ys
+
+
+class SawtoothSignal(Sinusoid):
+    """Represents a sawtooth signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = frac
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+
+
+class ParabolicSignal(Sinusoid):
+    """Represents a sawtooth signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = frac**2
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+
+
+class GlottalSignal(Sinusoid):
+    """Represents a sawtooth signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = frac**4 * (1-frac)
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+
+
+class TriangleSignal(Sinusoid):
+    """Represents a sawtooth signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        cycles = self.freq * ts
+        frac, _ = numpy.modf(cycles)
+        ys = numpy.abs(frac - 0.5)
+        ys = normalize(unbias(ys), self.amp)
         return ys
 
 
@@ -266,29 +401,86 @@ class SilentSignal(Signal):
 
         ts: float array of times
         
-        returns: float signal array
+        returns: float wave array
         """
         return numpy.zeros(len(ts))
 
 
-def sin_signal(ts, freq=440, amp=1.0, offset=0):
-    return amp * numpy.sin(PI2 * freq * ts + offset)
+def rest(duration):
+    """Makes a rest of the given duration.
+
+    duration: float seconds
+
+    returns: Wave
+    """
+    signal = SilentSignal()
+    wave = signal.make_wave(duration)
+    return wave
 
 
-def func_signal(ts, func, freq=440, amp=1.0, offset=0):
-    phase = freq * ts + offset
-    phase, _ = numpy.modf(freq * ts)
-    phase *= PI2
+def note(midi_num, duration, sig_cons=CosSignal):
+    """Make a MIDI note with the given duration.
 
-    ys = amp * func(phase)
-    return ys
+    midi_num: int MIDI note number
+    duration: float seconds
+    sig_cons: Signal constructor function
+    """
+    freq = midi_to_freq(midi_num)
+    print midi_num, freq
+    signal = sig_cons(freq)
+    wave = signal.make_wave(duration)
+    wave.apodize()
+    return wave
 
-    return ys * window
+
+def chord(midi_nums, duration, sig_cons=CosSignal):
+    """Make a chord with the given duration.
+
+    midi_nums: sequence of int MIDI note numbers
+    duration: float seconds
+    """
+    freqs = [midi_to_freq(num) for num in midi_nums]
+    signal = sum(sig_cons(freq) for freq in freqs)
+    wave = signal.make_wave(duration)
+    wave.apodize()
+    return wave
+
+
+def midi_to_freq(midi_num):
+    """Converts MIDI note number to frequency.
+
+    midi_num: int MIDI note number
+    
+    returns: float frequency in Hz
+    """
+    x = (midi_num - 69) / 12.0
+    freq = 440.0 * 2**x
+    return freq
 
 
 def main():
     wfile = WavFile()
-    for m in range(20, 120, 5):
+    for sig_cons in [SinSignal, TriangleSignal, SawtoothSignal, 
+                     GlottalSignal, ParabolicSignal, SquareSignal]:
+        print sig_cons
+        sig = sig_cons(440)
+        wave = sig.make_wave(1)
+        wave.apodize()
+        wfile.write(wave)
+    wfile.close()
+    return
+
+    signal = GlottalSignal(440)
+    signal.plot()
+    pyplot.show()
+    return
+
+    wave = note(69, 1, SquareSignal)
+    write_wave(wave)
+    return
+
+    wfile = WavFile()
+    for m in range(60, 0, -1):
         wfile.write(note(m, 0.25))
     wfile.close()
     return
@@ -317,7 +509,7 @@ def main():
 
     wfile = WavFile(wave)
     wfile.write()
-
+    wfile.close()
 
 
 if __name__ == '__main__':
