@@ -18,18 +18,24 @@ def main():
     mix = sin_sig + cos_sig
 
     wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
+    print len(wave.ys)
+    print 1.0 / 11025 * 1000
 
     period = mix.period
     sample = wave.sample(start=0, duration=period*3)
 
     sample.plot()
     #pyplot.show()
+    thinkplot.Save(root='example1',
+                   xlabel='time (s)',
+                   axis=[0, period*3, -1.55, 1.55])
 
     wave.normalize()
     wave.apodize()
-    thinkdsp.write_wave(wave, filename='sound.wav')
+    wave.write(filename='example1.wav')
 
-    thinkdsp.play_wave(filename='sound.wav', player='aplay')
+    thinkdsp.play_wave(filename='example1.wav', player='aplay')
+
 
 if __name__ == '__main__':
     main()
