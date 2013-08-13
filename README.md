@@ -1,7 +1,7 @@
 ThinkDSP
 ========
 
-LaTeX source and Python code for "Think DSP: Digital Signal Processing in Python", by Allen B. Downey.
+LaTeX source and Python code for _Think DSP: Digital Signal Processing in Python_, by Allen B. Downey.
 
 The premise of this book (and the other books in the _Think X_ series) is that if you know how to program,
 you can use that skill to learn other things.  I am writing this book because I think the conventional
