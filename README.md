@@ -8,7 +8,7 @@ you can use that skill to learn other things.  I am writing this book because I 
 approach to digital signal processing is backward: most books (and the classes that use them) present
 the material bottom-up, starting with mathematical abstractions like phasors.
 
-With a programming-based approach, I can go top-down, which I present the most important
+With a programming-based approach, I can go top-down, which means I can present the most important
 ideas right away.  By the end of the first chapter, you can
 break down a sound into its harmonics, modify the harmonics, and generate new sounds.  
 
