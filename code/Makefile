@@ -8,7 +8,11 @@ DOCPY = thinkdsp.py
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
-FIGS = sinusoid1.pdf  violin1.pdf  tuning1.pdf  violin2.pdf
+FIGS = sinusoid1.pdf sinusoid1.eps \
+violin1.pdf  violin1.eps  \
+tuning1.pdf  tuning1.eps  \
+violin2.pdf  violin2.eps  \
+example1.pdf example1.eps \
 
 all_figs:
 	python violin.py

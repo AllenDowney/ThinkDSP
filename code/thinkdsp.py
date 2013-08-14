@@ -135,6 +135,37 @@ class Spectrum(object):
         t.sort(reverse=True)
         return t
 
+    def low_pass(self, cutoff, factor=0):
+        """Attenuate frequencies above the cutoff.
+
+        cutoff: frequency in Hz
+        factor: what to multiply the magnitude by
+        """
+        for i in xrange(len(self.hs)):
+            if self.fs[i] > cutoff:
+                self.hs[i] *= factor
+
+    def high_pass(self, cutoff, factor=0):
+        """Attenuate frequencies below the cutoff.
+
+        cutoff: frequency in Hz
+        factor: what to multiply the magnitude by
+        """
+        for i in xrange(len(self.hs)):
+            if self.fs[i] < cutoff:
+                self.hs[i] *= factor
+
+    def band_stop(self, low_cutoff, high_cutoff, factor=0):
+        """Attenuate frequencies between the cutoffs.
+
+        low_cutoff: frequency in Hz
+        high_cutoff: frequency in Hz
+        factor: what to multiply the magnitude by
+        """
+        for i in xrange(len(self.hs)):
+            if low_cutoff < self.fs[i] < high_cutoff:
+                self.hs[i] = 0
+
     def angles(self, i):
         """Computes phase angles in radians.
 
@@ -142,14 +173,6 @@ class Spectrum(object):
         """
         return numpy.angle(self.hs)
 
-    def freq(self, i):
-        """
-        """
-        n = len(self.hs)
-        f_max = framerate / 2.0
-        freq = i * f_max / n
-        return freq
-        
     def make_wave(self):
         """Transforms to the time domain.
 

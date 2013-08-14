@@ -30,7 +30,7 @@
 \title{Think DSP}
 \author{Allen B. Downey}
 
-\newcommand{\thetitle}{Think DSP: Digital Signal Processing for Programmers}
+\newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
 \newcommand{\theversion}{0.1}
 
 % these styles get translated in CSS for the HTML version
@@ -93,7 +93,7 @@
 
 \begin{spacing}{3}
 {\huge Think DSP}\\
-{\Large Digital Signal Processing for Programmers}
+{\Large Digital Signal Processing in Python}
 \end{spacing}
 
 \vspace{0.25in}
@@ -118,7 +118,7 @@ Version \theversion
 
 \begin{spacing}{3}
 {\huge Think DSP}\\
-{\Large Digital Signal Processing for Programmers}
+{\Large Digital Signal Processing in Python}
 \end{spacing}
 
 \vspace{0.25in}
@@ -201,6 +201,19 @@ Unported License, which is available at
 \chapter{Preface}
 \label{preface}
 
+The premise of this book (and the other books in the {\it Think X}
+series) is that if you know how to program, you can use that skill to
+learn other things.  I am writing this book because I think the
+conventional approach to digital signal processing is backward: most
+books (and the classes that use them) present the material bottom-up,
+starting with mathematical abstractions like phasors.
+
+With a programming-based approach, I can go top-down, which means I
+can present the most important ideas right away.  By the end of the
+first chapter, you can break down a sound into its harmonics, modify
+the harmonics, and generate new sounds.
+
+This is a work in progress, so comments are welcome.
 
 
 Allen B. Downey \\*
@@ -255,23 +268,24 @@ Thanks!
 \chapter{Sounds and signals}
 \label{sounds}
 
-A signal is a quantity that varies in time.  For example, sound is
-variation in air pressure.  A microphone is
-a device that measures these variations and generates
-variations in voltage.  What comes out of the microphone is an
-electronic signal that represents sound.
-A speaker is a device that takes an electrical signal and produces
-a sound signal.  Microphones and speakers are called {\bf transducers}
-because they transduce, or convert, signals from one form to another.
+A {\bf signal} is a representation of a quantity that varies in time,
+or space, or both.  That definition is pretty abstract, so let's start
+with a concrete example, sound.  Sound is variation in air pressure.
+A sound signal represents variations in air pressure over time.
 
-This book is about signal processing, which includes processes
-for synthesizing, transforming, and analyzing signals.  It focuses
-on sound signals, but
-the same methods apply to other signals, like electronic signals and
-mechanical vibration.
+A microphone is a device that measures these variations and generates
+an electronic signal that represents sound.  A speaker is a device
+that takes an electrical signal and produces sound.
+Microphones and speakers are called {\bf transducers} because they
+transduce, or convert, signals from one form to another.
 
-They also apply to signals that vary in
-space rather than time, like elevation along a hiking trail.
+This book is about signal processing, which includes processes for
+synthesizing, transforming, and analyzing signals.  It focuses on
+sound signals, but the same methods apply to other signals, like
+electronic signals and mechanical vibration.
+
+They also apply to signals that vary in space rather than time, like
+elevation along a hiking trail.
 
 And they apply to signals in more than one dimension, like an
 image, which you can think of as a signal that varies in two-dimensional
@@ -311,9 +325,13 @@ per second, which is the inverse of the period.
 The units of frequency are cycles per second, or {\bf Hertz},
 abbreviated ``Hz''.
 
-The frequency of this signal is about 439 Hz, slightly lower than
-440 Hz, which is the standard tuning pitch for orchestral music.  The
-musical name of this note is A, or more specifically, A4.
+The frequency of this signal is about 439 Hz, slightly lower than 440
+Hz, which is the standard tuning pitch for orchestral music.  The
+musical name of this note is A, or more specifically, A4.  If you are
+not familiar with ``scientific pitch notation'', the suffix indicates
+which octave the note is in.  A4 is the A above middle C.  A5 is one
+octave higher.  See
+\url{http://en.wikipedia.org/wiki/Scientific_pitch_notation}.
 
 \begin{figure}
 % violin.py
@@ -323,7 +341,7 @@ musical name of this note is A, or more specifically, A4.
 \end{figure}
 
 A tuning fork generates a sinusoid because the vibration of the tines
-is a form of simple harmonic oscillation.  Most musical instruments
+is a form of simple harmonic motion.  Most musical instruments
 produce periodic signals, but the shape of these signals is not
 sinusoidal.  For example, Figure~\ref{fig.violin1} shows a sample
 from a recording of a violin playing
@@ -356,18 +374,18 @@ simpler signals with different frequencies.
 
 And the most important algorithm in this book is the {\bf discrete
   Fourier transform}, or {\bf DFT}, which takes a signal (a quantity
-varying in time) and produces a {\bf spectrum}, which is a set of
+varying in time) and produces its {\bf spectrum}, which is the set of
 sinusoids that add up to produce the signal.
 
 For example, Figure~\ref{fig.violin2} shows the spectrum of the violin
-sample in Figure~\ref{fig.violin1}.  The x-axis shows the range of
+sample in Figure~\ref{fig.violin1}.  The x-axis is the range of
 frequencies that make up the signal.  The y-axis shows the strength of
-each frequency component.\footnote{Technically, the y-axis shows
-  amplitude density; I'll define that more carefully later.}
+each frequency component.  The units of the y-axis are complicated;
+I will explain more later.
 
 The lowest frequency component is called the {\bf fundamental
   frequency}.  The fundamental frequency of this signal is near 440 Hz
-(actually just a little lower, or flat).
+(actually a little lower, or ``flat'').
 
 In this signal the fundamental frequency has the largest amplitude,
 so it is also the {\bf dominant frequency}.
@@ -406,7 +424,7 @@ reconstruct the signal exactly, you can use the inverse DFT.
 Next we'll see how.
 
 
-\section{Representing signals and spectrums}
+\section{Signals}
 
 I wrote a Python module called {\tt thinkdsp} that contains
 classes and function for working with signals and spectrums.
@@ -419,7 +437,7 @@ To represent signals, {\tt thinkdsp} provides a class named
 including {\tt Sinusoid}, which represents both sine and cosine
 signals.
 
-It provides functions to create sine and cosine signals:
+{\tt thinkdsp} provides functions to create sine and cosine signals:
 
 \begin{verbatim}
     cos_sig = thinkdsp.CosSignal(freq=440, amp=1.0, offset=0)
@@ -427,18 +445,19 @@ It provides functions to create sine and cosine signals:
 \end{verbatim}
 
 {\tt freq} is frequency in Hz.  {\tt amp} is amplitude in arbitrary
-units.  {\tt offset} is a {\tt phase offset} in units of radians.
-The phase offset determines where in the period the signal starts,
-at {\tt t=0}.  For example, a cosine signal with {\tt offset=0}
-starts at $\cos 0$, which is 1.  With {\tt offset=pi/2} it
-starts at $\cos \pi/2$, which is 0.
+units.  {\tt offset} is a {\tt phase offset} in radians.
 
-With {\tt offset=0} a sine signal also starts at 0.  In fact,
+The phase offset determines where in the period the signal starts
+(that is, when {\tt t=0}).  For example, a cosine signal with {\tt
+  offset=0} starts at $\cos 0$, which is 1.  With {\tt offset=pi/2} it
+starts at $\cos \pi/2$, which is 0.
+A sine signal with
+{\tt offset=0} also starts at 0.  In fact,
 a cosine signal with {\tt offset=pi/2} is identical to a sine
 signal with {\tt offset=0}.
 
 Signals have an \verb"__add__" method, so you can use the {\tt +}
-operator:
+operator to add them:
 
 \begin{verbatim}
     mix = sin_sig + cos_sig
@@ -449,15 +468,18 @@ or more signals.
 
 A Signal is basically a Python representation of a mathematical
 function.  Most signals are defined for all values of {\tt t},
-from negative infinity to infinity.  You can't do much with a
-Signal until you evaluate it.
+from negative infinity to infinity.
 
+But you can't do much with a
+Signal until you evaluate it.
 In this context, ``evaluate'' means taking a sequence of {\tt ts}
-and computing the corresponding values of the signal, which I'll
-call {\tt ys}.  I encapsulate the {\tt ts} and {\tt ys} in an
+and computing the corresponding values of the signal, which I
+call {\tt ys}.  I encapsulate {\tt ts} and {\tt ys} in an
 object called a Wave.
+
 A Wave represents a signal evaluated at a sequence of points in
-time.  Each point in time is called a {\bf frame}.
+time.  Each point in time is called a {\bf frame} (a term borrowed
+from movies and video).
 
 {\tt Signal} provides \verb"make_wave", which returns a new
 Wave object:
@@ -475,7 +497,7 @@ This example evaluates the signal from {\tt t=0} to {\tt t=0.5} at
 The time between frames, or {\bf timestep}, is {\tt 1/11025} seconds, or
 91 $\mu$s.
 
-{\tt Wave} provides a {\tt plot} method that uses {\tt matplotlib}.
+{\tt Wave} provides a {\tt plot} method that uses {\tt pyplot}.
 You can plot the wave like this:
 
 \begin{verbatim}
@@ -490,7 +512,7 @@ You can plot the wave like this:
 \label{fig.example1}
 \end{figure}
 
-But at {\tt freq=440} there are 220 periods in 0.5 seconds,
+At {\tt freq=440} there are 220 periods in 0.5 seconds,
 so the plot just looks like a solid block.  To zoom in on a small
 number of periods, we can use {\tt sample}, which copies a segment
 of a Wave and returns a new wave:
@@ -506,15 +528,25 @@ looks like Figure~\ref{fig.example1}.  This signal contains two
 frequency components, so it is more complex than the signal from the
 tuning fork, but less complex than the violin.
 
-Next we can write the Wave to a WAV file:
+
+\section{Reading and writing Waves}
+
+{\tt thinkdsp} provides \verb"read_wave", which reads a WAV
+file and returns a Wave:
+
+\begin{verbatim}
+    violin_wave = thinkdsp.read_wave('violin1.wav')
+\end{verbatim}
+
+And {\tt Wave} provides {\tt write}, which writes a WAV file:
 
 \begin{verbatim}
     wave.write(filename='example1.wav')
 \end{verbatim}
 
-You can play the file using any media player that reads WAV files.  On
-UNIX systems, I use {\tt aplay}, which is simple, robust, and
-installed in many Linux distributions.  For Windows you might like
+You can listen to Wave with any media player that plays WAV
+files.  On UNIX systems, I use {\tt aplay}, which is simple, robust,
+and included in many Linux distributions.  For Windows you might like
 MicroWav, available from
 \url{http://bellsouthpwp2.net/b/o/bobad/microwav.htm}.
 
@@ -528,9 +560,60 @@ the media player as a subprocess:
 It uses {\tt aplay} by default, but you can provide another player.
 
 
+\section{Spectrums}
+
+{\tt Wave} provides \verb"make_spectrum", which returns a
+{\tt Spectrum}:
 
 \begin{verbatim}
+    spectrum = wave.make_spectrum()
 \end{verbatim}
+
+{\tt Spectrum} provides {\tt plot}:
+
+\begin{verbatim}
+    spectrum.plot()
+    thinkplot.show()
+\end{verbatim}
+
+{\tt thinkplot} is a module I wrote to provide wrappers around some of
+the functions in {\tt matplotlib}.  You can download it from
+\url{http://think-dsp.com/thinkplot.py}.  It is also included in the
+Git repository for this book (see Section~\ref{code}).
+
+{\tt Spectrum} also provides three methods that modify the spectrum:
+
+\begin{itemize}
+
+\item \verb"low_pass" applies a low-pass filter, which means that
+  components above a given cutoff frequency are attenuated (that is,
+  reduced in magnitude) by a factor.
+
+\item \verb"high_pass" applies a high-pass filter, which means that
+  it attenuates components below the cutoff.
+
+\item \verb"band_stop" attenuates components in a the band of
+frequencies between two cutoffs.
+
+\end{itemize}
+
+This example attenuates all frequencies above 600 by 99\%:
+
+\begin{verbatim}
+   spectrum.low_pass(cutoff=600, factor=0.01)
+\end{verbatim}
+
+Finally, you can convert a Spectrum back to a Wave:
+
+\begin{verbatim}
+    wave = spectrum.make_wave()
+\end{verbatim}
+
+At this point you know how to use many of the classes and functions in
+{\tt thinkdsp}, and you are ready to do the exercises at the end of
+the chapter.  In Chapter~\ref{implementation} I will explain more
+about how these classes are implemented.
+
 
 
 \section{Exercises}
@@ -578,7 +661,12 @@ components that are not multiples of the fundamental?
 \end{exercise}
 
 
-\section{Some implementation details}
+
+
+\chapter{Fast Fourier Transform}
+\label{implementation}
+
+\section{Implementing Signals and Spectrums}
 
 If you have done the exercises, you know how to use the
 classes and methods in {\tt thinkdsp}.  Now we'll see how
@@ -695,13 +783,98 @@ In math notation, {\tt evaluate} is written like this:
 \[ A \cos (2 \pi f t + \phi) \]
 
 where $A$ is amplitude, $f$ is frequency, $t$ is time, and $\phi$
-is the phase offset.  It may seem like I have written a lot of code
+is the phase offset.  It may seem like I wrote a lot of code
 to evaluate one simple function, but as we will see, this code
 provides a framework for dealing with all kinds of signals, not
 just sinusoids.
 
 
-\chapter{}
+\section{Computing the spectrum}
+
+Given a Signal, we can compute a Wave.  Given a Wave, we can compute
+a Spectrum.  {\tt Wave} provides \verb"make_spectrum", which returns
+a new {\tt Spectrum} object.
+
+\begin{verbatim}
+    def make_spectrum(self):
+        hs = numpy.fft.rfft(self.ys)
+        return Spectrum(hs, self.framerate)
+\end{verbatim}
+
+\verb"make_spectrum" uses {\tt rfft}, which computes
+the discrete Fourier transform using an algorithm called
+{\bf Fast Fourier Transform} or FFT.
+
+The result of the FFT is a sequence of complex numbers, {\tt hs},
+which is stored in a Spectrum.  There are two ways to think about
+complex numbers:
+
+\begin{itemize}
+
+\item A complex number is the sum of a real part and an imaginary
+part, often written $x + iy$, where $i$ is the imaginary unit, $\sqrt{1}$.
+You can think of $x$ and $y$ as Cartesian coordinates.
+
+\item A complex number is also the product of a magnitude
+and a complex exponential, $r e^{i \phi}$, where $r$ is the
+{\bf magnitude} and $\phi$ is the
+{\bf angle} in radians, also called the ``argument.''   You
+can think of $r$ and $\phi$ as polar coordinates.
+
+\end{itemize}
+
+Each element of {\tt hs} corresponds to a
+frequency component.  The magnitude of each element is proportional
+to the amplitude of the corresponding component.
+The angle of each element is the phase offset (relative to a cosine
+signal).
+
+{\tt NumPy} provides {\tt absolute}, which computes
+the magnitude of a complex number, also called the ``absolute value,''
+and {\tt angle}, which computes the angle.
+
+Here is the definition of {\tt Spectrum}:
+
+\begin{verbatim}
+class Spectrum(object):
+
+    def __init__(self, hs, framerate):
+        self.hs = hs
+        self.framerate = framerate
+
+        n = len(hs)
+        f_max = framerate / 2.0
+        self.fs = numpy.linspace(0, f_max, n)
+
+        self.amps = numpy.absolute(self.hs)
+\end{verbatim}
+
+Again, {\tt hs} is the result of the FFT and {\tt framerate}
+is the number of frames per second.
+
+The elements of {\tt hs} correspond to a range of frequencies, {\tt
+  fs}, equally spaced from 0 to the maximum frequency, \verb"f_max".
+The maximum frequency is {\tt framerate/2}, for reasons I'll explain
+later.
+
+I'm sorry if these promises to ``explain later'' are irritating, but
+I think it is a good idea to practice using these technique first, and
+then I'll explain how they work.
+
+Finally, {\tt amps} contains the magnitude of {\tt hs}, which
+is proportional to the amplitude of the components.
+
+{\tt Spectrum} provides {\tt plot}, which plots the magnitude for each
+frequency:
+
+\begin{verbatim}
+    def plot(self, low=0, high=None):
+        thinkplot.Plot(self.fs[low:high], self.amps[low:high])
+\end{verbatim}
+
+{\tt low} and {\tt high} specify the slice of the Spectrum that
+should be plotted.
+
 
 \section{}
 

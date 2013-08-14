@@ -16,10 +16,10 @@ def sample_violin(start=1.2, duration=0.6):
     sample = wave.sample(start, duration)
     sample.normalize()
     sample.apodize()
-    thinkdsp.write_wave(sample, 'violin_sample1.wav')
+    sample.write('violin_sample1.wav')
 
     # plot the spectrum
-    spectrum = sample.spectrum()
+    spectrum = sample.make_spectrum()
     n = len(spectrum.hs)
     spectrum.plot(high=n/2)
     thinkplot.Save(root='violin2',
@@ -52,12 +52,12 @@ def sin_spectrum():
     peaks = spectrum.peaks()
     print peaks[0]
 
-    wave2 = spectrum.wave()
+    wave2 = spectrum.make_wave()
 
     wave2.plot()
     thinkplot.Show()
 
-    thinkdsp.write_wave(wave2)
+    wave2.write()
 
 
 def plot_sinusoid(duration = 0.00685):
