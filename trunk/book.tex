@@ -285,14 +285,12 @@ sound signals, but the same methods apply to other signals, like
 electronic signals and mechanical vibration.
 
 They also apply to signals that vary in space rather than time, like
-elevation along a hiking trail.
+elevation along a hiking trail.  And they apply to signals in more
+than one dimension, like an image, which you can think of as a signal
+that varies in two-dimensional space.  Or a movie, which is
+a signal that varies in two-dimensional space {\it and} time.
 
-And they apply to signals in more than one dimension, like an
-image, which you can think of as a signal that varies in two-dimensional
-space (or three).  Or a movie, which is a signal that varies
-in two-dimensional space {\it and} time.
-
-But we'll start with simple one-dimensional sound.
+But we start with simple one-dimensional sound.
 
 
 \section{Periodic signals}
@@ -300,17 +298,16 @@ But we'll start with simple one-dimensional sound.
 \begin{figure}
 % violin.py
 \centerline{\includegraphics[height=2.5in]{figs/tuning1.pdf}}
-\caption{Short sample from a recording of a tuning fork.}
+\caption{Segment from a recording of a tuning fork.}
 \label{fig.tuning1}
 \end{figure}
 
-
-We will also start with {\bf periodic signals}, which are signals
-that repeat themselves after some period.  For example, if you
-strike a tuning fork, it vibrates and generates sound.  If you
-record that sound and plot the transduced signal, it looks like
+We'll also start with {\bf periodic signals}, which are signals that
+repeat themselves after some period of time.  For example, if you
+strike a tuning fork, it vibrates and generates sound.  If you record
+that sound and plot the transduced signal, it looks like
 Figure~\ref{fig.tuning1}.\footnote{I got this recording from
-\url{http://www.freesound.org/people/zippi1/sounds/18871/}.}
+  \url{http://www.freesound.org/people/zippi1/sounds/18871/}.}
 
 This signal is a sinusoid, which means it has the same shape as
 the trigonometric sine function. 
@@ -336,14 +333,14 @@ octave higher.  See
 \begin{figure}
 % violin.py
 \centerline{\includegraphics[height=2.5in]{figs/violin1.pdf}}
-\caption{Short sample from a recording of a violin.}
+\caption{Segment from a recording of a violin.}
 \label{fig.violin1}
 \end{figure}
 
 A tuning fork generates a sinusoid because the vibration of the tines
 is a form of simple harmonic motion.  Most musical instruments
 produce periodic signals, but the shape of these signals is not
-sinusoidal.  For example, Figure~\ref{fig.violin1} shows a sample
+sinusoidal.  For example, Figure~\ref{fig.violin1} shows a segment
 from a recording of a violin playing
 Boccherini's String Quintet No. 5 in E, 3rd
 movement.\footnote{The recording is from
@@ -364,7 +361,7 @@ more interesting than sinusoids.
 \begin{figure}
 % violin.py
 \centerline{\includegraphics[height=2.5in]{figs/violin2.pdf}}
-\caption{Spectrum of the violin sample.}
+\caption{Spectrum of a segment from the violin recording.}
 \label{fig.violin2}
 \end{figure}
 
@@ -378,7 +375,7 @@ varying in time) and produces its {\bf spectrum}, which is the set of
 sinusoids that add up to produce the signal.
 
 For example, Figure~\ref{fig.violin2} shows the spectrum of the violin
-sample in Figure~\ref{fig.violin1}.  The x-axis is the range of
+recording in Figure~\ref{fig.violin1}.  The x-axis is the range of
 frequencies that make up the signal.  The y-axis shows the strength of
 each frequency component.  The units of the y-axis are complicated;
 I will explain more later.
@@ -508,22 +505,22 @@ You can plot the wave like this:
 \begin{figure}
 % example1.py
 \centerline{\includegraphics[height=2.5in]{figs/example1.pdf}}
-\caption{Short sample from a mixture of two sinusoid signals.}
+\caption{Segment from a mixture of two sinusoid signals.}
 \label{fig.example1}
 \end{figure}
 
 At {\tt freq=440} there are 220 periods in 0.5 seconds,
 so the plot just looks like a solid block.  To zoom in on a small
-number of periods, we can use {\tt sample}, which copies a segment
+number of periods, we can use {\tt segment}, which copies a segment
 of a Wave and returns a new wave:
 
 \begin{verbatim}
     period = mix.period
-    sample = wave.sample(start=0, duration=period*3)
+    segment = wave.segment(start=0, duration=period*3)
 \end{verbatim}
 
 {\tt start} and {\tt duration} are in seconds.  This example copies
-the first three periods from {\tt mix}.  If we plot the sample, it
+the first three periods from {\tt mix}.  If we plot the segment, it
 looks like Figure~\ref{fig.example1}.  This signal contains two
 frequency components, so it is more complex than the signal from the
 tuning fork, but less complex than the violin.
@@ -647,7 +644,7 @@ Compute and plot the spectrum.
 \end{exercise}
 
 \begin{exercise}
-Extract a 0.5-2 second sample with constant frequency.
+Extract a 0.5-2 second segment with constant frequency.
 
 Compute the spectrum.
 
@@ -663,14 +660,13 @@ components that are not multiples of the fundamental?
 
 
 
-\chapter{Fast Fourier Transform}
+\chapter{Non-periodic signals}
 \label{implementation}
 
 \section{Implementing Signals and Spectrums}
 
-If you have done the exercises, you know how to use the
-classes and methods in {\tt thinkdsp}.  Now we'll see how
-some of it works.
+If you have done the exercises, you know how to use the classes and
+methods in {\tt thinkdsp}.  Now let's see how they work.
 
 We'll start with {\tt CosSignal} and {SinSignal}:
 
@@ -703,8 +699,8 @@ The parameters of \verb"__init__" are:
 \item {\tt freq}: frequency in cycles per second, or Hz.
 
 \item {\tt amp}: amplitude.  The units of amplitude are arbitrary,
-usually chosen so 1.0 corresponds to the maximum output of a
-microphone or maximum input of a speaker.
+usually chosen so 1.0 corresponds to the maximum input from a
+microphone or maximum output to a speaker.
 
 \item {\tt offset}: where in its period the signal starts, at $t=0$.
 In units of radians, for reasons I explain below.
@@ -939,5 +935,24 @@ should be plotted.
 \end{verbatim}
 
 
+\chapter{Notes}
+
+Case study ideas:
+
+\begin{itemize}
+
+\item Pitch tracking in Rock Band
+
+\item Auto-Tune
+
+\item JPEG compression
+
+\item Image recognition in Fourier space (money)
+
+\item Application of cepstrum?
+
+\item Application of z transform -- digital control systems
+
+\end{itemize}
 
 \end{document}

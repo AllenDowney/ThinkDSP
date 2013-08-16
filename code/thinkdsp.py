@@ -104,6 +104,8 @@ def play_wave(filename='sound.wav', player='aplay'):
     cmd = '%s %s' % (player, filename)
     subprocess.Popen(cmd, shell=True)
 
+    # TODO: join?
+
 
 class Spectrum(object):
     """Represents the spectrum of a signal."""
@@ -227,7 +229,7 @@ class Wave(object):
         Tapers either the given duration of time or the given
         fraction of the total duration, whichever is less.
 
-        denom: float fraction of the sample to taper
+        denom: float fraction of the segment to taper
         duration: float duration of the taper in seconds
         """
         self.ys = apodize(self.ys, self.framerate, denom, duration)
@@ -241,8 +243,8 @@ class Wave(object):
         """
         self.ys = normalize(self.ys, amp=amp)
 
-    def sample(self, start, duration):
-        """Extracts a sample.
+    def segment(self, start, duration):
+        """Extracts a segment.
 
         start: float start time in seconds
         duration: float duration in seconds
@@ -340,12 +342,12 @@ def apodize(ys, framerate, denom=20, duration=0.1):
 
     ys: wave array
     framerate: int frames per second
-    denom: float fraction of the sample to taper
+    denom: float fraction of the segment to taper
     duration: float duration of the taper in seconds
 
     returns: wave array
     """
-    # a fixed fraction of the sample
+    # a fixed fraction of the segment
     n = len(ys)
     k1 = n / denom
 
