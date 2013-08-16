@@ -476,7 +476,9 @@ object called a Wave.
 
 A Wave represents a signal evaluated at a sequence of points in
 time.  Each point in time is called a {\bf frame} (a term borrowed
-from movies and video).
+from movies and video).  The measurement itself is called a
+{\bf sample}, although ``frame'' and ``sample'' are sometimes
+used interchangeably.
 
 {\tt Signal} provides \verb"make_wave", which returns a new
 Wave object:
@@ -487,10 +489,14 @@ Wave object:
 
 {\tt duration} is the length of the Wave in seconds.  {\tt start} is
 the start time, also in seconds.  {\tt framerate} is the (integer)
-number of frames per second.
+number of frames per second, which is also the number of samples
+per second.
+
+11,025 frames per second is one of several framerates commonly used in
+audio file formats, including Waveform Audio File (WAV) and mp3. 
 
 This example evaluates the signal from {\tt t=0} to {\tt t=0.5} at
-5513 equally-spaced frames (because 5513 is half of 11025).
+5,513 equally-spaced frames (because 5,513 is half of 11,025).
 The time between frames, or {\bf timestep}, is {\tt 1/11025} seconds, or
 91 $\mu$s.
 
@@ -502,6 +508,9 @@ You can plot the wave like this:
     pyplot.show()
 \end{verbatim}
 
+{\tt pyplot} is part of {\tt matplotlib}; it is included in many
+Python distributions, or you might have to install it.
+
 \begin{figure}
 % example1.py
 \centerline{\includegraphics[height=2.5in]{figs/example1.pdf}}
@@ -509,18 +518,20 @@ You can plot the wave like this:
 \label{fig.example1}
 \end{figure}
 
-At {\tt freq=440} there are 220 periods in 0.5 seconds,
-so the plot just looks like a solid block.  To zoom in on a small
-number of periods, we can use {\tt segment}, which copies a segment
-of a Wave and returns a new wave:
+At {\tt freq=440} there are 220 periods in 0.5 seconds, so this plot
+would look like a solid block of color.  To zoom in on a small number
+of periods, we can use {\tt segment}, which copies a segment of a Wave
+and returns a new wave:
 
 \begin{verbatim}
     period = mix.period
     segment = wave.segment(start=0, duration=period*3)
 \end{verbatim}
 
+{\tt period} is a property of a Signal; it returns the period in second.
+
 {\tt start} and {\tt duration} are in seconds.  This example copies
-the first three periods from {\tt mix}.  If we plot the segment, it
+the first three periods from {\tt mix}.  If we plot {\tt segment}, it
 looks like Figure~\ref{fig.example1}.  This signal contains two
 frequency components, so it is more complex than the signal from the
 tuning fork, but less complex than the violin.
@@ -541,7 +552,7 @@ And {\tt Wave} provides {\tt write}, which writes a WAV file:
     wave.write(filename='example1.wav')
 \end{verbatim}
 
-You can listen to Wave with any media player that plays WAV
+You can listen to the Wave with any media player that plays WAV
 files.  On UNIX systems, I use {\tt aplay}, which is simple, robust,
 and included in many Linux distributions.  For Windows you might like
 MicroWav, available from
@@ -566,7 +577,7 @@ It uses {\tt aplay} by default, but you can provide another player.
     spectrum = wave.make_spectrum()
 \end{verbatim}
 
-{\tt Spectrum} provides {\tt plot}:
+And {\tt Spectrum} provides {\tt plot}:
 
 \begin{verbatim}
     spectrum.plot()
@@ -574,11 +585,11 @@ It uses {\tt aplay} by default, but you can provide another player.
 \end{verbatim}
 
 {\tt thinkplot} is a module I wrote to provide wrappers around some of
-the functions in {\tt matplotlib}.  You can download it from
+the functions in {\tt pyplot}.  You can download it from
 \url{http://think-dsp.com/thinkplot.py}.  It is also included in the
 Git repository for this book (see Section~\ref{code}).
 
-{\tt Spectrum} also provides three methods that modify the spectrum:
+{\tt Spectrum} provides three methods that modify the spectrum:
 
 \begin{itemize}
 
@@ -624,7 +635,10 @@ Fork and clone the repo.
 \end{exercise}
 
 \begin{exercise}
-Run example1.py and listen.
+The example code in this chapter is in {\tt example1.py}.  If you
+run it, it should ...
+
+Gradually increase the cutoff and listen...
 \end{exercise}
 
 \begin{exercise}

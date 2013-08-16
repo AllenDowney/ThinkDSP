@@ -9,17 +9,17 @@ import thinkdsp
 import thinkplot
 
 
-def sample_violin(start=1.2, duration=0.6):
+def segment_violin(start=1.2, duration=0.6):
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
 
-    # extract a sample
-    sample = wave.sample(start, duration)
-    sample.normalize()
-    sample.apodize()
-    sample.write('violin_sample1.wav')
+    # extract a segment
+    segment = wave.segment(start, duration)
+    segment.normalize()
+    segment.apodize()
+    segment.write('violin_segment1.wav')
 
     # plot the spectrum
-    spectrum = sample.make_spectrum()
+    spectrum = segment.make_spectrum()
     n = len(spectrum.hs)
     spectrum.plot(high=n/2)
     thinkplot.Save(root='violin2',
@@ -31,14 +31,14 @@ def sample_violin(start=1.2, duration=0.6):
     for amp, freq in peaks[:10]:
         print freq, amp
 
-    # compare the samples to a 440 Hz Triangle wave
+    # compare the segments to a 440 Hz Triangle wave
     note = thinkdsp.make_note(69, 0.6, 
                               sig_cons=thinkdsp.TriangleSignal, 
-                              framerate=sample.framerate)
+                              framerate=segment.framerate)
 
-    wfile = thinkdsp.WavFileWriter('violin_sample2.wav', note.framerate)
+    wfile = thinkdsp.WavFileWriter('violin_segment2.wav', note.framerate)
     wfile.write(note)
-    wfile.write(sample)
+    wfile.write(segment)
     wfile.write(note)
     wfile.close()
 
@@ -74,7 +74,7 @@ def plot_sinusoid(duration = 0.00685):
 
 
 def plot_violin(start=1.30245, duration=0.00683):
-    """Plots three cycles of a sampled violin playing A4.
+    """Plots three cycles of a violin playing A4.
 
     duration: float
     """
@@ -84,17 +84,17 @@ def plot_violin(start=1.30245, duration=0.00683):
 
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
 
-    sample = wave.sample(start, duration)
-    sample.normalize()
+    segment = wave.segment(start, duration)
+    segment.normalize()
 
-    sample.plot()
+    segment.plot()
     thinkplot.Save(root='violin1',
                    xlabel='time (s)',
                    axis=[0, duration, -1.05, 1.05])
 
 
 def plot_tuning(start=7.0, duration=0.006835):
-    """Plots three cycles of a sampled violin playing A4.
+    """Plots three cycles of a tuning fork playing A4.
 
     duration: float
     """
@@ -104,21 +104,19 @@ def plot_tuning(start=7.0, duration=0.006835):
 
     wave = thinkdsp.read_wave('18871__zippi1__sound-bell-440hz.wav')
 
-    sample = wave.sample(start, duration)
-    sample.normalize()
+    segment = wave.segment(start, duration)
+    segment.normalize()
 
-    sample.plot()
+    segment.plot()
     thinkplot.Save(root='tuning1',
                    xlabel='time (s)',
                    axis=[0, duration, -1.05, 1.05])
 
 
 def main():
-    sample_violin()
-    return
+    segment_violin()
 
     plot_tuning()
-    return
 
     plot_sinusoid()
     plot_violin()
