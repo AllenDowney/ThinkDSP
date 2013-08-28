@@ -1,10 +1,11 @@
-FILES = thinkdsp.py violin.py
+FILES = thinkdsp.py violin.py example1.py example2.py
 
-DATA = 92002__jcveliz__violin-origional.wav
+DATA = 92002__jcveliz__violin-origional.wav \
+18871__zippi1__sound-bell-440hz.wav
 
-DOCS = thinkdsp.html
+DOCS = thinkdsp.html thinkplot.html
 
-DOCPY = thinkdsp.py
+DOCPY = thinkdsp.py thinkplot.py
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
@@ -13,6 +14,10 @@ violin1.pdf  violin1.eps  \
 tuning1.pdf  tuning1.eps  \
 violin2.pdf  violin2.eps  \
 example1.pdf example1.eps \
+aliasing-3.eps  square-100-1.eps  triangle-1100-1.eps  triangle-200-1.eps \
+aliasing-3.pdf  square-100-1.pdf  triangle-1100-1.pdf  triangle-200-1.pdf \
+square-100-2.eps  triangle-1100-2.eps  triangle-200-2.eps \
+square-100-2.pdf  triangle-1100-2.pdf  triangle-200-2.pdf \
 
 all_figs:
 	python violin.py

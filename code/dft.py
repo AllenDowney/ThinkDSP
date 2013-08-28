@@ -16,22 +16,19 @@ import thinkplot
 PI2 = math.pi * 2
 
 
-def synthesize1(amps, freqs):
+def synthesize1(amps, freqs, ts):
 
     components = [thinkdsp.CosSignal(freq, amp)
                   for amp, freq in zip(amps, freqs)]
     signal = thinkdsp.SumSignal(*components)
 
-    wave = signal.make_wave(duration=1, framerate=len(amps))
+    ys = signal.evaluate(ts)
     print 'synth1 ys'
-    print wave.ys
+    print ys
+    return ys
 
-
-def synthesize2(amps, freqs):
+def synthesize2(amps, freqs, ts):
     N = 1.0 * len(amps)
-    ts = (numpy.arange(N) + 0.5) / N
-    print 'ts'
-    print ts
 
     args = numpy.outer(ts, freqs)
     print 'args'
@@ -48,21 +45,23 @@ def synthesize2(amps, freqs):
     print 'Mt M'
     print numpy.dot(M.T, M)
 
-    print 'dct'
-    print numpy.dot(M.T, ys)
-    
+    return ys
 
 
 
 def main():
-    N = 4
-    amps = numpy.array([0.5, 0.5, 0, 0])
-    freqs = (numpy.arange(N) + 0.5) / 2
+    numpy.set_printoptions(precision=3, suppress=True)
+
+    N = 4.0
+    amps = numpy.array([0.5, 0.25, 0.1, 0.05])
+    freqs = numpy.arange(1, N+1) * 110
+    ts = numpy.arange(N) / N
     print 'amps', amps
     print 'freqs', freqs
+    print 'ts', ts
 
-    synthesize1(amps, freqs)
-    synthesize2(amps, freqs)
+    ys = synthesize1(amps, freqs, ts)
+    ys = synthesize2(amps, freqs, ts)
     return
 
     cos_sig = thinkdsp.CosSignal(freq=1)

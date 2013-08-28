@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.1}
+\newcommand{\theversion}{0.2}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -347,6 +347,8 @@ movement.\footnote{The recording is from
   \url{http://www.freesound.org/people/jcveliz/sounds/92002/}.
 I identified the piece using \url{http://www.musipedia.org}.}
 
+% Parson's code: DUUDDUURDR
+
 Again we can see that the signal is periodic, but the shape of the
 signal is much more complex.  The shape of a periodic signal is called
 the {\bf waveform}.  Most musical instruments produce waveforms more
@@ -377,8 +379,7 @@ sinusoids that add up to produce the signal.
 For example, Figure~\ref{fig.violin2} shows the spectrum of the violin
 recording in Figure~\ref{fig.violin1}.  The x-axis is the range of
 frequencies that make up the signal.  The y-axis shows the strength of
-each frequency component.  The units of the y-axis are complicated;
-I will explain more later.
+each frequency component.
 
 The lowest frequency component is called the {\bf fundamental
   frequency}.  The fundamental frequency of this signal is near 440 Hz
@@ -619,7 +620,7 @@ Finally, you can convert a Spectrum back to a Wave:
 
 At this point you know how to use many of the classes and functions in
 {\tt thinkdsp}, and you are ready to do the exercises at the end of
-the chapter.  In Chapter~\ref{implementation} I will explain more
+the chapter.  In Chapter~\ref{harmonics} I explain more
 about how these classes are implemented.
 
 
@@ -671,11 +672,48 @@ inverting it, and listening.  What happens as you add frequency
 components that are not multiples of the fundamental?
 \end{exercise}
 
+\begin{exercise}
+This exercise asks you to write a function that simulates the
+effect of sound transmission underwater.
+This is a more open-ended exercise for ambitious readers.
+It uses decibels, which you can read about at
+\url{http://en.wikipedia.org/wiki/Decibel}.
+
+First some background information: when sound travels through water,
+high frequency components are absorbed more than low frequency
+components.  In pure water, the absorption rate, expressed in decibels
+per kilometer (dB/km), is proportional to frequency squared.
+
+For example, if the absorption rate for frequency $f$ is 1 dB/km,
+we expect the absorption rate for $2f$ to be 4 dB/km.  In other words,
+doubling the frequency quadruples the absorption rate.
+
+Over a distance of 10 kilometers, the $f$ component would be attenuated
+by 10 dB, which corresponds to a factor of 10 in power, or a factor
+of 3.162 in amplitude.  
+
+Over the same distance, the $2f$ component would be attenuated by
+40 dB, or a factor or 100 in amplitude.
+
+Write a function that takes a Wave and returns a new Wave that contains
+the same frequency components as the original, but where each
+component is attenuated according to the absorption rate of water.
+Apply this function to the violin recording to see what a violin
+would sound like under water.
+
+For more about the physics of sound transmission in water, see
+``Underlying physics and mechanisms for the absorption of sound in
+seawater'' at
+\url{http://resource.npl.co.uk/acoustics/techguides/seaabsorption/physics.html}
+
+\end{exercise}
 
 
 
-\chapter{Non-periodic signals}
-\label{implementation}
+
+\chapter{Harmonics}
+\label{harmonics}
+
 
 \section{Implementing Signals and Spectrums}
 
@@ -719,9 +757,9 @@ microphone or maximum output to a speaker.
 \item {\tt offset}: where in its period the signal starts, at $t=0$.
 In units of radians, for reasons I explain below.
 
-\item {\tt func}: a Python function or function-like object used
+\item {\tt func}: a Python function used
 to evaluate the signal at a particular point in time.  It is
-usually either {\tt sin} or {\tt cos}, yielding a sine or
+usually either {\tt numpy.sin} or {\tt numpy.cos}, yielding a sine or
 cosine signal.
 
 \end{itemize}
@@ -733,24 +771,23 @@ The parent class of {\tt Sinusoid}, {\tt Signal}, provides \verb"make_wave":
 
 \begin{verbatim}
     def make_wave(self, duration=1, start=0, framerate=11025):
-        """Makes a Wave object.
-
-        duration: float seconds
-        start: float seconds
-        framerate: int frames per second
-
-        returns: Wave
-        """
         dt = 1.0 / framerate
         ts = numpy.arange(start, duration, dt)
         ys = self.evaluate(ts)
         return Wave(ys, framerate)
 \end{verbatim}
 
+{\tt start} and {\tt duration} are the start time and duration
+in seconds.  {\tt framerate} is the number of frames (samples)
+per second.
+
+{\tt dt} is the time between samples, and {\tt ts} is the sequence
+of sample times.
+
 \verb"make_wave" invokes {\tt evaluate}, which has to be provided
 by the child class of {\tt Signal}, in this case {\tt Sinusoid}.
 
-{\tt evaluate} takes an array of time values and returns an array of
+{\tt evaluate} takes the sequence of samples times and returns an array of
 corresponding quantities:
 
 \begin{verbatim}
@@ -770,21 +807,21 @@ Let's unwind this function one step at time:
 
 \item {\tt self.freq} is frequency in cycles per second, and
 each element of {\tt ts} a time in seconds, so their product is
-the number of cycles since {\tt t=0}.
+the number of cycles since the start time.
 
 \item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying
 by {\tt PI2} converts from cycles to {\bf phase}.  You can
-think of phase as ``cycles since {\tt t=0}'' except that the number
+think of phase as ``cycles since the start time'' except that the number
 of cycles is in units of radians, so each cycle is $2 \pi$ radians.
 
-\item {\tt self.offset} is the phase, in radians, at {\tt t=0}.  It has
-the effect of shifting the signal left or right in time.
+\item {\tt self.offset} is the phase, in radians, at the start time.
+  It has the effect of shifting the signal left or right in time.
 
-\item If {\tt self.func} is {\tt sin} or {\tt cos}, the result is
-a value between $-1$ and $+1$.
+\item If {\tt self.func} is {\tt sin} or {\tt cos}, the result is a
+  value between $-1$ and $+1$.
 
-\item Multiplying by {\tt self.amp} yields a signal that ranges
-from {\tt -self.amp} to {\tt +self.amp}.
+\item Multiplying by {\tt self.amp} yields a signal that ranges from
+  {\tt -self.amp} to {\tt +self.amp}.
 
 \end{enumerate}
 
@@ -815,14 +852,14 @@ a new {\tt Spectrum} object.
 the discrete Fourier transform using an algorithm called
 {\bf Fast Fourier Transform} or FFT.
 
-The result of the FFT is a sequence of complex numbers, {\tt hs},
+The result of {\tt fft} is a sequence of complex numbers, {\tt hs},
 which is stored in a Spectrum.  There are two ways to think about
 complex numbers:
 
 \begin{itemize}
 
 \item A complex number is the sum of a real part and an imaginary
-part, often written $x + iy$, where $i$ is the imaginary unit, $\sqrt{1}$.
+part, often written $x + iy$, where $i$ is the imaginary unit, $\sqrt{-1}$.
 You can think of $x$ and $y$ as Cartesian coordinates.
 
 \item A complex number is also the product of a magnitude
@@ -862,19 +899,15 @@ class Spectrum(object):
 Again, {\tt hs} is the result of the FFT and {\tt framerate}
 is the number of frames per second.
 
-The elements of {\tt hs} correspond to a range of frequencies, {\tt
+The elements of {\tt hs} correspond to a sequence of frequencies, {\tt
   fs}, equally spaced from 0 to the maximum frequency, \verb"f_max".
-The maximum frequency is {\tt framerate/2}, for reasons I'll explain
-later.
-
-I'm sorry if these promises to ``explain later'' are irritating, but
-I think it is a good idea to practice using these technique first, and
-then I'll explain how they work.
+The maximum frequency is {\tt framerate/2}, for reasons we'll see
+soon.
 
 Finally, {\tt amps} contains the magnitude of {\tt hs}, which
 is proportional to the amplitude of the components.
 
-{\tt Spectrum} provides {\tt plot}, which plots the magnitude for each
+{\tt Spectrum} also provides {\tt plot}, which plots the magnitude for each
 frequency:
 
 \begin{verbatim}
@@ -886,8 +919,345 @@ frequency:
 should be plotted.
 
 
-\section{}
+\section{Other waveforms}
 
+A sinusoid contains only one frequency component, so its DFT
+has only one peak.  More complex waveforms, like the
+violin recording, yield DFTs with many peaks.  In this section we
+investigate the relationship between waveforms and their DFTs.
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/triangle-200-1.pdf}}
+\caption{Segment of a triangle signal at 200 Hz.}
+\label{fig.triangle.200.1}
+\end{figure}
+
+The triangle waveform is like a straight-line version of a sinusoid.
+Figure~\ref{fig.triangle.200.1} shows a triangle waveform with
+frequency 200 Hz.
+
+To generate a triangle wave, you can use {\tt thinkdsp.TriangleSignal}:
+
+\begin{verbatim}
+class TriangleSignal(Sinusoid):
+    
+    def evaluate(self, ts):
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = numpy.abs(frac - 0.5)
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+\end{verbatim}
+
+{\tt TriangleSignal} inherits \verb"__init__" from {\tt Sinusoid},
+so it takes the same arguments: {\tt freq}, {\tt amp}, and {\tt offset}.
+
+The only difference is {\tt evaluate}.  As we saw before,
+{\tt ts} is the sequence of sample times where we want to
+evaluate the signal.
+
+There are lots of ways to generate a triangle wave.  The details
+are not important, but here's how {\tt evaluate} works:
+
+\begin{enumerate}
+
+\item {\tt cycles} is the number of cycles since the start time.
+{\tt numpy.modf} splits the number of cycles into the fraction
+part, stored in {\tt frac}, and the integer part, which is ignored.
+\footnote{Using an underscore as a variable name is a convention that
+means, ``I don't intend to use this value.''}
+
+\item {\tt frac} is a sequence that ramps from 0 to 1 with the given
+frequency.  Subtracting
+0.5 yields values between -0.5 and 0.5.  Taking the absolute value
+yields a waveform that zig-zags between 0.5 and 0.
+
+\item {\tt unbias} shifts the waveform down so it is centered at 0, then
+{\tt normalize} scales it to the given amplitude, {\tt amp}.
+
+\end{enumerate}
+
+Here's the code that generates Figure~\ref{fig.triangle.200.1}:
+
+\begin{verbatim}
+    signal = thinkdsp.TriangleSignal(200)
+    duration = signal.period*3
+    segment = signal.make_wave(duration, framerate=10000)
+    segment.plot()
+\end{verbatim}
+
+
+\section{Harmonics}
+
+Next we can compute the spectrum of this waveform:
+
+\begin{verbatim}
+    wave = signal.make_wave(duration=0.5, framerate=framerate)
+    spectrum = wave.make_spectrum()
+    spectrum.plot()
+\end{verbatim}
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/triangle-200-2.pdf}}
+\caption{Spectrum of a triangle signal at 200 Hz.}
+\label{fig.triangle.200.2}
+\end{figure}
+
+Figure~\ref{fig.triangle.200.2} shows the result.  As expected, the
+highest peak is at the fundamental frequency, 200 Hz, and there
+are additional peaks at harmonic frequencies, which are integer
+multiples of 200.
+
+But one surprise is that there are no peaks at the even multiples:
+400, 800, etc.  The harmonics of a triangle wave are all
+odd multiples of the fundamental frequency, in this example
+600, 1000, 1400, etc.
+
+Another feature of this spectrum is the relationship between the
+amplitude and frequency of the harmonics.  The amplitude of the
+harmonics drops off in proportion to frequency squared.  For example
+the frequency ratio of the first two harmonics (200 and 600 Hz) is 3, and the
+amplitude ration is approximately 9.  The frequency ratio of the
+next two harmonics (600 and 1000 Hz) is 1.7, and the amplitude ratio
+is approximately $1.7^2 = 2.9$.
+
+{\tt thinkdsp} also provides {\tt SquareSignal}, which represents
+a square signal.  Here's the class definition:
+
+\begin{verbatim}
+class SquareSignal(Sinusoid):
+    
+    def evaluate(self, ts):
+        cycles = self.freq * ts + self.offset / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = self.amp * numpy.sign(unbias(frac))
+        return ys
+\end{verbatim}
+
+Like {\tt TriangleSignal}, {\tt SquareSignal} inherits 
+\verb"__init__" from {\tt Sinusoid}, so it takes the same
+parameters.
+
+And the {\tt evaluate} method is similar.  Again, {\tt cycles} is
+the number of cycles since the start time, and {\tt frac} is the
+fractional part, which ramps from 0 to 1 each period.
+
+{\tt unbias} shifts {\tt frac} so it ramps from -0.5 to 0.5,
+then {\tt numpy.sign} maps the negative values to -1 and the
+positive values to 1.  Multiplying by {\tt amp} yields a square
+wave that jumps between {\tt -amp} and {\tt amp}.
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/square-100-1.pdf}}
+\caption{Segment of a square signal at 100 Hz.}
+\label{fig.square.100.1}
+\end{figure}
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/square-100-2.pdf}}
+\caption{Spectrum of a square signal at 100 Hz.}
+\label{fig.square.100.2}
+\end{figure}
+
+Figure~\ref{fig.square.100.1} shows three periods of a square
+wave with frequency 100 Hz,
+and Figure~\ref{fig.square.100.2} shows its spectrum.
+
+Like a triangle wave, the square wave contains only odd harmonics,
+which is why there are peaks at 300, 500, and 700 Hz, etc.
+But the amplitude of the harmonics drops off more slowly.
+Specifically, amplitude drops in proportion to frequency (not frequency
+squared).
+
+
+\section{Aliasing}
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/triangle-1100-2.pdf}}
+\caption{Spectrum of a triangle signal at 1100 Hz sampled at
+10,000 frames per second.}
+\label{fig.triangle.1100.2}
+\end{figure}
+
+I have a confession.  I chose the examples in the previous section
+carefully,
+to avoid showing you something confusing.  But now it's time to get
+confused.
+
+Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave at 1100 Hz, sampled
+at 10,000 frames per second.
+
+As expected, there are peaks at 1100 and 3300 Hz, but the third
+peak is at 4500, not 5500 Hz as expected.  There is a small fourth peak
+at 2300, not 7700 Hz.  And if you look very closely, the peak that should
+be at 9900 is actually at 100 Hz.  What's going on?
+
+The fundamental problem is that when you evaluate the signal at
+discrete points in time, you lose information about what happens
+between samples.  For low frequency components, that's not a
+problem, because you have lots of samples per period.
+
+But if you sample a signal at 5000 Hz with 10,000 frames per second,
+you only have two samples per period.  That's enough to measure the
+frequency (it turns out), but it doesn't tell you much about
+the shape of the signal.
+
+If the frequency is higher, like the 5500 Hz component of the
+triangle wave, things are worse: you don't even get the
+frequency right.
+
+To see why, let's generate cosine signals at 4500 and 5500 Hz,
+and sample them at 10,000 frames per second:
+
+\begin{verbatim}
+    framerate = 10000
+
+    signal = thinkdsp.CosSignal(4500)
+    duration = signal.period*5
+    segment = signal.make_wave(duration, framerate=framerate)
+    segment.plot()
+
+    signal = thinkdsp.CosSignal(5500)
+    segment = signal.make_wave(duration, framerate=framerate)
+    segment.plot()
+\end{verbatim}
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/aliasing-3.pdf}}
+\caption{Cosine signals at 4500 and 5500 Hz, sampled at 10,000 frames
+per second.}
+\label{fig.aliasing-3}
+\end{figure}
+
+Figure~\ref{fig.aliasing-3} shows the result.  The
+sampled waveform doesn't look very much like a sinusoid, but the
+bigger problem is that the two waveforms are exactly the same!
+
+When we sample a 5500 Hz signal at 10,000 frames per second, the
+result is indistinguishable from a 4500 Hz signal.
+
+For the same reason, a 7700 Hz signal is indistinguishable
+from 2300 Hz, and a 9900 Hz is indistinguishable from 100 Hz.
+
+This effect is called {\bf aliasing} because when the high frequency
+signal is sampled, it disguises itself as a low frequency signal.
+
+In this example, the highest frequency we can measure is 5000 Hz,
+which is half the sampling rate.  Frequencies above 5000 Hz are folded
+back below 5000 Hz, which is why this threshold is sometimes called
+the ``folding frequency,'' but more often it is called the {\bf
+  Nyquist frequency}.  See
+\url{http://en.wikipedia.org/wiki/Nyquist_frequency}.
+
+The folding pattern continues if the aliased frequency goes below
+zero.  For example, the 5th harmonic of the 1100 Hz triangle wave is
+at 12,100 Hz.  Folded at 5000 Hz, it would appear at -2100 Hz, but it
+gets folded again at 0 Hz, back to 2100 Hz.  In fact, you can see a
+small peak at 2100 Hz in Figure~\ref{fig.square.100.2}, and the next
+one at 4300 Hz.
+
+
+\section{Exercises}
+
+\begin{exercise}
+Listen to the various non-sinusoidal waveforms.
+\end{exercise}
+
+\begin{exercise}
+Start with a sawtooth.  Compute the DFT.  Remove all harmonics above
+the $i$th.
+Compute the inverse DFT and see what it looks like.
+Repeat for a range of values of $i$.
+\end{exercise}
+
+\begin{exercise}
+Write a new Signal type, compute it's DFT and listen to it.  What
+happens if the signal is discontinuous?  What if the signal is continuous
+but the slope is discontinuous?
+\end{exercise}
+
+\begin{exercise}
+Make a frequency-limited sawtooth wave and see what it looks like
+and sounds like.
+See \url{http://en.wikipedia.org/wiki/Sawtooth_wave}.
+
+\begin{exercise}
+What does a square wave sound like underwater?
+\end{exercise}
+
+\begin{exercise}
+Sample an 1100 Hz triangle at 10000 frames per second and listen to it.
+Can you hear the aliased harmonic?  Might help to play a sequence of
+notes with increasing pitch.
+\end{exercise}
+
+\begin{exercise}
+Compute the spectrum of an 1100 Hz square wave.
+\end{exercise}
+
+
+\end{exercise}
+
+\chapter{Discrete Cosine Transform}
+
+At this point we know how to use an FFT to identify the frequency
+components of a complex signal, but we don't know how it works.
+
+To explain, I will proceed in a few steps.  Here's the outline:
+
+\begin{enumerate}
+
+\item We'll start with covariance, which is a measure of how similar
+two signals are.
+
+\item Then I'll present the discrete cosine transform (DFT), which compares
+a signal to cosine signals with a range of frequencies.  Although the
+DFT is useful for some applications, it is not sufficient for spectral
+analysis because it only captures part of the signal, the so-called
+``even'' part.
+
+\item Then we'll see that the sine transform captures the other part
+of the signal, the ``odd'' part.
+
+\item We'll combine the sine and cosine transforms to make
+the discrete Fourier transform (DFT).
+
+\item And finally we'll derive the FFT, which is an efficient
+  algorithm to evaluate the DFT.
+
+\end{enumerate}
+
+So let's get started.
+
+
+\section{Covariance}
+
+Suppose I give you a Wave that represents samples from a cosine
+signal, but I don't tell you the frequency of the signal.  How would
+you figure it out.
+
+One possibility is to plot the waveform, identify the repeating
+pattern, and measure the period.  From the period, you can compute
+the frequency.
+
+That would work with a simple signal, where the repeating pattern
+is obvious, but it would not be easy with a complex signal containing
+many frequency components.  And if the samples come from a real-world
+signal, they might be noisy, which would make it even harder.
+
+A more robust approach is to compare the given Wave to cosine
+signals with a known frequencies, and see which 
+
+
+
+generate cosine signals with a range
+of frequencies, and se
 
 \begin{verbatim}
 \end{verbatim}

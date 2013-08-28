@@ -191,7 +191,7 @@ class Wave(object):
     array of floats.
     """
 
-    def __init__(self, ys, framerate):
+    def __init__(self, ys, framerate, start=0):
         """Initializes the wave.
 
         ys: wave array
@@ -199,6 +199,15 @@ class Wave(object):
         """
         self.ys = ys
         self.framerate = framerate
+        self.start = start
+
+    @property
+    def duration(self):
+        """Duration (property).
+
+        returns: float duration in seconds
+        """
+        return len(self.ys) / float(self.framerate)
 
     def __or__(self, other):
         """Concatenates two waves.
@@ -264,14 +273,14 @@ class Wave(object):
         hs = numpy.fft.rfft(self.ys)
         return Spectrum(hs, self.framerate)
 
-    def plot(self):
+    def plot(self, label='', time_factor=1):
         """Plots the wave.
 
         """
         n = len(self.ys)
-        duration = float(n) / self.framerate
-        ts = numpy.linspace(0, duration, n)
-        thinkplot.Plot(ts, self.ys)
+        ts = numpy.linspace(0, self.duration, n) * time_factor
+        print self.duration, ts[-1]
+        thinkplot.plot(ts, self.ys, label=label)
 
     def cov(self, other):
         """Computes the covariance of two waves.
@@ -281,7 +290,34 @@ class Wave(object):
         returns: float
         """
         total = sum(self.ys * other.ys)
-        return total / len(self.ys)
+        # return total / len(self.ys)
+        return total
+
+    def cos_cov(self, k):
+        """Covariance with a cosine signal.
+
+        freq: freq of the cosine signal in Hz
+
+        returns: float covariance
+        """
+        n = len(self.ys)
+        factor = math.pi * k / n
+        ys = [math.cos(factor * (i+0.5)) for i in range(n)]
+        total = 2 * sum(self.ys * ys)
+        return total
+
+    def cos_transform(self):
+        """Discrete cosine transform.
+
+        returns: list of frequency, cov pairs
+        """
+        n = len(self.ys)
+        res = []
+        for k in range(n):
+            cov = self.cos_cov(k)
+            res.append((k, cov))
+
+        return res
 
     def write(self, filename='sound.wav'):
         """Write a wave file.
@@ -382,7 +418,7 @@ class Signal(object):
 
     @property
     def period(self):
-        """Period of the signal in seconds.
+        """Period of the signal in seconds (property).
 
         For non-periodic signals, use the default, 0.1 seconds
 
@@ -411,7 +447,7 @@ class Signal(object):
         dt = 1.0 / framerate
         ts = numpy.arange(start, duration, dt)
         ys = self.evaluate(ts)
-        return Wave(ys, framerate)
+        return Wave(ys, framerate=framerate, start=start)
 
 
 class SumSignal(Signal):
@@ -584,7 +620,7 @@ class TriangleSignal(Sinusoid):
         
         returns: float wave array
         """
-        cycles = self.freq * ts
+        cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = numpy.abs(frac - 0.5)
         ys = normalize(unbias(ys), self.amp)
@@ -705,7 +741,7 @@ def main():
     cos_basis = cos_wave(440)
     sin_basis = sin_wave(440)
 
-    wave = cos_wave(440, offset=1)
+    wave = cos_wave(440, offset=math.pi/2)
     cos_cov = cos_basis.cov(wave)
     sin_cov = sin_basis.cov(wave)
     print cos_cov, sin_cov, mag((cos_cov, sin_cov))
