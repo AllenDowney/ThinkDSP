@@ -243,6 +243,11 @@ class Wave(object):
         """
         self.ys = apodize(self.ys, self.framerate, denom, duration)
 
+    def hamming(self):
+        """
+        """
+        self.ys *= numpy.hamming(len(self.ys))
+
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
 
@@ -494,7 +499,6 @@ class Sinusoid(Signal):
         offset: float phase offset in radians
         func: function that maps phase to amplitude
         """
-        Signal.__init__(self)
         self.freq = freq
         self.amp = amp
         self.offset = offset
@@ -625,6 +629,69 @@ class TriangleSignal(Sinusoid):
         ys = numpy.abs(frac - 0.5)
         ys = normalize(unbias(ys), self.amp)
         return ys
+
+
+class Chirp(Signal):
+    """Represents a signal with variable frequency."""
+    
+    def __init__(self, start=440, end=880, amp=1.0):
+        """Initializes a linear chirp.
+
+        start: float frequency in Hz
+        end: float frequency in Hz
+        amp: float amplitude, 1.0 is nominal max
+        """
+        self.start = start
+        self.end = end
+        self.amp = amp
+
+    @property
+    def period(self):
+        """Period of the signal in seconds.
+
+        returns: float seconds
+        """
+        return ValueError('Non-periodic signal.')
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        freqs = numpy.linspace(self.start, self.end, len(ts)-1)
+        return self._evaluate(ts, freqs)
+
+    def _evaluate(self, ts, freqs):
+        """Helper function that evaluates the signal.
+
+        ts: float array of times
+        freqs: float array of frequencies during each interval
+        """
+        #n = len(freqs)
+        #print freqs[::n/2]
+        dts = numpy.diff(ts)
+        dps = PI2 * freqs * dts
+        phases = numpy.cumsum(dps)
+        phases = numpy.insert(phases, 0, 0)
+        ys = self.amp * numpy.cos(phases)
+        return ys
+
+
+class ExpoChirp(Chirp):
+    """Represents a signal with varying frequency."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        start, end = math.log10(self.start), math.log10(self.end)
+        freqs = numpy.logspace(start, end, len(ts)-1)
+        return self._evaluate(ts, freqs)
 
 
 class SilentSignal(Signal):
