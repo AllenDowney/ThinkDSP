@@ -117,8 +117,15 @@ class Spectrum(object):
         self.amps = numpy.absolute(self.hs)
 
         n = len(hs)
-        f_max = framerate / 2.0
-        self.fs = numpy.linspace(0, f_max, n)
+        self.fs = numpy.linspace(0, self.max_freq, n)
+
+    @property
+    def max_freq(self):
+        return self.framerate / 2.0
+        
+    @property
+    def freq_res(self):
+        return self.max_freq / (len(self.fs) - 1)
 
     def plot(self, low=0, high=None):
         """Plots the spectrum.
@@ -184,6 +191,71 @@ class Spectrum(object):
         return Wave(ys, self.framerate)
 
 
+class Spectrogram(object):
+    """Represents the spectrum of a signal."""
+
+    def __init__(self, spec_map, seg_length, window_func=numpy.hamming):
+        self.spec_map = spec_map
+        self.seg_length = seg_length
+        self.window_func = window_func
+
+    def any_spectrum(self):
+        return self.spec_map.itervalues().next()
+
+    @property
+    def time_res(self):
+        spectrum = self.any_spectrum()
+        return float(self.seg_length) / spectrum.framerate
+
+    @property
+    def freq_res(self):
+        return self.any_spectrum().freq_res
+
+    def times(self):
+        """Sorted sequence of times.
+
+        returns: sequence of float times in seconds
+        """
+        ts = sorted(self.spec_map.iterkeys())
+        return ts
+
+    def frequencies(self):
+        """Sequence of frequencies.
+
+        returns: sequence of float freqencies in Hz.
+        """
+        fs = self.any_spectrum().fs
+        return fs
+
+    def plot(self, low=0, high=None):
+        """Make a pseudocolor plot.
+
+        low: index of the lowest frequency component to plot
+        high: index of the highest frequency component to plot
+        """
+        ts = self.times()
+        fs = self.frequencies()[low:high]
+
+        # make the array
+        size = len(fs), len(ts)
+        array = numpy.zeros(size, dtype=numpy.float)
+
+        # copy amplitude from each spectrum into a column of the array
+        for i, t in enumerate(ts):
+            spectrum = self.spec_map[t]
+            array[:,i] = spectrum.amps[low:high]
+
+        thinkplot.pcolor(ts, fs, array)
+
+    def make_wave(self):
+        """Inverts the spectrogram and returns a Wave.
+
+        returns: Wave
+        """
+        #TODO: write this
+        return None
+
+
 class Wave(object):
     """Represents a discrete-time waveform.
 
@@ -244,7 +316,7 @@ class Wave(object):
         self.ys = apodize(self.ys, self.framerate, denom, duration)
 
     def hamming(self):
-        """
+        """Apply a Hamming window to the wave.
         """
         self.ys *= numpy.hamming(len(self.ys))
 
@@ -277,6 +349,32 @@ class Wave(object):
         """
         hs = numpy.fft.rfft(self.ys)
         return Spectrum(hs, self.framerate)
+
+    def make_spectrogram(self, seg_length, window_func=numpy.hamming):
+        """Computes the spectrogram of the wave.
+
+        seg_length: number of samples in each segment
+        window_func: function used to compute the window
+
+        returns: Spectrogram
+        """
+        n = len(self.ys)
+        window = window_func(seg_length)
+
+        start, end, step = 0, seg_length, seg_length / 2
+        spec_map = {}
+
+        while end < n:
+            ys = self.ys[start:end] * window
+            hs = numpy.fft.rfft(ys)
+
+            t = (start + end) / 2.0 / self.framerate
+            spec_map[t] = Spectrum(hs, self.framerate)
+
+            start += step
+            end += step
+
+        return Spectrogram(spec_map, seg_length, window_func)
 
     def plot(self, label='', time_factor=1):
         """Plots the wave.

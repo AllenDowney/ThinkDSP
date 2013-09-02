@@ -1375,6 +1375,14 @@ sound more like music than the linear chirp.
 
 \section{Windowing}
 
+\begin{figure}
+% example3.py
+\centerline{\includegraphics[height=2.5in]{figs/windowing1.pdf}}
+\caption{Spectrum of (a) a periodic segment of a sinusoid, (b)
+a non-periodic segment, (c) a tapered non-periodic segment.}
+\label{fig.windowing1}
+\end{figure}
+
 In previous chapters, we used FFT to compute the spectrum of a wave.
 Later, when we discuss how FFT works, we will learn that the algorithm
 is based on the assumption that the signal is periodic.  In theory, we
@@ -1382,24 +1390,253 @@ should not use FFT on non-periodic signals, but in practice it happens
 all the time.  But there are a few things you have to be careful about.
 
 One common problem is dealing with discontinuities at the beginning
-and end of a segment.  
+and end of a segment.  Because FFT assumes that the signal is periodic,
+in a sense it connects the end of the segment back to the beginning
+to make a loop.  If the end does not connect smoothly to the beginning,
+the discontinuity creates additional frequency components in the
+segment that are not in the signal.
+
+As an example, let's start with a sine wave that contains only
+one frequency component at 440 Hz.
+
+\begin{verbatim}
+    signal = thinkdsp.SinSignal(freq=440)
+\end{verbatim}
+
+If we select a segment that happens to be an integer multiple of
+the period, the end of the segment connects smoothly with the
+beginning, and FFT behaves well.
+
+\begin{verbatim}
+    duration = signal.period * 30
+    wave = signal.make_wave(duration)
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Figure~\ref{fig.windowing1}a shows the result.  As expected, there is a single
+peak at 440 Hz.  But if the duration is not a multiple of the
+period, bad things happen.  With {\tt duration = signal.period * 30.25},
+the signal starts at 0 and ends at 1.  Figure~\ref{fig.windowing1}b shows the
+spectrum of this segment.  Again, the peak is at 440 Hz, but now
+there are additional components spread out from 240 to 640 Hz.
+This spread is called ``spectral leakage'', because some of
+the energy at the fundamental frequency leaks into other frequencies.
+
+In this case leakage happens because we are using FFT on a segment
+that is not periodic.
+
+
+\section{Windowing}
+
+\begin{figure}
+% example3.py
+\centerline{\includegraphics[height=2.5in]{figs/windowing2.pdf}}
+\caption{(a) Segment of a sinusoid, (b) Hamming window, (c) product
+of the segment and the window.}
+\label{fig.windowing2}
+\end{figure}
+
+We can reduce leakage by smoothing out the discontinuity between
+the beginning and end of the segment, and one way to do that is
+{\bf windowing}.
+
+A ``window'' is a function designed to transform a non-periodic
+segment into something that can pass for periodic.
+Figure~\ref{fig.windowing2}a shows a segment where the end does not
+connect smoothly to the beginning.
+
+Figure~\ref{fig.windowing2}b shows a ``Hamming window'', one of the
+more common window functions.  No window function is perfect, but some
+can be shown to be optimal for different applications.
+
+Figure~\ref{fig.windowing2}c shows the result of multiplying the
+window by the original signal.  Where the window is close to 1, the
+signal is unchanged.  Where the window is close to 0, the signal is
+attenuated.  Because the window tapers at both ends, the end of the
+segment connects smoothly to the beginning.
+
+Figure~\ref{fig.windowing1}c shows the spectrum of the tapered signal.
+Windowing has reduced leakage substantially, but not completely. 
+
+Here's what the code looks like.  {\tt Wave} provides {\tt hamming},
+which applies a Hamming window:
+
+\begin{verbatim}
+    def hamming(self):
+        self.ys *= numpy.hamming(len(self.ys))
+\end{verbatim}
+
+{\tt numpy.hamming} computes the Hamming window with the given number
+of elements.  {\tt numpy} provides functions to compute other window
+functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
+and {\tt kaiser}.  One of the exercises at the end of this chapter
+asks you to experiment with these other windows.
+
+
+\section{Spectrum of a chirp}
+
+\begin{figure}
+% example3.py
+\centerline{\includegraphics[height=2.5in]{figs/chirp1.pdf}}
+\caption{Spectrum of a one-second one-octave chirp.}
+\label{fig.chirp1}
+\end{figure}
+
+What do you think happens if you compute the spectrum of a chirp?
+Here's an example that constructs a one-second one-octave chirp and
+its spectrum:
+
+\begin{verbatim}
+    signal = thinkdsp.Chirp(start=220, end=440)
+    wave = signal.make_wave(duration=1)
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Figure~\ref{fig.chirp2} shows the result.  The spectrum shows
+components at every frequency from 220 to 440 Hz with variations,
+caused by leakage, that look a little like the Eye of Sauron.
+
+The spectrum is approximately flat between 220 and 440 Hz, which
+indicates that the signal spends equal time at each frequency in this
+range.  Based on that observation, you should be able to guess what
+the spectrum of an exponential chirp looks like.
+
+The spectrum gives hints about the structure of the signal,
+but it loses the relationship between frequency and time.
+For example, we cannot tell by looking at this spectrum whether
+the frequency went up or down, or both.
+
+
+\section{Spectrogram}
+
+\begin{figure}
+% example3.py
+\centerline{\includegraphics[height=2.5in]{figs/chirp2.pdf}}
+\caption{Spectrogram of a one-second one-octave chirp.}
+\label{fig.chirp2}
+\end{figure}
+
+To recover the relationship between frequency and time, we can break
+the chirp into segments and plot the spectrum of each segment.  The
+result is called a {\bf short-time Fourier transform} (STFT).
+
+There are several ways to visualize a STFT, but the most common
+is a {\bf spectrogram}, which shows time on the x-axis, and frequency
+on the y-axis.  Each column in the spectrogram shows the spectrum of
+a short segment, using color or grayscale to represent amplitude.
+
+{\tt Wave} provides \verb"make_spectrogram", which returns a
+{\tt Spectrogram} object:
+
+\begin{verbatim}
+    signal = thinkdsp.Chirp(start=220, end=440)
+    wave = signal.make_wave(duration=1)
+    spectrogram = wave.make_spectrogram(seg_length=512)
+    spectrogram.plot(high=32)
+\end{verbatim}
+
+\verb"seg_length" is the number of samples in each segment.  I chose
+512 because FFT is most efficient when the number of samples is a
+power of 2.
+
+Figure~\ref{fig.chirp2} shows the result.  The x-axis shows time from
+0 to 1 seconds.  The y-axis shows frequency from 0 to 700 Hz.  I cut
+off the top part of the spectrogram; the full range goes to 5012.5 Hz,
+which is half of the framerate.
+
+The spectrogram shows clearly that frequency increases linearly
+over time.  Similarly, in the spectrogram of an exponential chirp, we
+can see the shape of the exponential curve.
+
+However, notice that the peak in each column is blurred across 2--3
+cells.  This blurring reflects the limited resolution of the
+spectrogram.
+
+
+\section{The Gabor limit}
+
+The {\bf time resolution} of the spectrogram is the duration of the
+segments, which corresponds to the width of the cells in the
+spectrogram.  Since each segment is 512 frames, and there are 11,025
+frames per second, there are 0.046 seconds per segment.
+
+The {\bf frequency resolution} is the frequency range between
+components in the spectrum, which corresponds to the height of the
+cells.  With 512 frames, we get 256 frequency components over a range
+from 0 to 5012.5 Hz, so the range between components is 21.5 Hz.
+
+More generally, if $n$ is the segment length, the spectrum contains
+$n/2$ components.  If the framerate is $r$, the maximum frequency
+in the spectrum is $r/2$.
+So the time resolution is $n/r$ and the frequency resolution is 
+$r/2$ divided by $n/2$, which is $r/n$.
+
+Ideally we would like time resolution to be small, so we can see rapid
+changes in frequency.  And we would like frequency resolution to be
+small so we can see small changes in frequency.  But you can't have
+both.  Notice that time resolution, $n/r$, is the inverse of frequency
+resolution, $r/n$.  So if one gets smaller, the other gets bigger.
+
+For example, if you double the segment length, you cut frequency
+resolution in half (which is good), but you double time resolution
+(which is bad).  Even increasing the framerate doesn't help.  You get
+more samples to play with, but the range of frequencies increases at
+the same time.
+
+This tradeoff is called the ``Gabor limit'' and it is a fundamental
+limitation of the STFT.  Wavelet analysis is an alternative that
+addresses this limitation.
+
+
+\section{Implementing spectrograms}
+
+Here is the {\tt Wave} method that computes spectrograms:
+
+\begin{verbatim}
+    def make_spectrogram(self, seg_length):
+        n = len(self.ys)
+        window = numpy.hamming(seg_length)
+
+        start, end, step = 0, seg_length, seg_length / 2
+        spec_map = {}
+
+        while end < n:
+            ys = self.ys[start:end] * window
+            hs = numpy.fft.rfft(ys)
+
+            t = (start + end) / 2.0 / self.framerate
+            spec_map[t] = Spectrum(hs, self.framerate)
+
+            start += step
+            end += step
+
+        return Spectrogram(spec_map, seg_length, window_func)
+\end{verbatim}
+
+\verb"seg_length" is the number of samples in each segment.
+{\tt n} is the number of samples in the wave.  {\tt window}
+is a Hamming window with the same length as the segments.
+
+{\tt start} and {\tt end} are the slice indices that select
+the segments from the wave.  {\tt step} is the offset between
+segments.  Since {\tt step} is half of \verb"seg_length", the
+segments overlap by half.  Figure~\ref{fig.windowing3} shows what
+these overlapping windows look like.
+
 
 \begin{verbatim}
 \end{verbatim}
 
-\begin{verbatim}
-\end{verbatim}
-
-\begin{verbatim}
-\end{verbatim}
-
-
-\section{Spectrum of a non-periodic signal}
 
 
 \section{Exercises}
 
 \begin{exercise}
+What kind of chirp is a trombone glissando?
+\end{exercise}
+
+\begin{exercise}
+Try other window functions.
 \end{exercise}
 
 \begin{exercise}
@@ -1409,9 +1646,8 @@ and end of a segment.
 \end{exercise}
 
 \begin{exercise}
-\end{exercise}
-
-\begin{exercise}
+Compute the inverse spectrogram of an image and listen to it.
+Landscape images might work best.
 \end{exercise}
 
 

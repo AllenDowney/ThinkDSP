@@ -1,4 +1,4 @@
-FILES = thinkdsp.py violin.py example1.py example2.py
+FILES = thinkdsp.py violin.py example1.py example2.py example3.py
 
 DATA = 92002__jcveliz__violin-origional.wav \
 18871__zippi1__sound-bell-440hz.wav
@@ -18,6 +18,11 @@ aliasing-3.eps  square-100-1.eps  triangle-1100-1.eps  triangle-200-1.eps \
 aliasing-3.pdf  square-100-1.pdf  triangle-1100-1.pdf  triangle-200-1.pdf \
 square-100-2.eps  triangle-1100-2.eps  triangle-200-2.eps \
 square-100-2.pdf  triangle-1100-2.pdf  triangle-200-2.pdf \
+chirp1.pdf chirp1.eps \
+chirp2.pdf chirp2.eps \
+windowing1.pdf windowing1.eps \
+windowing2.pdf windowing2.eps \
+
 
 all_figs:
 	python violin.py
