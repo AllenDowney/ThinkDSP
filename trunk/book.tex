@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.2}
+\newcommand{\theversion}{0.3}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -1373,7 +1373,7 @@ Run this code and listen.  If you have a musical ear, this might
 sound more like music than the linear chirp.
 
 
-\section{Windowing}
+\section{Leakage}
 
 \begin{figure}
 % example3.py
@@ -1413,14 +1413,15 @@ beginning, and FFT behaves well.
     spectrum = wave.make_spectrum()
 \end{verbatim}
 
-Figure~\ref{fig.windowing1}a shows the result.  As expected, there is a single
-peak at 440 Hz.  But if the duration is not a multiple of the
-period, bad things happen.  With {\tt duration = signal.period * 30.25},
-the signal starts at 0 and ends at 1.  Figure~\ref{fig.windowing1}b shows the
-spectrum of this segment.  Again, the peak is at 440 Hz, but now
-there are additional components spread out from 240 to 640 Hz.
-This spread is called ``spectral leakage'', because some of
-the energy at the fundamental frequency leaks into other frequencies.
+Figure~\ref{fig.windowing1}a shows the result.  As expected, there is
+a single peak at 440 Hz.  But if the duration is not a multiple of the
+period, bad things happen.  With {\tt duration = signal.period *
+  30.25}, the signal starts at 0 and ends at 1.
+Figure~\ref{fig.windowing1}b shows the spectrum of this segment.
+Again, the peak is at 440 Hz, but now there are additional components
+spread out from 240 to 640 Hz.  This spread is called ``spectral
+leakage'', because some of the energy at the fundamental frequency
+leaks into other frequencies.
 
 In this case leakage happens because we are using FFT on a segment
 that is not periodic.
@@ -1590,6 +1591,13 @@ addresses this limitation.
 
 \section{Implementing spectrograms}
 
+\begin{figure}
+% example3.py
+\centerline{\includegraphics[height=2.5in]{figs/windowing3.pdf}}
+\caption{Overlapping Hamming windows.}
+\label{fig.windowing3}
+\end{figure}
+
 Here is the {\tt Wave} method that computes spectrograms:
 
 \begin{verbatim}
@@ -1623,32 +1631,137 @@ segments.  Since {\tt step} is half of \verb"seg_length", the
 segments overlap by half.  Figure~\ref{fig.windowing3} shows what
 these overlapping windows look like.
 
+Inside the while loop, we select a slice from the wave, multiply
+by the window, and compute the FFT.  Then we construct a Spectrum
+object and add it to \verb"spec_map" which is a map from the
+midpoint of the segment in time to the Spectrum object.
+
+Finally, the method constructs and returns a Spectrogram.  Here
+is the definition of Spectrogram:
 
 \begin{verbatim}
+    def __init__(self, spec_map, seg_length):
+        self.spec_map = spec_map
+        self.seg_length = seg_length
 \end{verbatim}
 
+And {\tt Spectrogram} provides {\tt plot}, which generates a
+pseudocolor plot:
+
+\begin{verbatim}
+    def plot(self, low=0, high=None):
+        ts = self.times()
+        fs = self.frequencies()[low:high]
+
+        # copy amplitude from each spectrum into a column of the array
+        size = len(fs), len(ts)
+        array = numpy.zeros(size, dtype=numpy.float)
+
+        # copy each spectrum into a column of the array
+        for i, t in enumerate(ts):
+            spectrum = self.spec_map[t]
+            array[:,i] = spectrum.amps[low:high]
+
+        thinkplot.pcolor(ts, fs, array)
+\end{verbatim}
+
+{\tt plot} uses {\tt times}, which the returns the midpoint of each
+time segment in a sorted sequence, and {\tt frequencies}, which returns
+the frequencies of the components in the spectrums.
+
+{\tt array} is a numpy array that holds the amplitudes from the
+spectrums, with one column for each point in time and one row
+for each frequency.  The {\tt for} loop iterates through the times
+and copies each spectrum into a column of the array.
+
+Finally {\tt thinkplot.color} is a wrapper around {\tt pyplot.pcolor},
+which generates the pseudocolor plot.
+
+So that's how Spectrograms are implemented.
 
 
 \section{Exercises}
 
 \begin{exercise}
-What kind of chirp is a trombone glissando?
+Synthesize a sawtooth chirp by adding up harmonics.  Note: some
+care is needed to make sure the ratios between the frequencies of
+the harmonics are maintained.
 \end{exercise}
+
+\begin{exercise}
+In musical terminology, a ``glissando'' is a note that slides from one
+pitch to another like a chirp.  A trombone player can play a glissando
+by extending the trombone slide while blowing continuously.  As the
+slide extends, the total length of the tube gets longer, and the
+resulting pitch is inversely proportional to length.
+
+Assuming that the player moves the slide at a constant speed, how
+does frequency vary with time?  Is a trombone glissando more like
+a linear or exponential chirp?
+
+Write a function that simulates a trombone glissando from C4 up to F4
+and back down to C4.  C3 is 262 Hz; F3 is 349 Hz.
+\end{exercise}
+
 
 \begin{exercise}
 Try other window functions.
 \end{exercise}
 
 \begin{exercise}
+Make a spectrogram of the clarinet glissando at the beginning of
+Rhapsody in Blue.
+
+% http://archive.org/details/rhapblue11924
 \end{exercise}
 
 \begin{exercise}
+Make a recording of a series of vowel sounds and look at the spectrogram.
+Can you identify different vowels?
 \end{exercise}
 
 \begin{exercise}
 Compute the inverse spectrogram of an image and listen to it.
 Landscape images might work best.
 \end{exercise}
+
+
+
+
+\chapter{Pitch tracking}
+
+\section{Spectrum of vowels}
+
+\section{Spectrum of a piano}
+
+\section{Music synthesis}
+
+Additive synthesis.
+
+Envelope generation.
+
+\section{Convert music notation to a signal}
+
+\section{Compute the spectrogram of an idealized performance}
+
+\section{Compute the spectrogram of an actual performance}
+
+\section{Pitch tracking algorithm}
+
+\section{Pitch shifting}
+
+Motivate wavelets?
+
+
+\chapter{Spectral density estimation}
+
+Spectrum of symbal crash, applause.
+
+Synthesize white and pink noise.
+
+Estimate the spectrum of a long time series (stock market data?)
+
+Welch's method, and discussion of amplitude, amplitude density and power.
 
 
 \chapter{Discrete cosine transform}

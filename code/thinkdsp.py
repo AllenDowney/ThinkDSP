@@ -102,9 +102,8 @@ def play_wave(filename='sound.wav', player='aplay'):
     player: string name of executable that plays wav files
     """
     cmd = '%s %s' % (player, filename)
-    subprocess.Popen(cmd, shell=True)
-
-    # TODO: join?
+    popen = subprocess.Popen(cmd, shell=True)
+    popen.communicate()
 
 
 class Spectrum(object):
@@ -194,21 +193,30 @@ class Spectrum(object):
 class Spectrogram(object):
     """Represents the spectrum of a signal."""
 
-    def __init__(self, spec_map, seg_length, window_func=numpy.hamming):
+    def __init__(self, spec_map, seg_length, window_func=None):
+        """Initialize the spectrogram.
+
+        spec_map: map from float time to Spectrum
+        seg_length: number of samples in each segment
+        window_func: function that computes the window
+        """
         self.spec_map = spec_map
         self.seg_length = seg_length
         self.window_func = window_func
 
     def any_spectrum(self):
+        """Returns an arbitrary spectrum from the spectrogram."""
         return self.spec_map.itervalues().next()
 
     @property
     def time_res(self):
+        """Time resolution in seconds."""
         spectrum = self.any_spectrum()
         return float(self.seg_length) / spectrum.framerate
 
     @property
     def freq_res(self):
+        """Frequency resolution in Hz."""
         return self.any_spectrum().freq_res
 
     def times(self):
@@ -252,8 +260,29 @@ class Spectrogram(object):
 
         returns: Wave
         """
-        #TODO: write this
-        return None
+        res = []
+        for t, spectrum in sorted(self.spec_map.iteritems()):
+            wave = spectrum.make_wave()
+            n = len(wave)
+            
+            if self.window_func:
+                window = 1 / self.window_func(n)
+                wave.window(window)
+
+            i = int(round(t * wave.framerate))
+            start = i - n / 2
+            end = start + n
+            res.append((start, end, wave))
+
+        starts, ends, waves = zip(*res)
+        low = min(starts)
+        high = max(ends)
+
+        ys = numpy.zeros(high-low, numpy.float)
+        for start, end, wave in res:
+            ys[start:end] = wave.ys
+
+        return Wave(ys, wave.framerate)
 
 
 class Wave(object):
@@ -272,6 +301,9 @@ class Wave(object):
         self.ys = ys
         self.framerate = framerate
         self.start = start
+
+    def __len__(self):
+        return len(self.ys)
 
     @property
     def duration(self):
@@ -319,6 +351,13 @@ class Wave(object):
         """Apply a Hamming window to the wave.
         """
         self.ys *= numpy.hamming(len(self.ys))
+
+    def window(self, window):
+        """Apply a window to the wave.
+
+        window: sequence of multipliers, same length as self.ys
+        """
+        self.ys *= window
 
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
@@ -376,13 +415,13 @@ class Wave(object):
 
         return Spectrogram(spec_map, seg_length, window_func)
 
-    def plot(self, label='', time_factor=1):
+    def plot(self, label=''):
         """Plots the wave.
 
+        label: string label for the plotted line
         """
         n = len(self.ys)
-        ts = numpy.linspace(0, self.duration, n) * time_factor
-        print self.duration, ts[-1]
+        ts = numpy.linspace(0, self.duration, n)
         thinkplot.plot(ts, self.ys, label=label)
 
     def cov(self, other):
@@ -393,7 +432,6 @@ class Wave(object):
         returns: float
         """
         total = sum(self.ys * other.ys)
-        # return total / len(self.ys)
         return total
 
     def cos_cov(self, k):
@@ -789,6 +827,22 @@ class ExpoChirp(Chirp):
         """
         start, end = math.log10(self.start), math.log10(self.end)
         freqs = numpy.logspace(start, end, len(ts)-1)
+        return self._evaluate(ts, freqs)
+
+
+class TromboneGliss(Chirp):
+    """Represents a signal with varying frequency."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        lengths = numpy.linspace(1.0 / self.start, 1.0 / self.end, len(ts)-1)
+        freqs = 1 / lengths
+        print freqs
         return self._evaluate(ts, freqs)
 
 
