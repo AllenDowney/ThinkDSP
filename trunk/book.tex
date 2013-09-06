@@ -1683,24 +1683,41 @@ So that's how Spectrograms are implemented.
 \section{Exercises}
 
 \begin{exercise}
-Synthesize a sawtooth chirp by adding up harmonics.  Note: some
-care is needed to make sure the ratios between the frequencies of
-the harmonics are maintained.
+Write a class called {\tt SawtoothChirp} that extends {\tt Chirp}
+and overrides {\tt evaluate} to generate a sawtooth waveform with
+frequency that increases (or decreases) linearly.
+
+Hint: combine the evaluate functions from {\tt Chirp} and {\tt
+  SawtoothSignal}.
+
+Draw a sketch of what you think the spectrogram of this signal
+looks like, and then plot it.  The effect of aliasing should be
+visually apparent, and if you listen carefully, you can hear it.
 \end{exercise}
 
 \begin{exercise}
+Another way to generate a sawtooth chirp is to add up a harmonic
+series of sinusoidal chirps.  Write another version of {\tt
+  SawtoothChirp} that uses this method and plot the histogram.
+
+If you truncate the harmonic series at the Nyquist frequency, you
+should be able to avoid aliasing.
+\end{exercise}
+
+
+\begin{exercise}
 In musical terminology, a ``glissando'' is a note that slides from one
-pitch to another like a chirp.  A trombone player can play a glissando
-by extending the trombone slide while blowing continuously.  As the
-slide extends, the total length of the tube gets longer, and the
-resulting pitch is inversely proportional to length.
+pitch to another, so it is similar to a chirp.  A trombone player can
+play a glissando by extending the trombone slide while blowing
+continuously.  As the slide extends, the total length of the tube gets
+longer, and the resulting pitch is inversely proportional to length.
+
+Write a function that simulates a trombone glissando from C4 up to F4
+and back down to C4.  C3 is 262 Hz; F3 is 349 Hz.
 
 Assuming that the player moves the slide at a constant speed, how
 does frequency vary with time?  Is a trombone glissando more like
 a linear or exponential chirp?
-
-Write a function that simulates a trombone glissando from C4 up to F4
-and back down to C4.  C3 is 262 Hz; F3 is 349 Hz.
 \end{exercise}
 
 
@@ -1720,10 +1737,10 @@ Make a recording of a series of vowel sounds and look at the spectrogram.
 Can you identify different vowels?
 \end{exercise}
 
-\begin{exercise}
-Compute the inverse spectrogram of an image and listen to it.
-Landscape images might work best.
-\end{exercise}
+%\begin{exercise}
+%Compute the inverse spectrogram of an image and listen to it.
+%Landscape images might work best.
+%\end{exercise}
 
 
 
@@ -1775,7 +1792,6 @@ To explain, I will proceed in a few steps.  Here's the outline:
 
 \item We'll start with the synthesis problem: given a set of frequency
 components and their amplitudes, how can we construct the waveform?
-two signals are.
 
 \item 
 

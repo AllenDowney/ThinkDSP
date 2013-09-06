@@ -224,7 +224,21 @@ def invert_image():
         res.append(ys)
 
 
+def sawtooth_chirp():
+    signal = thinkdsp.SawtoothChirp(start=220, end=880)
+    wave = signal.make_wave(duration=2, framerate=44100)
+    wave.apodize()
+    wave.play()
+
+    sp = wave.make_spectrogram(1024)
+    sp.plot()
+    thinkplot.show()
+
+
 def main():
+    sawtooth_chirp()
+    return
+
     signal = thinkdsp.TromboneGliss(start=262, end=349)
     wave1 = signal.make_wave(duration=1)
     wave1.apodize()

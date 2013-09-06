@@ -470,6 +470,13 @@ class Wave(object):
         wfile.write(self)
         wfile.close()
 
+    def play(self, filename='sound.wav'):
+        """Plays a wave file.
+
+        filename: string
+        """
+        self.write(filename)
+        play_wave(filename)
 
 
 def unbias(ys):
@@ -828,6 +835,25 @@ class ExpoChirp(Chirp):
         start, end = math.log10(self.start), math.log10(self.end)
         freqs = numpy.logspace(start, end, len(ts)-1)
         return self._evaluate(ts, freqs)
+
+
+class SawtoothChirp(Chirp):
+    """Represents a sawtooth signal with varying frequency."""
+
+    def _evaluate(self, ts, freqs):
+        """Helper function that evaluates the signal.
+
+        ts: float array of times
+        freqs: float array of frequencies during each interval
+        """
+        dts = numpy.diff(ts)
+        dps = PI2 * freqs * dts
+        phases = numpy.cumsum(dps)
+        phases = numpy.insert(phases, 0, 0)
+        cycles = phases / PI2
+        frac, _ = numpy.modf(cycles)
+        ys = normalize(unbias(frac), self.amp)
+        return ys
 
 
 class TromboneGliss(Chirp):
