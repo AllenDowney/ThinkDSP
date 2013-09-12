@@ -1585,8 +1585,7 @@ more samples to play with, but the range of frequencies increases at
 the same time.
 
 This tradeoff is called the ``Gabor limit'' and it is a fundamental
-limitation of the STFT.  Wavelet analysis is an alternative that
-addresses this limitation.
+limitation of this kind of time-frequency analysis.
 
 
 \section{Implementing spectrograms}
@@ -1783,17 +1782,32 @@ Welch's method, and discussion of amplitude, amplitude density and power.
 
 \chapter{Discrete cosine transform}
 
-At this point we know how to use an FFT to identify the frequency
-components of a complex signal, but we don't know how it works.
+The topic of this chapter is the {\bf Discrete Cosine Transform}
+(DCT), which is used in MP3 and related formats for compressing music,
+JPEG and similar formats for images, and the MPEG family of formats
+for video.
 
-To explain, I will proceed in a few steps.  Here's the outline:
+DCT is similar in many ways to the discrete Fourier transform (DFT).
+Once we learn how DCT works, it will be easier to explain DFT.
+
+Here are the steps we will follow to get there:
 
 \begin{enumerate}
 
 \item We'll start with the synthesis problem: given a set of frequency
 components and their amplitudes, how can we construct the waveform?
 
-\item 
+\item Next we'll rewrite the synthesis problem using numpy arrays, which
+is good for performance, and also provides some insight into the problem.
+
+\item Next we'll look at the analysis problem: given a signal and
+a set of frequencies, how can we find the amplitude of each frequency
+component?  We'll start with a solution that is conceptually simple
+but slow.
+
+\item Finally, we'll use some principles from linear algebra to find
+a more efficient algorithm.  If you already know linear algebra, that's
+great, but I will explain what we need as we go along.
 
 \end{enumerate}
 
@@ -1802,33 +1816,228 @@ So let's get started.
 
 \section{Synthesis}
 
+Suppose I give you a list of amplitudes and a list of frequencies,
+and ask you to construct a signal that is the sum of these frequency
+components.  Using objects in the {\tt thinkdsp} module, there is
+a simple way to perform this operation, which is called {\bf synthesis}:
 
 \begin{verbatim}
+def synthesize1(amps, freqs, ts):
+    components = [thinkdsp.CosSignal(freq, amp)
+                  for amp, freq in zip(amps, freqs)]
+    signal = thinkdsp.SumSignal(*components)
+
+    ys = signal.evaluate(ts)
+    return ys
 \end{verbatim}
 
+{\tt amps} is a list of amplitudes, {\tt freqs} is the list
+of frequencies, and {\tt ts} is the sequence
+of times where the signal should be evaluated.
+
+{\tt components} is a list of {\tt CosSignal} objects, one for
+each amplitude-frequency pair.  {\tt SumSignal} represents the
+sum of these frequency components.
+
+Finally, {\tt evaluate} computes the value of the signal at each
+time in {\tt ts}.
+
+We can test this function like this:
 
 \begin{verbatim}
+    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    freqs = [220, 440, 660, 880]
+
+    framerate = 11025
+    ts = numpy.linspace(0, 1, 11025)
+    ys = synthesize1(amps, freqs, ts)
+    wave = thinkdsp.Wave(ys, framerate)
+    wave.play()
 \end{verbatim}
 
+This example makes a signal that contains a fundamental frequency
+at 220 Hz and three harmonics.  It renders the signal for one second
+at 11,025 frames per second and plays the resulting wave.
+
+Conceptually, synthesis is pretty simple.  But in this form it doesn't
+help much with {\bf analysis}; that is, given the wave, can we identify
+the frequency components and their amplitudes.  To do that, we have
+to take another approach.
+
+
+\section{Synthesis with arrays}
+
+\begin{figure}
+\input{diagram}
+\caption{}
+\end{figure}
+
+Here's another way to write {\tt synthesize}:
 
 \begin{verbatim}
+def synthesize2(amps, freqs, ts):
+    args = numpy.outer(ts, freqs)
+    M = numpy.cos(PI2 * args)
+    ys = numpy.dot(M, amps)
+    return ys
 \end{verbatim}
 
+This function looks very different, but it does the same thing.
+Let's see how it works:
+
+\begin{enumerate}
+
+\item {\tt numpy.outer} computes the outer product of {\tt ts} and
+  {\tt freqs}.  The result is an array with one row for each element
+  of {\tt ts} and one column for each element of {\tt freqs}.  Each
+  element in the array is the product of a frequency and a time, $f
+  t$.
+
+\item We multiply {\tt args} by $2 \pi$ and apply {\tt cos}, so each
+  element of the result is $\cos (2 \pi f t)$.  So each column contains a
+  cosine signal at a particular frequency, evaluated at a sequence of
+  times.
+
+\item {\tt numpy.dot} computes a dot product.  In terms of linear
+  algebra, we are multiplying a matrix, {\tt M}, by a vector, {\tt
+    amps}.  Figure~\ref{} is a diagram of this multiplication.  {\tt
+    numpy.dot} multiplies each row of M {\tt M} by {\tt amps},
+  element-wise, and then adds up the products.
+
+\end{enumerate}
+
+In the diagram, each row of the matrix, {\tt M}, corresponds to a time 
+from 0.0 to 1.0 s; $t_k$ is the time of the $k$th row.
+Each column corresponds to a frequency from
+220 to 880 Hz; $f_j$ is the frequency of the $j$th column.
+
+I have labeled the $k$th row with
+the letters
+$a$ through $d$; as an example, the value of $a$ is $\cos [2 \pi (220) t_k]$.
+
+The result of the dot product, {\tt ys}, is a vector with one element
+for each row of {\tt ts}.  The $k$th element, labeled $e$, is the sum
+of products:
+
+\[ e = 0.6 a + 0.25 b + 0.1 c + 0.05 d \]
+
+And likewise with the other elements of {\tt ys}.  
+
+One note on linear algebra vocabulary: I am using ``matrix'' to refer
+to a two-dimensional array, and ``vector'' for a one-dimensional array
+or sequence.  To be a bit pedantic, it would be more correct to think
+of matrices and vectors as abstract mathematical concepts, and {\tt
+  numpy} arrays as one way (and not the only way) to represent them.
+
+One advantage of linear algebra is that it provides concise notation
+for operations on matrices and vectors.  For example, we could write
+{\tt synthesize} like this:
+
+\begin{eqnarray*}
+M = \cos [2 \pi (t \otimes f)] \\
+y = M a
+\end{eqnarray*}
+
+where $a$ is a vector of amplitudes,
+$t$ is a vector of times, $f$ is a vector of frequencies, and
+$\otimes$ is the symbol for the outer product of two vectors.
+
+
+\section{Analysis}
+
+Now we are ready to solve the analysis problem.  Suppose I give you
+a wave and tell you that it is the sum of cosines with a given set
+of frequencies.  How would you find the amplitude for each frequency
+component?  In other words, given {\tt ys}, {\tt ts} and {\tt freqs},
+can you recover {\tt amps}?
+
+In terms of linear algebra, the first step is the same as for
+synthesis: we compute $M = \cos[2 \pi (t \otimes f)]$.  Then
+we want to find $a$ so that $y = M a$; in other words,
+we want to solve a linear system.  {\tt numpy} provides
+{\tt linalg.solve}, which does exactly that.
+
+Here's what the code looks like:
 
 \begin{verbatim}
+def analyze1(ys, freqs, ts):
+    args = numpy.outer(ts, freqs)
+    M = numpy.cos(PI2 * args)
+    amps = numpy.linalg.solve(M, ys)
+    return amps
 \end{verbatim}
 
+The first two lines use {\tt ts} and {\tt freqs} to build the
+matrix, {\tt M}.  Then {\tt numpy.linalg.solve} computes {\tt amps}.
+
+But there's a catch.  In general we can only solve a system of linear
+equations if the matrix is square; that is, the number of equations
+(rows) is the same as the number of unknowns (columns).
+
+In this example, we have only 4 frequencies, but we evaluated the
+signal at 11,025 times.  So we have many more equations than unknowns.
+That suggests that we should be able to recover $a$ using only
+4 elements of {\tt ys}.  Here's what that looks like:
+
+Using the values of {\tt ys}, {\tt freqs} and {\tt ts} from
+the previous section, we can run {\tt analyze1} like this:
 
 \begin{verbatim}
+    n = len(freqs)
+    amps2 = analyze1(ys[:n], freqs, ts[:n])
 \end{verbatim}
 
+And sure enough, we get
 
 \begin{verbatim}
+amps2 = [ 0.6   0.25  0.1   0.05]
 \end{verbatim}
 
+In this case, we know that the {\tt ys} were actually generated
+by adding only 4 frequency components, so we can use any 4 values
+to recover {\tt amps}.  But in general if {\tt ys} contains more
+than 4 elements, it is unlikely that we can analyze it using only
+4 frequencies.
 
-\begin{verbatim}
-\end{verbatim}
+We'll come back to this issue later, but first I want to address
+a different problem -- this algorithm is slow.  Solving a linear
+system of equations takes time proportional to $n^3$, where $n$ is
+the number of columns in $M$.
+
+It turns out that we can do better.
+
+
+\section{Orthogonal matrixes}
+
+One way to solve linear systems is by inverting matrixes.  The
+inverse of a matrix $M$ is written $M^{-1}$, and it has the property
+that $M^{-1}M = I$, where $I$ is the identity matrix, which has
+the value 1 on all diagonal elements and 0 everywhere else.
+
+So, to
+solve the equation $y = Ma$, we can multiply both sides by $M^{-1}$,
+which yields:
+
+\[ M^{-1}y = M^{-1} M a \]
+
+On the right side, we can replace $M^{-1}M$ with I
+
+\[ M^{-1}y = I a \]
+
+If we multiply $I$ by any vector $a$, the result is $a$, so  
+
+\[ M^{-1}y = a \]
+
+This implies that if we can find $M^{-1}$ efficiently, we can find
+$a$ with a simple matrix multiplication, which takes time proportional
+to $n^2$.  And that's much better than $n^3$.
+
+In general inverting a matrix is slow, but there is one special case:
+if $M$ is orthogonal, the inverse of $M$ is just the transpose of $M$,
+written $M^T$.  And in {\tt numpy} 
+
+
+
 
 
 \begin{verbatim}
@@ -1880,6 +2089,8 @@ Case study ideas:
 \item Application of cepstrum?
 
 \item Application of z transform -- digital control systems
+
+\item tilt shift effect on a photo
 
 \end{itemize}
 
