@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.3}
+\newcommand{\theversion}{0.4}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -1766,7 +1766,7 @@ Envelope generation.
 
 \section{Pitch shifting}
 
-Motivate wavelets?
+Auto-tune?
 
 
 \chapter{Spectral density estimation}
@@ -1775,17 +1775,19 @@ Spectrum of symbal crash, applause.
 
 Synthesize white and pink noise.
 
-Estimate the spectrum of a long time series (stock market data?)
+Estimate the spectrum of a long time series (stock market data?
+astronomical data?)
 
-Welch's method, and discussion of amplitude, amplitude density and power.
+Welch's method, discussion of amplitude, amplitude density, power
+and decibels.
 
 
 \chapter{Discrete cosine transform}
 
-The topic of this chapter is the {\bf Discrete Cosine Transform}
-(DCT), which is used in MP3 and related formats for compressing music,
-JPEG and similar formats for images, and the MPEG family of formats
-for video.
+The topic of the next two chapters is the {\bf Discrete Cosine
+  Transform} (DCT), which is used in MP3 and related formats for
+compressing music, JPEG and similar formats for images, and the MPEG
+family of formats for video.
 
 DCT is similar in many ways to the discrete Fourier transform (DFT).
 Once we learn how DCT works, it will be easier to explain DFT.
@@ -1795,23 +1797,24 @@ Here are the steps we will follow to get there:
 \begin{enumerate}
 
 \item We'll start with the synthesis problem: given a set of frequency
-components and their amplitudes, how can we construct the waveform?
+  components and their amplitudes, how can we construct a waveform?
 
-\item Next we'll rewrite the synthesis problem using numpy arrays, which
-is good for performance, and also provides some insight into the problem.
+\item Next we'll rewrite the synthesis problem using numpy arrays.
+  This move is good for performance, and also provides insight
+  into the analysis problem.
 
-\item Next we'll look at the analysis problem: given a signal and
-a set of frequencies, how can we find the amplitude of each frequency
-component?  We'll start with a solution that is conceptually simple
-but slow.
+\item Next we'll look at the analysis problem: given a signal and a
+  set of frequencies, how can we find the amplitude of each frequency
+  component?  We'll start with a solution that is conceptually simple
+  but slow.
 
-\item Finally, we'll use some principles from linear algebra to find
-a more efficient algorithm.  If you already know linear algebra, that's
-great, but I will explain what we need as we go along.
+\item Finally, we'll use some principles from linear algebra to find a
+  more efficient algorithm.  If you already know linear algebra,
+  that's great, but I will explain what you need as we go.
 
 \end{enumerate}
 
-So let's get started.
+Let's get started.
 
 
 \section{Synthesis}
@@ -1846,21 +1849,22 @@ We can test this function like this:
 
 \begin{verbatim}
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
-    freqs = [220, 440, 660, 880]
-
+    freqs = [100, 200, 300, 400]
     framerate = 11025
-    ts = numpy.linspace(0, 1, 11025)
+
+    ts = numpy.linspace(0, 1, framerate)
     ys = synthesize1(amps, freqs, ts)
     wave = thinkdsp.Wave(ys, framerate)
     wave.play()
 \end{verbatim}
 
-This example makes a signal that contains a fundamental frequency
-at 220 Hz and three harmonics.  It renders the signal for one second
-at 11,025 frames per second and plays the resulting wave.
+This example makes a signal that contains a fundamental frequency at
+100 Hz and three harmonics (100 Hz is a sharp G2).  It renders the
+signal for one second at 11,025 frames per second and plays the
+resulting wave.
 
 Conceptually, synthesis is pretty simple.  But in this form it doesn't
-help much with {\bf analysis}; that is, given the wave, can we identify
+help much with {\bf analysis}; that is, given the wave, identifying
 the frequency components and their amplitudes.  To do that, we have
 to take another approach.
 
@@ -1869,7 +1873,8 @@ to take another approach.
 
 \begin{figure}
 \input{diagram}
-\caption{}
+\caption{Synthesis with arrays.}
+\label{fig.synthesis}
 \end{figure}
 
 Here's another way to write {\tt synthesize}:
@@ -1894,34 +1899,51 @@ Let's see how it works:
   t$.
 
 \item We multiply {\tt args} by $2 \pi$ and apply {\tt cos}, so each
-  element of the result is $\cos (2 \pi f t)$.  So each column contains a
-  cosine signal at a particular frequency, evaluated at a sequence of
-  times.
+  element of the result is $\cos (2 \pi f t)$.  Since the {\tt ts} run
+  down the columns, each column contains a cosine signal at a
+  particular frequency, evaluated at a sequence of times.
 
 \item {\tt numpy.dot} computes a dot product.  In terms of linear
   algebra, we are multiplying a matrix, {\tt M}, by a vector, {\tt
-    amps}.  Figure~\ref{} is a diagram of this multiplication.  {\tt
-    numpy.dot} multiplies each row of M {\tt M} by {\tt amps},
-  element-wise, and then adds up the products.
+    amps}.  Figure~\ref{fig.synthesis} is a diagram of this
+  multiplication.  {\tt numpy.dot} multiplies each row of {\tt M} by
+  {\tt amps}, element-wise, and then adds up the products.
 
 \end{enumerate}
 
 In the diagram, each row of the matrix, {\tt M}, corresponds to a time 
 from 0.0 to 1.0 s; $t_k$ is the time of the $k$th row.
 Each column corresponds to a frequency from
-220 to 880 Hz; $f_j$ is the frequency of the $j$th column.
+100 to 400 Hz; $f_j$ is the frequency of the $j$th column.
 
-I have labeled the $k$th row with
-the letters
-$a$ through $d$; as an example, the value of $a$ is $\cos [2 \pi (220) t_k]$.
+I have labeled the $k$th row with the letters $a$ through $d$; as an
+example, the value of $a$ is $\cos [2 \pi (220) t_k]$.
 
 The result of the dot product, {\tt ys}, is a vector with one element
-for each row of {\tt ts}.  The $k$th element, labeled $e$, is the sum
+for each row of {\tt M}.  The $k$th element, labeled $e$, is the sum
 of products:
-
+%
 \[ e = 0.6 a + 0.25 b + 0.1 c + 0.05 d \]
+%
+And likewise with the other elements of {\tt ys}.  So each element
+of {\tt y} is the sum of four frequency components, evaluated at
+a point in time, and multiplied by the corresponding amplitudes.
+And that's exactly what we wanted.  We can use the test code from
+the previous section to
+check that the two versions of {\tt synthesize} produce the same results.
 
-And likewise with the other elements of {\tt ys}.  
+\begin{verbatim}
+    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    freqs = [100, 200, 300, 400]
+    framerate = 11025
+    ts = numpy.linspace(0, 1, framerate)
+    ys1 = synthesize1(amps, freqs, ts)
+    ys2 = synthesize2(amps, freqs, ts)
+    print max(abs(ys1 == ys2))
+\end{verbatim}
+
+The biggest difference between {\tt ys1} and {\tt y2} is about {\tt
+  1e-13}, which is about what we expect due to floating-point errors.
 
 One note on linear algebra vocabulary: I am using ``matrix'' to refer
 to a two-dimensional array, and ``vector'' for a one-dimensional array
@@ -1932,12 +1954,12 @@ of matrices and vectors as abstract mathematical concepts, and {\tt
 One advantage of linear algebra is that it provides concise notation
 for operations on matrices and vectors.  For example, we could write
 {\tt synthesize} like this:
-
+%
 \begin{eqnarray*}
 M = \cos [2 \pi (t \otimes f)] \\
 y = M a
 \end{eqnarray*}
-
+%
 where $a$ is a vector of amplitudes,
 $t$ is a vector of times, $f$ is a vector of frequencies, and
 $\otimes$ is the symbol for the outer product of two vectors.
@@ -1952,10 +1974,10 @@ component?  In other words, given {\tt ys}, {\tt ts} and {\tt freqs},
 can you recover {\tt amps}?
 
 In terms of linear algebra, the first step is the same as for
-synthesis: we compute $M = \cos[2 \pi (t \otimes f)]$.  Then
-we want to find $a$ so that $y = M a$; in other words,
-we want to solve a linear system.  {\tt numpy} provides
-{\tt linalg.solve}, which does exactly that.
+synthesis: we compute $M = \cos[2 \pi (t \otimes f)]$.  Then we want
+to find $a$ so that $y = M a$; in other words, we want to solve a
+linear system.  {\tt numpy} provides {\tt linalg.solve}, which does
+exactly that.
 
 Here's what the code looks like:
 
@@ -1993,11 +2015,11 @@ And sure enough, we get
 amps2 = [ 0.6   0.25  0.1   0.05]
 \end{verbatim}
 
-In this case, we know that the {\tt ys} were actually generated
-by adding only 4 frequency components, so we can use any 4 values
-to recover {\tt amps}.  But in general if {\tt ys} contains more
-than 4 elements, it is unlikely that we can analyze it using only
-4 frequencies.
+In this case, we know that the {\tt ys} were actually generated by
+adding only 4 frequency components, so we can use any 4 values from
+the wave array to recover {\tt amps}.  But in general if {\tt ys}
+contains more than 4 elements, it is unlikely that we can analyze it
+using only 4 frequencies.
 
 We'll come back to this issue later, but first I want to address
 a different problem -- this algorithm is slow.  Solving a linear
@@ -2011,65 +2033,269 @@ It turns out that we can do better.
 
 One way to solve linear systems is by inverting matrixes.  The
 inverse of a matrix $M$ is written $M^{-1}$, and it has the property
-that $M^{-1}M = I$, where $I$ is the identity matrix, which has
+that $M^{-1}M = I$.  $I$ is the identity matrix, which has
 the value 1 on all diagonal elements and 0 everywhere else.
 
-So, to
-solve the equation $y = Ma$, we can multiply both sides by $M^{-1}$,
-which yields:
-
+So, to solve the equation $y = Ma$, we can multiply both sides by
+$M^{-1}$, which yields:
+%
 \[ M^{-1}y = M^{-1} M a \]
-
-On the right side, we can replace $M^{-1}M$ with I
-
+%
+On the right side, we can replace $M^{-1}M$ with $I$:
+%
 \[ M^{-1}y = I a \]
-
+%
 If we multiply $I$ by any vector $a$, the result is $a$, so  
-
+%
 \[ M^{-1}y = a \]
+%
+This implies that if we can compute $M^{-1}$ efficiently, we can solve
+for $a$ with a simple matrix multiplication (using {\tt numpy.dot}).
+That takes time proportional to $n^2$, which is much better than
+$n^3$.
 
-This implies that if we can find $M^{-1}$ efficiently, we can find
-$a$ with a simple matrix multiplication, which takes time proportional
-to $n^2$.  And that's much better than $n^3$.
+In general inverting a matrix is slow, but some special cases are
+faster.  In particular, if $M$ is {\bf orthogonal}, the inverse of $M$
+is just the transpose of $M$, written $M^T$.  And in {\tt numpy}
+computing the transpose is usually a constant-time operation.  It
+doesn't actually move the elements of the array; instead, it creates a
+``view'' that changes the way the elements are accessed.
 
-In general inverting a matrix is slow, but there is one special case:
-if $M$ is orthogonal, the inverse of $M$ is just the transpose of $M$,
-written $M^T$.  And in {\tt numpy} 
+Again, a matrix is orthogonal
+if its transpose is also
+its inverse; that is, $M^T = M^{-1}$.  That implies that $M^TM = I$,
+which means we can check whether a matrix is orthogonal by computing
+$M^TM$.
 
-
-
-
-
-\begin{verbatim}
-\end{verbatim}
-
-
-\begin{verbatim}
-\end{verbatim}
-
-
-\begin{verbatim}
-\end{verbatim}
-
+So let's see what the matrix looks like in {\tt synthesize2}.  In 
+the previous example, $M$ has 11,025 rows, so it might be a good idea
+to work with a smaller example:
 
 \begin{verbatim}
+def test1():
+    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    N = 4.0
+    time_unit = 0.001
+    ts = numpy.arange(N) / N * time_unit
+    max_freq = N / time_unit / 2
+    freqs = numpy.arange(N) / N * max_freq
+    ys = synthesize2(amps, freqs, ts)
 \end{verbatim}
 
+{\tt amps} is the same vector of amplitudes we saw before.
+Since we have 4 frequency components, we'll sample the signal
+at 4 points in time.  That way, $M$ is square.
+
+{\tt ts} is a vector of equally spaced sample times in the range from
+0 to 1 time unit.  I chose the time unit to be 1 millisecond, but it
+is an arbitrary choice, and we will see in a minute that it drops out
+of the computation anyway.
+
+Since the frame rate is $N$ samples per time unit, the Nyquist
+frequency is \verb"N / time_unit / 2", which is 2000 Hz in this
+example.  So {\tt freqs} is a vector of equally spaced frequencies
+between 0 and 2000 Hz.
+
+With these values of {\tt ts} and {\tt freqs}, the matrix, $M$, is:
 
 \begin{verbatim}
+[[ 1.     1.     1.     1.   ]
+ [ 1.     0.707  0.    -0.707]
+ [ 1.     0.    -1.    -0.   ]
+ [ 1.    -0.707 -0.     0.707]]
 \end{verbatim}
 
+You might recognize 0.707 as an approximation of $\sqrt{2}/2$,
+which is $\cos \pi/4$.  You also might notice that this matrix
+is {\bf symmetric}, which means that the element at $(j, k)$ always
+equals the element at $k, j$.  This implies that $M$ is its own
+transpose; that is $M^T = M$.
+
+But sadly, $M$ is not orthogonal.  If we compute $M^TM$, we get:
 
 \begin{verbatim}
+[[ 4.  1. -0.  1.]
+ [ 1.  2.  1. -0.]
+ [-0.  1.  2.  1.]
+ [ 1. -0.  1.  2.]]
 \end{verbatim}
 
+And that's not the identity matrix.
+
+
+\section{DCT-IV}
+
+But if we choose {\tt ts} and {\tt freqs} carefully,
+we can make $M$ orthogonal.  There are several ways to do it, which
+is why there are several version of the discrete cosine transform (DCT).
+
+One simple option is to shift {\tt
+  ts} and {\tt freqs} by a half unit.  This version is called DCT-IV,
+where ``IV'' is a roman numeral indicating that this is the fourth of
+eight versions used often enough to deserve a name.
+
+Here's an updated version of
+{\tt test1}:
 
 \begin{verbatim}
+def test2()
+    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    N = 4.0
+    ts = (0.5 + numpy.arange(N)) / N
+    freqs = (0.5 + numpy.arange(N)) / 2
+    ys = synthesize2(amps, freqs, ts)
 \end{verbatim}
 
+If you compare this to the previous version, you'll notice
+two changes.  First, I added 0.5 to {\tt ts} and {\tt freqs}.
+Second, I cancelled out \verb"time_units", which simplifies
+the expression for {\tt freqs}.
+
+With these values, $M$ is
 
 \begin{verbatim}
+[[ 0.981  0.831  0.556  0.195]
+ [ 0.831 -0.195 -0.981 -0.556]
+ [ 0.556 -0.981  0.195  0.831]
+ [ 0.195 -0.556  0.831 -0.981]]
 \end{verbatim}
+
+And $M^TM$ is
+
+\begin{verbatim}
+[[ 2.  0.  0.  0.]
+ [ 0.  2. -0.  0.]
+ [ 0. -0.  2. -0.]
+ [ 0.  0. -0.  2.]]
+\end{verbatim}
+
+Some of the off-diagonal elements are displayed as -0, which means
+that the floating-point representation is a small negative number.  So
+this matrix is very close to $2I$, which means $M$ is almost
+orthogonal; it's just off by a factor of 2.  And for our purposes,
+that's good enough.
+
+Because $M$ is symmetric and (almost) orthogonal, the inverse of $M$
+is just $M/2$.  Now we can write a more efficient version of {\tt
+  analyze}:
+
+\begin{verbatim}
+def analyze2(ys, freqs, ts):
+    args = numpy.outer(ts, freqs)
+    M = numpy.cos(PI2 * args)
+    amps = numpy.dot(M, ys) / 2
+    return amps
+\end{verbatim}
+
+Instead of using {\tt numpy.linalg.solve}, we just multiply
+by $M/2$.
+
+Putting it all together, we can write an implementation of
+DCT-IV:
+
+\begin{verbatim}
+def dct_iv(ys):
+    N = len(ys)
+    ts = (0.5 + numpy.arange(N)) / N
+    freqs = (0.5 + numpy.arange(N)) / 2
+    args = numpy.outer(ts, freqs)
+    M = numpy.cos(PI2 * args)
+    amps = numpy.dot(M, ys) / 2
+    return amps
+\end{verbatim}
+
+Again, {\tt ys} is the wave array.  We don't have to pass
+{\tt ts} and {\tt freqs} as parameters; \verb"dct_iv" can
+figure them out based on {\tt N}, the length of {\tt ys}.
+
+We can test \verb"dct_iv" like this
+
+\begin{verbatim}
+    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    N = 4.0
+    ts = (0.5 + numpy.arange(N)) / N
+    freqs = (0.5 + numpy.arange(N)) / 2
+    ys = synthesize2(amps, freqs, ts)
+
+    amps2 = dct_iv(ys)
+    print max(abs(amps - amps2))
+\end{verbatim}
+
+Starting with {\tt amps}, we synthesize a wave array, then use
+\verb"dct_iv" to see if we can recover the amplitudes.  The biggest
+difference between {\tt amps} and {\tt amps2} is about {\tt 1e-16},
+which is what we expect with 64-bit floating point arithmetic.
+
+
+\section{Inverse DCT}
+
+Finally, notice that {\tt analyze2} and {\tt synthesize2} are almost
+identical.  The only difference is that {\tt analyze2} divides the
+result by 2.  We can use this insight to compute the inverse DCT:
+
+\begin{verbatim}
+def inverse_dct_iv(amps):
+    return dct_iv(amps) * 2
+\end{verbatim}
+
+\verb"inverse_dct_iv" takes the vector of amplitudes and returns
+the wave array, {\tt ys}.  We can confirm that it works by starting
+with {\tt amps}, applying \verb"inverse_dct_iv" and \verb"dct_iv",
+and testing that we get back what we started with.
+
+\begin{verbatim}
+    amps = [0.6, 0.25, 0.1, 0.05]
+    ys = inverse_dct_iv(amps)
+    amps2 = dct_iv(ys)
+    print max(abs(amps - amps2))
+\end{verbatim}
+
+Again, the biggest difference is about {\tt 1e-16}.
+
+
+\section{Summary}
+
+This chapter explores the relationship between the synthesis problem
+and the analysis problem.  By writing the synthesis problem in the
+form of matrix operations, we derive an efficient algorithm for computing
+the DCT.
+
+This algorithm is based on a matrix, $M$, that is orthogonal and
+symmetric, so it has the unusual property that the inverse of $M$ is
+$M$ (within a factor of two, anyway).  As a result, the function we
+wrote to compute DCT-IV also computes the inverse DCT.
+
+For the analysis problem, we started with a solution that
+takes time proportional to $n^3$ and improved it to take time
+proportional to $n^2$.  It turns out that there is another optimization
+that get the run time down to $n \log n$.  That algorithm is implemented
+in {\tt scipy}, so we will use it in the next chapter.  And then in
+Chapter~\ref{} we will see how it works.
+
+The code from this chapter is available from
+\url{http://think-dsp.com/example4.py}.
+
+
+
+
+
+\section{Exercises}
+
+\begin{exercise}
+Test the algorithmic complexity of {\tt analyze1}, {\tt analyze2}
+and {\tt scipy.fftpack.dct}.
+\end{exercise}
+
+
+\chapter{Using the DCT}
+
+In the previous chapter we derived the DCT and wrote a simple
+implementation of DCT-IV.  I chose DCT-IV because it is the
+easiest to explain, but in practice it is more common to use
+DCT-II and its inverse, DCT-III.  And unlike DCT-IV, the more
+common versions are available in {\tt scipy}.
+
+
 
 
 \chapter{Notes}

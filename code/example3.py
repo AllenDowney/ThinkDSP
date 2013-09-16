@@ -62,7 +62,6 @@ def discontinuity(num_periods=30, hamming=False):
     spectrum.plot(high=60)
 
 
-
 def three_spectrums():    
     """Makes a plot showing three spectrums for a sinusoid.
     """
@@ -154,24 +153,6 @@ def chirp_spectrogram():
                    ylabel='frequency (Hz)')
     
     
-def invert_spectrogram():
-    """
-    """
-    signal = thinkdsp.Chirp(start=220, end=440)
-    wave = signal.make_wave(duration=1, framerate=11025)
-    spectrogram = wave.make_spectrogram(seg_length=512)
-
-    wave2 = spectrogram.make_wave()
-
-    for i, (y1, y2) in enumerate(zip(wave.ys, wave2.ys)):
-        if abs(y1 - y2) > 1e-14:
-            print i, y1, y2
-
-    #wave.plot()
-    #wave2.plot()
-    #thinkplot.show()
-
-    
 def violin_spectrogram():
     """Makes a spectrogram of a violin recording.
     """
@@ -208,6 +189,20 @@ def overlapping_windows():
                    axis=[0, 800, 0, 1.05])
 
 
+def invert_spectrogram():
+    """Tests Spectrogram.make_wave.
+    """
+    signal = thinkdsp.Chirp(start=220, end=440)
+    wave = signal.make_wave(duration=1, framerate=11025)
+    spectrogram = wave.make_spectrogram(seg_length=512)
+
+    wave2 = spectrogram.make_wave()
+
+    for i, (y1, y2) in enumerate(zip(wave.ys, wave2.ys)):
+        if abs(y1 - y2) > 1e-14:
+            print i, y1, y2
+
+    
 def invert_image():
     img = PIL.open('Welsh seascape.png')
     array = numpy.asarray(img) / 255.0
@@ -236,25 +231,11 @@ def sawtooth_chirp():
 
 
 def main():
-    sawtooth_chirp()
+    chirp_spectrogram()
+    chirp_spectrum()
     return
 
-    signal = thinkdsp.TromboneGliss(start=262, end=349)
-    wave1 = signal.make_wave(duration=1)
-    wave1.apodize()
-
-    signal = thinkdsp.TromboneGliss(start=349, end=262)
-    wave2 = signal.make_wave(duration=1)
-    wave2.apodize()
-
-    wave = wave1 | wave2
-    filename = 'gliss.wav'
-    #wave.write(filename)
-    #thinkdsp.play_wave(filename)
-
-    sp = wave.make_spectrogram(1024)
-    sp.plot(high=40)
-    thinkplot.show()
+    violin_spectrogram()
     return
 
     invert_image()
@@ -263,18 +244,8 @@ def main():
     invert_spectrogram()
     return
 
-    filename = 'chirp.wav'
-    thinkdsp.play_wave(filename)
-    thinkdsp.play_wave(filename)
-    return
-
     overlapping_windows()
     return
-
-    violin_spectrogram()
-    return
-
-    chirp_spectrum()
 
     window_plot()
 

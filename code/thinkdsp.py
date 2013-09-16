@@ -8,6 +8,7 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 import array
 import math
 import numpy
+import scipy
 import struct
 import subprocess
 import thinkplot
@@ -106,17 +107,9 @@ def play_wave(filename='sound.wav', player='aplay'):
     popen.communicate()
 
 
-class Spectrum(object):
-    """Represents the spectrum of a signal."""
-
-    def __init__(self, hs, framerate):
-        self.hs = hs
-        self.framerate = framerate
-
-        self.amps = numpy.absolute(self.hs)
-
-        n = len(hs)
-        self.fs = numpy.linspace(0, self.max_freq, n)
+class _SpectrumParent(object):
+    """Contains code common to Spectrum and DCT.
+    """
 
     @property
     def max_freq(self):
@@ -142,6 +135,19 @@ class Spectrum(object):
         t = zip(self.amps, self.fs)
         t.sort(reverse=True)
         return t
+
+
+class Spectrum(_SpectrumParent):
+    """Represents the spectrum of a signal."""
+
+    def __init__(self, hs, framerate):
+        self.hs = hs
+        self.framerate = framerate
+
+        self.amps = numpy.absolute(self.hs)
+
+        n = len(hs)
+        self.fs = numpy.linspace(0, self.max_freq, n)
 
     def low_pass(self, cutoff, factor=0):
         """Attenuate frequencies above the cutoff.
@@ -187,6 +193,24 @@ class Spectrum(object):
         returns: Wave
         """
         ys = numpy.fft.irfft(self.hs)
+        return Wave(ys, self.framerate)
+
+
+class Dct(_SpectrumParent):
+    """Represents the spectrum of a signal."""
+
+    def __init__(self, amps, framerate):
+        self.amps = amps
+        self.framerate = framerate
+        n = len(amps)
+        self.fs = numpy.arange(n) / float(n) * self.max_freq
+
+    def make_wave(self):
+        """Transforms to the time domain.
+
+        returns: Wave
+        """
+        ys = scipy.fftpack.dct(self.amps, type=3) / 2
         return Wave(ys, self.framerate)
 
 
@@ -388,6 +412,10 @@ class Wave(object):
         """
         hs = numpy.fft.rfft(self.ys)
         return Spectrum(hs, self.framerate)
+
+    def make_dct(self):
+        amps = scipy.fftpack.dct(self.ys, type=2)
+        return Dct(amps, self.framerate)
 
     def make_spectrogram(self, seg_length, window_func=numpy.hamming):
         """Computes the spectrogram of the wave.
@@ -834,41 +862,6 @@ class ExpoChirp(Chirp):
         """
         start, end = math.log10(self.start), math.log10(self.end)
         freqs = numpy.logspace(start, end, len(ts)-1)
-        return self._evaluate(ts, freqs)
-
-
-class SawtoothChirp(Chirp):
-    """Represents a sawtooth signal with varying frequency."""
-
-    def _evaluate(self, ts, freqs):
-        """Helper function that evaluates the signal.
-
-        ts: float array of times
-        freqs: float array of frequencies during each interval
-        """
-        dts = numpy.diff(ts)
-        dps = PI2 * freqs * dts
-        phases = numpy.cumsum(dps)
-        phases = numpy.insert(phases, 0, 0)
-        cycles = phases / PI2
-        frac, _ = numpy.modf(cycles)
-        ys = normalize(unbias(frac), self.amp)
-        return ys
-
-
-class TromboneGliss(Chirp):
-    """Represents a signal with varying frequency."""
-    
-    def evaluate(self, ts):
-        """Evaluates the signal at the given times.
-
-        ts: float array of times
-        
-        returns: float wave array
-        """
-        lengths = numpy.linspace(1.0 / self.start, 1.0 / self.end, len(ts)-1)
-        freqs = 1 / lengths
-        print freqs
         return self._evaluate(ts, freqs)
 
 
