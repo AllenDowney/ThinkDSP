@@ -5,9 +5,12 @@ Copyright 2013 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
+import math
+import numpy
 import thinkdsp
 import thinkplot
 
+PI2 = 2 * math.pi
 
 class SawtoothChirp(thinkdsp.Chirp):
     """Represents a sawtooth signal with varying frequency."""
@@ -24,7 +27,7 @@ class SawtoothChirp(thinkdsp.Chirp):
         phases = numpy.insert(phases, 0, 0)
         cycles = phases / PI2
         frac, _ = numpy.modf(cycles)
-        ys = normalize(unbias(frac), self.amp)
+        ys = thinkdsp.normalize(thinkdsp.unbias(frac), self.amp)
         return ys
 
 
@@ -47,7 +50,7 @@ class TromboneGliss(thinkdsp.Chirp):
 def sawtooth_chirp():
     """Tests SawtoothChirp.
     """
-    signal = thinkdsp.SawtoothChirp(start=220, end=880)
+    signal = SawtoothChirp(start=220, end=880)
     wave = signal.make_wave(duration=2, framerate=44100)
     wave.apodize()
     wave.play()
@@ -62,11 +65,11 @@ def trombone_gliss():
     """
     low = 262
     high = 340
-    signal = thinkdsp.TromboneGliss(high, low)
+    signal = TromboneGliss(high, low)
     wave1 = signal.make_wave(duration=1)
     wave1.apodize()
 
-    signal = thinkdsp.TromboneGliss(low, high)
+    signal = TromboneGliss(low, high)
     wave2 = signal.make_wave(duration=1)
     wave2.apodize()
 
@@ -81,10 +84,8 @@ def trombone_gliss():
 
 
 def main():
-    trombone_gliss()
-    return
-
     sawtooth_chirp()
+    trombone_gliss()
     return
 
 
