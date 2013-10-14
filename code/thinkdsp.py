@@ -8,6 +8,7 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 import array
 import math
 import numpy
+import random
 import scipy
 import struct
 import subprocess
@@ -19,6 +20,15 @@ from wave import open as open_wave
 import matplotlib.pyplot as pyplot
 
 PI2 = math.pi * 2
+
+
+def random_seed(x):
+    """Initialize the random and numpy.random generators.
+
+    x: int seed
+    """
+    random.seed(x)
+    numpy.random.seed(x)
 
 
 class UnimplementedMethodException(Exception):
@@ -86,18 +96,16 @@ def read_wave(filename='sound.wav'):
     
     fp.close()
 
-    # TODO: generalize this to handle other sample widths
-    assert sampwidth == 2
-    fmt = 'h'
-    dtype = numpy.int16
-
-    ys = numpy.fromstring(z_str, dtype=dtype)
+    dtype_map = {1:numpy.int8, 2:numpy.int16}
+    assert sampwidth in dtype_map
+    
+    ys = numpy.fromstring(z_str, dtype=dtype_map[sampwidth])
     wave = Wave(ys, framerate)
     return wave
 
 
 def play_wave(filename='sound.wav', player='aplay'):
-    """Playes a wave file.
+    """Plays a wave file.
 
     filename: string
     player: string name of executable that plays wav files
@@ -144,10 +152,13 @@ class Spectrum(_SpectrumParent):
         self.hs = hs
         self.framerate = framerate
 
-        self.amps = numpy.absolute(self.hs)
-
         n = len(hs)
         self.fs = numpy.linspace(0, self.max_freq, n)
+
+    @property
+    def amps(self):
+        """Returns a sequence of amplitudes (read-only property)."""
+        return numpy.absolute(self.hs)
 
     def low_pass(self, cutoff, factor=0):
         """Attenuate frequencies above the cutoff.
@@ -187,6 +198,12 @@ class Spectrum(_SpectrumParent):
         """
         return numpy.angle(self.hs)
 
+    def make_integrated_spectrum(self):
+        """Makes an integrated spectrum.
+        """
+        cs = numpy.cumsum(self.amps)
+        return IntegratedSpectrum(cs, self.fs)
+
     def make_wave(self):
         """Transforms to the time domain.
 
@@ -194,6 +211,27 @@ class Spectrum(_SpectrumParent):
         """
         ys = numpy.fft.irfft(self.hs)
         return Wave(ys, self.framerate)
+
+
+class IntegratedSpectrum(object):
+    """Represents the integral of a spectrum."""
+    
+    def __init__(self, cs, fs):
+        """Initializes an integrated spectrum:
+
+        cs: sequence of cumulative amplitudes
+        fs: sequence of frequences
+        """
+        self.cs = cs
+        self.fs = fs
+
+    def plot(self, low=0, high=None):
+        """Plots the integrated spectrum.
+
+        low: int index to start at 
+        high: int index to end at
+        """
+        thinkplot.Plot(self.fs[low:high], self.cs[low:high])
 
 
 class Dct(_SpectrumParent):
@@ -876,6 +914,59 @@ class SilentSignal(Signal):
         returns: float wave array
         """
         return numpy.zeros(len(ts))
+
+
+class _Noise(Signal):
+    """Represents a noise signal (abstract parent class)."""
+    
+    def __init__(self, amp=1.0):
+        """Initializes a white noise signal.
+
+        amp: float amplitude, 1.0 is nominal max
+        """
+        self.amp = amp
+
+    @property
+    def period(self):
+        """Period of the signal in seconds.
+
+        returns: float seconds
+        """
+        return ValueError('Non-periodic signal.')
+
+
+class WhiteNoise(_Noise):
+    """Represents white noise."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        ys = numpy.random.uniform(-self.amp, self.amp, len(ts))
+        return ys
+
+
+class BrownianNoise(_Noise):
+    """Represents Brownian noise, aka red noise."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        Computes Brownian noise by taking the cumulative sum of
+        a uniform random series.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        #dys = numpy.random.uniform(-self.amp, self.amp, len(ts))
+        dys = numpy.random.normal(0, self.amp, len(ts))
+        ys = numpy.cumsum(dys)
+        ys = normalize(unbias(ys), self.amp)
+        return ys
 
 
 def rest(duration):

@@ -88,16 +88,6 @@ def dct_iv(ys):
     return amps
 
 
-def inverse_dct_iv(amps):
-    """Computes the inverse of DCT-IV.
-
-    amps: vector of amplitudes
-
-    returns: wave array
-    """
-    return dct_iv(amps) * 2
-
-
 def plot(res, index):
 
     slices = [[0, None], [400, 1000], [860, 900]]
@@ -110,21 +100,7 @@ def plot(res, index):
                    formats=['png'])
 
 
-def test_synthesize():
-    """Compares the output of synthesize1 and synthesize2.
-    """
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
-    freqs = [100, 200, 300, 400]
-    framerate = 11025
-    ts = numpy.linspace(0, 1, framerate)
-    ys1 = synthesize1(amps, freqs, ts)
-    ys2 = synthesize2(amps, freqs, ts)
-    print max(abs(ys1 - ys2))
-
-
 def synthesize_example():
-    """Synthesizes a signal with four components and plays it.
-    """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
 
@@ -143,7 +119,7 @@ def synthesize_example():
 
 
 def test_analyze1():
-    """Tests analyze1.
+    """
     """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
@@ -161,7 +137,7 @@ def test_analyze1():
 
 
 def test_analyze2():
-    """Tests analyze2.
+    """
     """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
@@ -176,7 +152,7 @@ def test_analyze2():
     print 'amps2', amps2
 
 
-def test_dct_iv():
+def test_dct():
     """
     """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
@@ -186,53 +162,14 @@ def test_dct_iv():
     ys = synthesize2(amps, freqs, ts)
 
     amps2 = dct_iv(ys)
-    print max(abs(amps - amps2))
-    
-
-
-def test_inverse_dct_iv():
-    amps = [0.6, 0.25, 0.1, 0.05]
-    ys = inverse_dct_iv(amps)
-    amps2 = dct_iv(ys)
-    print max(abs(amps - amps2))
-
-
-def test_make_dct():
-    N = 32
-    framerate = N
-    amps = numpy.zeros(N)
-    amps[2] = 1.0
-    dct = thinkdsp.Dct(amps, framerate)
-    wave = dct.make_wave()
-    print wave.ys
-
-    cos_sig = thinkdsp.CosSignal(freq=1, offset=math.pi/N)
-    wave = cos_sig.make_wave(duration=1, start=0, framerate=framerate)
-    print wave.ys
-
-    dct = wave.make_dct()
-    dct.plot()
-    print dct.fs
-
-    iv = dct_iv(wave.ys)
-    thinkplot.plot(dct.fs, iv)
-    thinkplot.show()
-
+    print 'amps', amps
+    print 'amps2', amps2
 
 
 def main():
-    test_inverse_dct_iv()
-    return
-
-    test_dct_iv()
-    return
-
-    test_synthesize()
-    return
-
     numpy.set_printoptions(precision=3, suppress=True)
 
-    test_make_dct()
+    test_dct()
     return
 
     synthesize_example()
@@ -242,6 +179,13 @@ def main():
     test_synthesize(fshift=0, tshift=0)
     test_synthesize(fshift=0.5, tshift=0.5)
     return
+
+    cos_sig = thinkdsp.CosSignal(freq=1)
+    wave = cos_sig.make_wave(duration=1, start=0, framerate=4)
+    print wave.ys
+
+    dct = scipy.fftpack.dct(wave.ys, type=2)
+    print dct
 
     cos_trans = wave.cos_transform()
     xs, ys = zip(*cos_trans)

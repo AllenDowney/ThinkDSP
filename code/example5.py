@@ -60,8 +60,6 @@ def test_fft(N, freq, window=False):
     dct.plot()
 
 
-
-
 def main():
     N = 64
     
