@@ -128,7 +128,6 @@ def main():
 
     signal = thinkdsp.PinkNoise()
     test_noise(signal, 'pink-noise')
-    return
 
     signal = thinkdsp.WhiteNoise()
     test_noise(signal, 'white-noise')

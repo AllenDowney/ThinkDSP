@@ -1008,11 +1008,19 @@ class PinkNoise(_Noise):
         #hs = reals + imags * complex(0, 1)
         #spectrum = Spectrum(hs, framerate)
         signal = WhiteNoise()
-        wave = signal.make
+        wave = signal.make_wave()
+        spectrum = wave.make_spectrum()
+        spectrum.hs[0] = 0
+        power_before = sum(spectrum.amps**2)
+        print power_before
 
         spectrum.plot()
         spectrum.pink_filter()
-        spectrum.hs *= 2
+
+        power_after = sum(spectrum.amps**2)
+        print power_after
+
+        spectrum.hs *= power_before / power_after
         spectrum.plot()
         thinkplot.show()
         wave = spectrum.make_wave()
