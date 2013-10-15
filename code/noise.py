@@ -101,7 +101,7 @@ def process_files():
 
 def test_noise(signal, root):
     wave = signal.make_wave(duration=0.5)
-    #wave.play()
+    wave.play()
 
     segment = wave.segment(start=0.0, duration=0.01)
     segment.plot()
@@ -125,6 +125,10 @@ def test_noise(signal, root):
 
 def main():
     thinkdsp.random_seed(17)
+
+    signal = thinkdsp.PinkNoise()
+    test_noise(signal, 'pink-noise')
+    return
 
     signal = thinkdsp.WhiteNoise()
     test_noise(signal, 'white-noise')

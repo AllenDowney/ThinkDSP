@@ -191,6 +191,13 @@ class Spectrum(_SpectrumParent):
             if low_cutoff < self.fs[i] < high_cutoff:
                 self.hs[i] = 0
 
+    def pink_filter(self, exponent=1):
+        """Apply a filter that would make white noise pink.
+
+        exponent: exponent of the pink noise
+        """
+        self.hs /= self.fs ** exponent/2.0
+
     def angles(self, i):
         """Computes phase angles in radians.
 
@@ -664,6 +671,20 @@ class Signal(object):
         return Wave(ys, framerate=framerate, start=start)
 
 
+def infer_framerate(ts):
+    """Given ts, find the framerate.
+
+    Assumes that the ts are equally spaced.
+
+    ts: sequence of times in seconds
+
+    returns: frames per second
+    """
+    dt = ts[1] - ts[0]
+    framerate = 1.0 / dt
+    return framerate
+
+
 class SumSignal(Signal):
     """Represents the sum of signals."""
     
@@ -962,11 +983,40 @@ class BrownianNoise(_Noise):
         
         returns: float wave array
         """
-        #dys = numpy.random.uniform(-self.amp, self.amp, len(ts))
         dys = numpy.random.normal(0, self.amp, len(ts))
         ys = numpy.cumsum(dys)
         ys = normalize(unbias(ys), self.amp)
         return ys
+
+
+class PinkNoise(_Noise):
+    """Represents Brownian noise, aka red noise."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        Computes Brownian noise by taking the cumulative sum of
+        a uniform random series.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        #framerate = infer_framerate(ts)
+        #reals = numpy.random.normal(0, self.amp, len(ts))
+        #imags = numpy.random.normal(0, self.amp, len(ts))
+        #hs = reals + imags * complex(0, 1)
+        #spectrum = Spectrum(hs, framerate)
+        signal = WhiteNoise()
+        wave = signal.make
+
+        spectrum.plot()
+        spectrum.pink_filter()
+        spectrum.hs *= 2
+        spectrum.plot()
+        thinkplot.show()
+        wave = spectrum.make_wave()
+        return wave.ys
 
 
 def rest(duration):
