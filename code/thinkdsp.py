@@ -10,6 +10,7 @@ import math
 import numpy
 import random
 import scipy
+import scipy.stats
 import struct
 import subprocess
 import thinkplot
@@ -127,13 +128,24 @@ class _SpectrumParent(object):
     def freq_res(self):
         return self.max_freq / (len(self.fs) - 1)
 
-    def plot(self, low=0, high=None):
+    def plot(self, low=0, high=None, exponent=1, **options):
         """Plots the spectrum.
 
         low: int index to start at 
         high: int index to end at
         """
-        thinkplot.Plot(self.fs[low:high], self.amps[low:high])
+        ys = self.amps[low:high] ** exponent
+        thinkplot.plot(self.fs[low:high], ys, **options)
+
+    def estimate_slope(self):
+        """Runs linear regression on log power vs log frequency.
+
+        returns: slope, inter, r2, p, stderr
+        """
+        x = numpy.log(self.fs[1:])
+        y = numpy.log(self.power[1:])
+        t = scipy.stats.linregress(x,y)
+        return t
 
     def peaks(self):
         """Finds the highest peaks and their frequencies.
@@ -155,10 +167,26 @@ class Spectrum(_SpectrumParent):
         n = len(hs)
         self.fs = numpy.linspace(0, self.max_freq, n)
 
+    def __add__(self, other):
+        if other == 0:
+            return self
+
+        assert self.framerate == other.framerate
+        hs = self.hs + other.hs
+        return Spectrum(hs, self.framerate)
+
+    __radd__ = __add__
+        
+
     @property
     def amps(self):
         """Returns a sequence of amplitudes (read-only property)."""
         return numpy.absolute(self.hs)
+
+    @property
+    def power(self):
+        """Returns a sequence of powers (read-only property)."""
+        return self.amps ** 2
 
     def low_pass(self, cutoff, factor=0):
         """Attenuate frequencies above the cutoff.
@@ -191,12 +219,15 @@ class Spectrum(_SpectrumParent):
             if low_cutoff < self.fs[i] < high_cutoff:
                 self.hs[i] = 0
 
-    def pink_filter(self, exponent=1):
+    def pink_filter(self, beta=1):
         """Apply a filter that would make white noise pink.
 
-        exponent: exponent of the pink noise
+        beta: exponent of the pink noise
         """
-        self.hs /= self.fs ** exponent/2.0
+        denom = self.fs ** (beta/2.0)
+        denom[0] = 1
+        self.hs /= denom
+        self.hs[0] = 0
 
     def angles(self, i):
         """Computes phase angles in radians.
@@ -208,7 +239,8 @@ class Spectrum(_SpectrumParent):
     def make_integrated_spectrum(self):
         """Makes an integrated spectrum.
         """
-        cs = numpy.cumsum(self.amps)
+        cs = numpy.cumsum(self.power)
+        cs /= cs[-1]
         return IntegratedSpectrum(cs, self.fs)
 
     def make_wave(self):
@@ -232,13 +264,31 @@ class IntegratedSpectrum(object):
         self.cs = cs
         self.fs = fs
 
-    def plot(self, low=0, high=None):
+    def plot(self, low=0, high=None, expo=False, **options):
         """Plots the integrated spectrum.
 
         low: int index to start at 
         high: int index to end at
         """
-        thinkplot.Plot(self.fs[low:high], self.cs[low:high])
+        cs = self.cs[low:high]
+        fs = self.fs[low:high]
+
+        if expo:
+            cs = numpy.exp(cs)
+
+        thinkplot.Plot(fs, cs, **options)
+
+    def estimate_slope(self, low=1, high=-12000):
+        """Runs linear regression on log cumulative power vs log frequency.
+
+        returns: slope, inter, r2, p, stderr
+        """
+        #print self.fs[low:high]
+        #print self.cs[low:high]
+        x = numpy.log(self.fs[low:high])
+        y = numpy.log(self.cs[low:high])
+        t = scipy.stats.linregress(x,y)
+        return t
 
 
 class Dct(_SpectrumParent):
@@ -304,7 +354,7 @@ class Spectrogram(object):
         fs = self.any_spectrum().fs
         return fs
 
-    def plot(self, low=0, high=None):
+    def plot(self, low=0, high=None, **options):
         """Make a pseudocolor plot.
 
         low: index of the lowest frequency component to plot
@@ -322,7 +372,7 @@ class Spectrogram(object):
             spectrum = self.spec_map[t]
             array[:,i] = spectrum.amps[low:high]
 
-        thinkplot.pcolor(ts, fs, array)
+        thinkplot.pcolor(ts, fs, array, **options)
 
     def make_wave(self):
         """Inverts the spectrogram and returns a Wave.
@@ -432,12 +482,15 @@ class Wave(object):
         """Normalizes the signal to the given amplitude.
 
         amp: float amplitude
-
-        returns: sequence of floats
         """
         self.ys = normalize(self.ys, amp=amp)
 
-    def segment(self, start, duration):
+    def unbias(self):
+        """Unbiases the signal.
+        """
+        self.ys = unbias(self.ys)
+
+    def segment(self, start=0, duration=None):
         """Extracts a segment.
 
         start: float start time in seconds
@@ -446,7 +499,12 @@ class Wave(object):
         returns: Wave
         """
         i = start * self.framerate
-        j = i + duration * self.framerate
+
+        if duration is None:
+            j = None
+        else:
+            j = i + duration * self.framerate
+
         ys = self.ys[i:j]
         return Wave(ys, self.framerate)
 
@@ -488,14 +546,13 @@ class Wave(object):
 
         return Spectrogram(spec_map, seg_length, window_func)
 
-    def plot(self, label=''):
+    def plot(self, **options):
         """Plots the wave.
 
-        label: string label for the plotted line
         """
         n = len(self.ys)
         ts = numpy.linspace(0, self.duration, n)
-        thinkplot.plot(ts, self.ys, label=label)
+        thinkplot.plot(ts, self.ys, **options)
 
     def cov(self, other):
         """Computes the covariance of two waves.
@@ -956,8 +1013,8 @@ class _Noise(Signal):
         return ValueError('Non-periodic signal.')
 
 
-class WhiteNoise(_Noise):
-    """Represents white noise."""
+class UncorrelatedUniformNoise(_Noise):
+    """Represents uncorrelated uniform noise."""
 
     def evaluate(self, ts):
         """Evaluates the signal at the given times.
@@ -967,6 +1024,21 @@ class WhiteNoise(_Noise):
         returns: float wave array
         """
         ys = numpy.random.uniform(-self.amp, self.amp, len(ts))
+        return ys
+
+
+class UncorrelatedGaussianNoise(_Noise):
+    """Represents uncorrelated gaussian noise."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        ys = numpy.random.normal(0, 1, len(ts))
+        ys = normalize(ys, self.amp)
         return ys
 
 
@@ -983,48 +1055,44 @@ class BrownianNoise(_Noise):
         
         returns: float wave array
         """
-        dys = numpy.random.normal(0, self.amp, len(ts))
+        dys = numpy.random.normal(-1, 1, len(ts))
+        dys = numpy.random.uniform(-1, 1, len(ts))
+        dys = numpy.random.choice([-1, 1], len(ts))
         ys = numpy.cumsum(dys)
-        ys = normalize(unbias(ys), self.amp)
+        ys = normalize(ys, self.amp)
         return ys
 
 
 class PinkNoise(_Noise):
     """Represents Brownian noise, aka red noise."""
 
-    def evaluate(self, ts):
-        """Evaluates the signal at the given times.
+    def __init__(self, amp=1.0, beta=1.0):
+        """Initializes a pink noise signal.
 
-        Computes Brownian noise by taking the cumulative sum of
-        a uniform random series.
-
-        ts: float array of times
-        
-        returns: float wave array
+        amp: float amplitude, 1.0 is nominal max
         """
-        #framerate = infer_framerate(ts)
-        #reals = numpy.random.normal(0, self.amp, len(ts))
-        #imags = numpy.random.normal(0, self.amp, len(ts))
-        #hs = reals + imags * complex(0, 1)
-        #spectrum = Spectrum(hs, framerate)
+        self.amp = amp
+        self.beta = beta
+
+    def make_wave(self, duration=1, start=0, framerate=11025):
+        """Makes a Wave object.
+
+        duration: float seconds
+        start: float seconds
+        framerate: int frames per second
+
+        returns: Wave
+        """
         signal = WhiteNoise()
-        wave = signal.make_wave()
+        wave = signal.make_wave(duration, start, framerate)
         spectrum = wave.make_spectrum()
-        spectrum.hs[0] = 0
-        power_before = sum(spectrum.amps**2)
-        print power_before
 
-        spectrum.plot()
-        spectrum.pink_filter()
+        spectrum.pink_filter(beta=self.beta)
 
-        power_after = sum(spectrum.amps**2)
-        print power_after
-
-        spectrum.hs *= power_before / power_after
-        spectrum.plot()
-        thinkplot.show()
-        wave = spectrum.make_wave()
-        return wave.ys
+        wave2 = spectrum.make_wave()
+        wave2.unbias()
+        wave2.normalize()
+        return wave2
 
 
 def rest(duration):

@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.4}
+\newcommand{\theversion}{0.5}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -1742,6 +1742,111 @@ Can you identify different vowels?
 %\end{exercise}
 
 
+\chapter{Noise}
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/noise0.pdf}}
+\caption{Waveform of uncorrelated uniform noise.}
+\label{fig.noise0}
+\end{figure}
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/noise1.pdf}}
+\caption{Spectrum of uncorrelated uniform noise.}
+\label{fig.noise1}
+\end{figure}
+
+
+In English, ``noise'' means an unwanted or unpleasant sound.  In the
+context of digital signal processing, it has two different senses:
+
+\begin{enumerate}
+
+\item As in English, it can mean an unwanted signal of any kind.  If
+two signals interfere with each other, then for each signal the other
+would be considered noise.
+
+\item ``Noise'' also refers to a signal that contains components at
+many frequencies, so it lacks the harmonic structure of the periodic
+signals we saw in previous chapters.  
+
+\end{enumerate}
+
+This chapter is about noise in the second sense.  The simplest way
+to understand noise is to generate it, and the simplest way to generate
+it is uncorrelated uniform noise (UU noise).  ``Uniform'' means that the values
+that make up the signal are drawn at random from a uniform distribution,
+and ``uncorrelated'' means that each value is independent of the others.
+
+Here's the code to generate some:
+
+\begin{verbatim}
+    duration = 0.5
+    framerate = 11025
+    n = framerate * duration
+    ys = numpy.random.uniform(-1, 1, n)
+    wave = thinkdsp.Wave(ys, framerate)
+\end{verbatim}
+
+The result is a wave with duration 0.5 seconds at 11,025
+samples per second.  Each sample is drawn from a uniform distribution
+between -1 and 1, which means that every value in that range is
+equally likely.
+
+If you play this wave, it sounds like the static you hear if you tune
+a radio between channels.  Figure~\ref{fig.noise0} shows what the
+waveform looks like.  As expected, it looks pretty random.
+
+Now let's take a look at the spectrum.  Here's the code:
+
+\begin{verbatim}
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Figure~\ref{fig.noise1} shows the result.  The spectrum looks pretty
+random, too.  And it is, but we have to be more precise about the
+word ``random.''  There are at least three things we might like to
+know about a random signal, or its spectrum:
+
+\begin{itemize}
+
+\item Distribution: The distribution of a random signal is the set of
+  possibly values and their probabilities.  For example, in the
+  uniform noise signal, the set of values is the range from -1 to 1,
+  and all values have the same probability.  An alternative is
+  {\bf Gaussian noise}, where the set of values is the range from negative
+  to positive infinity, but values near 0 are the most likely, with
+  probability that drops off according to the Gaussian distribution or
+  ``bell curve.''
+
+\item Correlation: Is each value in the signal independent of the
+  others, or are there dependencies between them?  In UU noise, each
+  value is independent of the others, so knowing the value of the
+  signal at one point in time provides no new information about the
+  value at any other time.  An alternative is {\bf Brownian noise},
+  where each value is the sum of the previous value and a random
+  value.  So if the value of the signal is high at a particular point
+  in time, we expect it to stay high for a least the next few values.
+  And if it is low, we expect it to stay low.
+
+\item Relationship between power and frequency: In the spectrum of UU
+  noise, the power at all frequencies is drawn from the same
+  distribution; that is, the is no relationship between power and
+  frequency (or, if you like, the relationship is a constant).  An
+  alternative is {\bf pink noise}, where power is inversely related
+  to frequency; that is, the power at frequency $f$ is drawn from
+  a distribution whose mean is proportional to $1/f$.
+
+\end{itemize}
+
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
 
 
 \chapter{Pitch tracking}
@@ -1763,6 +1868,8 @@ Envelope generation.
 \section{Compute the spectrogram of an actual performance}
 
 \section{Pitch tracking algorithm}
+
+Autocorrelation (or maybe this gets introduced in the noise chapter first?)
 
 \section{Pitch shifting}
 
@@ -2300,3 +2407,25 @@ common versions are available in {\tt scipy}.
 
 
 \end{document}
+
+
+
+Case study ideas:
+
+\begin{itemize}
+
+\item Pitch tracking in Rock Band
+
+\item Auto-Tune
+
+\item JPEG compression
+
+\item Image recognition in Fourier space (money)
+
+\item Application of cepstrum?
+
+\item Application of z transform -- digital control systems
+
+\item tilt shift effect on a photo
+
+\end{itemize}

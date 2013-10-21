@@ -24,6 +24,11 @@ chirp2.pdf chirp2.eps \
 windowing1.pdf windowing1.eps \
 windowing2.pdf windowing2.eps \
 windowing3.pdf windowing3.eps \
+noise0.pdf noise0.eps \
+noise1.pdf noise1.eps \
+noise2.pdf noise2.eps \
+noise3.pdf noise3.eps \
+
 
 
 all_figs:

@@ -5,9 +5,10 @@ Copyright 2013 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
+import numpy
+import thinkbayes
 import thinkdsp
 import thinkplot
-
 
 """
 Samples used in this file
@@ -100,41 +101,117 @@ def process_files():
 
 
 def test_noise(signal, root):
-    wave = signal.make_wave(duration=0.5)
-    wave.play()
+    wave = signal.make_wave(duration=1.0, framerate=32768)
+    # wave.play()
 
-    segment = wave.segment(start=0.0, duration=0.01)
+    segment = wave
     segment.plot()
     thinkplot.save(root=root + '1',
                    xlabel='time (s)',
                    ylabel='amplitude')
 
     spectrum = segment.make_spectrum()
-    spectrum.plot()
+    spectrum.plot(low=1, exponent=2)
     thinkplot.save(root=root + '2',
+                   xlabel='frequency (Hz)',
+                   ylabel='power',
+                   xscale='log',
+                   yscale='log')
+
+    integ = spectrum.make_integrated_spectrum()
+    integ.plot(low=1, complement=False)
+    thinkplot.save(root=root + '3',
+                   xlabel='frequency (Hz)',
+                   ylabel='cumulative power',
+                   xscale='linear',
+                   yscale='linear')
+    
+    return spectrum, integ
+
+
+def make_periodogram(signal):
+    specs = []
+    for i in range(1000):
+        wave = signal.make_wave(duration=1.0, framerate=32768)
+        spec = wave.make_spectrum()
+        specs.append(spec)
+    
+    spectrum = sum(specs)
+    print spectrum.estimate_slope()
+    spectrum.plot(exponent=2)
+    thinkplot.show(xlabel='frequency (Hz)',
+                   ylabel='power',
+                   xscale='log',
+                   yscale='log')
+
+
+def white_noise():
+    framerate = 11025
+    duration = 0.5
+    n = framerate * duration
+    ys = numpy.random.uniform(-1, 1, n)
+    wave = thinkdsp.Wave(ys, framerate)
+
+    segment = wave.segment(duration=0.1)
+    segment.plot(linewidth=1, alpha=0.5)
+    thinkplot.save(root='noise0',
+                   xlabel='time (s)',
+                   ylabel='amplitude')
+
+    spectrum = wave.make_spectrum()
+    spectrum.plot(linewidth=1, alpha=0.5)
+    thinkplot.save(root='noise1',
                    xlabel='frequency (Hz)',
                    ylabel='amplitude')
 
     integ = spectrum.make_integrated_spectrum()
     integ.plot()
-    thinkplot.save(root=root + '3',
+    thinkplot.save(root='noise2',
                    xlabel='frequency (Hz)',
-                   ylabel='cumulative amplitude')
-    
+                   ylabel='normalized power')
+
+    cdf = thinkbayes.MakeCdfFromList(spectrum.power)
+    thinkplot.cdf(cdf, complement=True)
+    thinkplot.save(root='noise3',
+                   xlabel='power',
+                   ylabel='CDF',
+                   yscale='log')
+
 
 
 def main():
-    thinkdsp.random_seed(17)
+    white_noise()
+    return
 
-    signal = thinkdsp.PinkNoise()
-    test_noise(signal, 'pink-noise')
+    thinkdsp.random_seed(19)
 
     signal = thinkdsp.WhiteNoise()
-    test_noise(signal, 'white-noise')
+    white, integ_white = test_noise(signal, 'white-noise')
+    print white.estimate_slope()
 
     signal = thinkdsp.BrownianNoise()
-    test_noise(signal, 'red-noise')
+    red, integ_red = test_noise(signal, 'red-noise')
+    print red.estimate_slope()
+    return
 
+    signal = thinkdsp.PinkNoise(beta=1.0)
+    pink, integ_pink = test_noise(signal, 'pink-noise')
+    print pink.estimate_slope()
+
+    thinkplot.preplot(num=3)
+    white.plot(low=1, exponent=2, label='white', linewidth=2)
+    pink.plot(low=1, exponent=2, label='pink', linewidth=2)
+    red.plot(low=1, exponent=2, label='red', linewidth=2)
+    thinkplot.show(xlabel='frequency (Hz)',
+                   ylabel='power',
+                   xscale='log',
+                   yscale='log',
+                   axis=[1, 18000, 1e-5, 1e8])
+    
+
+    return
+    signal = thinkdsp.BrownianNoise()
+    make_periodogram(signal)
 
 
 
