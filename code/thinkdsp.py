@@ -128,14 +128,21 @@ class _SpectrumParent(object):
     def freq_res(self):
         return self.max_freq / (len(self.fs) - 1)
 
-    def plot(self, low=0, high=None, exponent=1, **options):
-        """Plots the spectrum.
+    def plot(self, low=0, high=None, **options):
+        """Plots amplitude vs frequency.
 
         low: int index to start at 
         high: int index to end at
         """
-        ys = self.amps[low:high] ** exponent
-        thinkplot.plot(self.fs[low:high], ys, **options)
+        thinkplot.plot(self.fs[low:high], self.amps[low:high], **options)
+
+    def plot_power(self, low=0, high=None, **options):
+        """Plots power vs frequency.
+
+        low: int index to start at 
+        high: int index to end at
+        """
+        thinkplot.plot(self.fs[low:high], self.power[low:high], **options)
 
     def estimate_slope(self):
         """Runs linear regression on log power vs log frequency.
@@ -177,6 +184,16 @@ class Spectrum(_SpectrumParent):
 
     __radd__ = __add__
         
+
+    @property
+    def real(self):
+        """Returns the real part of the hs (read-only property)."""
+        return numpy.real(self.hs)
+
+    @property
+    def imag(self):
+        """Returns the imaginary part of the hs (read-only property)."""
+        return numpy.imag(self.hs)
 
     @property
     def amps(self):
@@ -264,7 +281,7 @@ class IntegratedSpectrum(object):
         self.cs = cs
         self.fs = fs
 
-    def plot(self, low=0, high=None, expo=False, **options):
+    def plot_power(self, low=0, high=None, expo=False, **options):
         """Plots the integrated spectrum.
 
         low: int index to start at 

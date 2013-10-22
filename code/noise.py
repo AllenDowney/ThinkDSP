@@ -6,7 +6,7 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 import numpy
-import thinkbayes
+import thinkstats2
 import thinkdsp
 import thinkplot
 
@@ -159,21 +159,29 @@ def white_noise():
                    ylabel='amplitude')
 
     spectrum = wave.make_spectrum()
-    spectrum.plot(linewidth=1, alpha=0.5)
+    spectrum.plot_power(linewidth=1, alpha=0.5)
     thinkplot.save(root='noise1',
                    xlabel='frequency (Hz)',
-                   ylabel='amplitude')
+                   ylabel='power density')
 
     integ = spectrum.make_integrated_spectrum()
-    integ.plot()
+    integ.plot_power()
     thinkplot.save(root='noise2',
                    xlabel='frequency (Hz)',
                    ylabel='normalized power')
 
-    cdf = thinkbayes.MakeCdfFromList(spectrum.power)
-    thinkplot.cdf(cdf, complement=True)
+    cdf = thinkstats2.MakeCdfFromList(spectrum.real, name='real')
+    thinkplot.cdf(cdf)
+    cdf = thinkstats2.MakeCdfFromList(spectrum.imag, name='imag')
+    thinkplot.cdf(cdf)
     thinkplot.save(root='noise3',
-                   xlabel='power',
+                   xlabel='power density',
+                   ylabel='CDF')
+
+    cdf = thinkstats2.MakeCdfFromList(spectrum.power)
+    thinkplot.cdf(cdf, complement=True)
+    thinkplot.save(root='noise4',
+                   xlabel='power density',
                    ylabel='CDF',
                    yscale='log')
 
