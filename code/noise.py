@@ -145,53 +145,89 @@ def make_periodogram(signal):
                    yscale='log')
 
 
-def white_noise():
-    framerate = 11025
-    duration = 0.5
-    n = framerate * duration
-    ys = numpy.random.uniform(-1, 1, n)
-    wave = thinkdsp.Wave(ys, framerate)
+def process_noise(signal, root='red'):
+    wave = signal.make_wave(duration=0.5, framerate=11025)
 
+    # 0: waveform
     segment = wave.segment(duration=0.1)
     segment.plot(linewidth=1, alpha=0.5)
-    thinkplot.save(root='noise0',
+    thinkplot.save(root=root+'noise0',
                    xlabel='time (s)',
                    ylabel='amplitude')
 
     spectrum = wave.make_spectrum()
+
+    # 1: spectrum
     spectrum.plot_power(linewidth=1, alpha=0.5)
-    thinkplot.save(root='noise1',
+    thinkplot.save(root=root+'noise1',
                    xlabel='frequency (Hz)',
                    ylabel='power density')
 
+    slope, _, _, _, _ = spectrum.estimate_slope()
+    print 'estimated slope', slope
+
+    # 2: integrated spectrum
     integ = spectrum.make_integrated_spectrum()
     integ.plot_power()
-    thinkplot.save(root='noise2',
+    thinkplot.save(root=root+'noise2',
                    xlabel='frequency (Hz)',
                    ylabel='normalized power')
 
-    cdf = thinkstats2.MakeCdfFromList(spectrum.real, name='real')
+    # 3: log-log spectral density
+    spectrum.plot_power(low=1, linewidth=1, alpha=0.5)
+    thinkplot.save(root=root+'noise3',
+                   xlabel='frequency (Hz)',
+                   ylabel='power density',
+                   xscale='log',
+                   yscale='log')
+
+    # 4: CDF of power density
+    cdf = thinkstats2.MakeCdfFromList(spectrum.power)
     thinkplot.cdf(cdf)
-    cdf = thinkstats2.MakeCdfFromList(spectrum.imag, name='imag')
-    thinkplot.cdf(cdf)
-    thinkplot.save(root='noise3',
+    thinkplot.save(root=root+'noise4',
                    xlabel='power density',
                    ylabel='CDF')
 
-    cdf = thinkstats2.MakeCdfFromList(spectrum.power)
+    # 5: CCDF of power density, log-y
     thinkplot.cdf(cdf, complement=True)
-    thinkplot.save(root='noise4',
+    thinkplot.save(root=root+'noise5',
                    xlabel='power density',
-                   ylabel='CDF',
+                   ylabel='log(CCDF)',
                    yscale='log')
 
+    thinkstats2.NormalProbabilityPlot(spectrum.real, label='real',
+                                      data_color='#253494')
+    thinkstats2.NormalProbabilityPlot(spectrum.imag-50, label='imag-50', 
+                                      data_color='#1D91C0')
+    thinkplot.save(root=root+'noise6',
+                   xlabel='normal sample',
+                   ylabel='power density')
 
 
 def main():
-    white_noise()
+    thinkdsp.random_seed(19)
+
+    signal = thinkdsp.UncorrelatedUniformNoise()
+    wave1 = signal.make_wave(duration=1.0, framerate=11025)
+    wave2 = signal.make_wave(duration=1.0, framerate=11025)
+    print wave1.cov(wave2)
+    print wave1.cov(wave1)
+    print wave2.cov(wave2)
+
+    print wave1.cov_mat(wave2)
+
+    print wave1.corr(wave2)
+    print wave1.corr(wave1)
+    print wave2.corr(wave2)
     return
 
-    thinkdsp.random_seed(19)
+    signal = thinkdsp.BrownianNoise()
+    process_noise(signal, root='red')
+    return
+
+    signal = thinkdsp.UncorrelatedUniformNoise()
+    process_noise(signal, root='white')
+    return
 
     signal = thinkdsp.WhiteNoise()
     white, integ_white = test_noise(signal, 'white-noise')

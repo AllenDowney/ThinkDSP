@@ -571,14 +571,34 @@ class Wave(object):
         ts = numpy.linspace(0, self.duration, n)
         thinkplot.plot(ts, self.ys, **options)
 
+    def corr(self, other):
+        """Correlation coefficient two waves.
+
+        other: Wave
+
+        returns: 2x2 covariance matrix
+        """
+        mat = self.cov_mat(other)
+        corr = mat[0][1] / math.sqrt(mat[0][0] * mat[1][1])
+        return corr
+        
+    def cov_mat(self, other):
+        """Covariance matrix of two waves.
+
+        other: Wave
+
+        returns: 2x2 covariance matrix
+        """
+        return numpy.cov(self.ys, other.ys)
+
     def cov(self, other):
-        """Computes the covariance of two waves.
+        """Covariance of two unbiased waves.
 
         other: Wave
 
         returns: float
         """
-        total = sum(self.ys * other.ys)
+        total = sum(self.ys * other.ys) / len(self.ys)
         return total
 
     def cos_cov(self, k):
@@ -1072,11 +1092,10 @@ class BrownianNoise(_Noise):
         
         returns: float wave array
         """
-        dys = numpy.random.normal(-1, 1, len(ts))
+        #dys = numpy.random.normal(0, 1, len(ts))
         dys = numpy.random.uniform(-1, 1, len(ts))
-        dys = numpy.random.choice([-1, 1], len(ts))
         ys = numpy.cumsum(dys)
-        ys = normalize(ys, self.amp)
+        ys = normalize(unbias(ys), self.amp)
         return ys
 
 

@@ -1746,14 +1746,14 @@ Can you identify different vowels?
 
 \begin{figure}
 % noise.py
-\centerline{\includegraphics[height=2.5in]{figs/noise0.pdf}}
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise0.pdf}}
 \caption{Waveform of uncorrelated uniform noise.}
 \label{fig.noise0}
 \end{figure}
 
 \begin{figure}
 % noise.py
-\centerline{\includegraphics[height=2.5in]{figs/noise1.pdf}}
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise1.pdf}}
 \caption{Spectrum of uncorrelated uniform noise.}
 \label{fig.noise1}
 \end{figure}
@@ -1856,16 +1856,9 @@ the spectrum up to $f$.
 
 \begin{figure}
 % noise.py
-\centerline{\includegraphics[height=2.5in]{figs/noise2.pdf}}
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise2.pdf}}
 \caption{Integrated spectrum of uncorrelated uniform noise.}
 \label{fig.noise2}
-\end{figure}
-
-\begin{figure}
-% noise.py
-\centerline{\includegraphics[height=2.5in]{figs/noise3.pdf}}
-\caption{?}
-\label{fig.noise3}
 \end{figure}
 
 
@@ -1900,6 +1893,8 @@ we can compute and plot the integrated spectrum like this:
 \begin{verbatim}
     integ = spectrum.make_integrated_spectrum()
     integ.plot_power()
+    thinkplot.show(xlabel='frequency (Hz)',
+                   ylabel='cumulative power')
 \end{verbatim}
 
 The result, shown in Figure~\ref{fig.noise2}, is a remarkably
@@ -1912,6 +1907,13 @@ of light at all visible frequencies is white.
 
 \section{}
 
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise4.pdf}}
+\caption{CDF of values in the spectrum of UU noise.}
+\label{fig.noise4}
+\end{figure}
+
 We started by generating uncorrelated uniform noise and computing
 its spectrum.  We found that the spectrum looks random, and has
 equal power at all frequencies, on average.
@@ -1923,20 +1925,174 @@ the range of values is from 0 to about 14,000, with more values near
 0 and fewer high values.
 
 To be more precise, we can compute the {\bf cumulative distribution
-function} (CDF), which is one of several ways to describe a
-distribution.  If you are not familiar with CDFs, you might want
-to read Appendix~\ref{}, which is an exerpt from {\it Think Stats}
-that explains CDFs.  It also presents methods to test whether a
-particular distribution is a good model for a set of data.
+  function} (CDF), which is one of several ways to describe a
+distribution.  If you are not familiar with CDFs, you might want to
+read Appendix~\ref{}, which is an exerpt from {\it Think Stats}.  It
+defines the CDF and presents methods to test whether a
+distribution is a good model for a dataset.
 
 Here's the code to compute the CDF of the values in the
 spectrum of UU noise:
 
 \begin{verbatim}
 cdf = thinkstats2.MakeCdfFromList(spectrum.power)
+thinkplot.cdf(cdf)
 \end{verbatim}
 
+Figure~\ref{fig.noise4} shows the distribution of power in this
+spectrum.  To my experienced eye, the shape of this CDF resembles
+an exponential distribution, but there are other analytic distributions
+that also look like this.  We can test how well this sample fits
+an exponential model by plotting the complementary CDF on a 
+log-$y$ scale.  But it is also possible to show mathematically that
+the distribution is approximately exponential.
 
+\begin{exercise}
+
+Use this code to plot the complementary CDF on a log-$y$ scale
+and confirm that the result is a straight line:
+
+\begin{verbatim}
+    thinkplot.cdf(cdf, complement=True)
+    thinkplot.show(xlabel='power density',
+                   ylabel='CDF',
+                   yscale='log')
+\end{verbatim}
+
+\end{exercise}
+
+% If X and Y are normal, then the amplitude of X + iY is chi
+% with df=2, and power is chi2 with df=2, which is exponential
+% (with a scale factor of two)
+
+% http://en.wikipedia.org/wiki/Normal_distribution#Related_distributions
+% http://en.wikipedia.org/wiki/Chi_distribution#Related_distributions
+% http://en.wikipedia.org/wiki/Chi-squared_distribution#Relation_to_other_distributions
+
+
+\section{Brownian noise}
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/rednoise0.pdf}}
+\caption{Waveform of Brownian noise.}
+\label{fig.noise0}
+\end{figure}
+
+UU noise is uncorrelated, which means that each value does not depend
+on the others.  An alternative is Brownian noise, in which each value
+is the sum of the previous value and a random ``step.''
+
+It is called ``Brownian'' by analogy with Brownian motion, in which a
+particle suspended in a fluid moves apparently at random, due to
+unseen interactions with the fluid.  Brownian motion is often
+described using a {\bf random walk}, which is a mathematical model 
+of a path where the distance between steps is characterized by a
+random distribution.
+
+The simplest way to generate Brownian noise is to generate an
+uncorrelated signal and then compute it cumulative sum.
+
+Here is a class definition that implements this algorithm:
+
+\begin{verbatim}
+class BrownianNoise(_Noise):
+
+    def evaluate(self, ts):
+        dys = numpy.random.uniform(-1, 1, len(ts))
+        ys = numpy.cumsum(dys)
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+\end{verbatim}
+
+We use {\tt numpy.random.uniform} to generate an uncorrelated signal
+and {\tt numpy.cumsum} to compute the cumulative sum.  Since the
+cumulative signal is likely to escape the range from -1 to 1, we
+have to use {\tt unbias} to shift the mean to 0, and
+{\tt normalize} to get the desired maximum amplitude.
+
+Here's the code that generates a BrownianNoise object and plots the
+waveform.
+
+\begin{verbatim}
+    signal = thinkdsp.BrownianNoise()
+    wave = signal.make_wave(duration=0.5, framerate=11025)
+    wave.plot()
+\end{verbatim}
+
+Figure~\ref{fig.rednoise0} shows the result.  The waveform
+wanders up and down, but there is a clear correlation between
+successive values.
+
+If you plot the spectrum of Brownian noise, it doesn't look like
+much.  Nearly all of the power is at the lowest frequencies; on a
+linear scale, the higher frequency components are not visible.
+
+To see the shape of the spectrum, we have to plot power density
+and frequency on a log-log scale.  Here's the code:
+
+\begin{verbatim}
+    spectrum = wave.make_spectrum()
+    spectrum.plot_power(low=1, linewidth=1, alpha=0.5)
+    thinkplot.show(xlabel='frequency (Hz)',
+                   ylabel='power density',
+                   xscale='log',
+                   yscale='log')
+\end{verbatim}
+
+In theory, we expect the result to be a straight line with slope -2.
+To see why, it helps to know that if $H(f)$ is the Fourier transform
+of a wave, $h(t)$, and $g(t)$ is the integral of $h(t)$, then the
+Fourier transform of $g(t)$ is $H(f) / i 2 \pi f$.  In the denominator,
+the factor $i 2 \pi$ isn't important here; the important part is that
+integrating a waveform has the effect of dividing its Fourier
+transform by $f$.
+
+Since power is related to the square of amplitude, dividing the
+Fourier components by $f$ has the effect of dividing power by $f^2$.
+Since we started with white noise, which has equal power at all
+frequencies, we expect Brownian noise to have power at frequency $f$
+proportional to $1/f^2$, on average.  In other words:
+%
+\[ P(f) = k f^{-2} \]
+%
+with some unknown constant, $k$.  Taking the log of both sides yields:
+%
+\[ \log P = \log k -2 \log f \]
+%
+Which means that the result, in Figure~\ref{fig.rednoise3}, should be
+a straight line with slope -2.  In fact it is quite noisy, so we can't
+really say whether it is a straight line, but at least we can estimate
+its slope.
+
+Spectrum provides \verb"estimate_slope", which uses linear
+regression:
+
+\begin{verbatim}
+    def estimate_slope(self):
+        x = numpy.log(self.fs[1:])
+        y = numpy.log(self.power[1:])
+        t = scipy.stats.linregress(x,y)
+        return t
+\end{verbatim}
+
+We discard the first component of the spectrum for two reasons:
+(1) this component corresponds to
+$f=0$, and the log of 0 is undefined, and (2) the amplitude at
+$f=0$ indicates the mean value of the signal (sometimes called the
+``DC offset'' or ``bias.''  Since we unbiased the signal, this
+component should be 0.
+
+\verb"estimate_slope" returns the
+result from {\tt scipy.stats.linregress} which is a tuple that
+contains the estimated slope and intercept, coefficient of
+determination, $R^2$, p-value, and standard error.  For now,
+we only need the slope, which for this example is -1.8.
+
+Note for readers of this draft: This result is close to the
+theoretical value of -2, but not as close as I expected.  I am
+working on finding the source of the discrepancy, but I would be
+grateful for any hints.
 
 
 \begin{verbatim}
