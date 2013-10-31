@@ -1094,7 +1094,8 @@ class BrownianNoise(_Noise):
         """
         #dys = numpy.random.normal(0, 1, len(ts))
         dys = numpy.random.uniform(-1, 1, len(ts))
-        ys = numpy.cumsum(dys)
+        #ys = numpy.cumsum(dys)
+        ys = scipy.integrate.cumtrapz(dys, ts)
         ys = normalize(unbias(ys), self.amp)
         return ys
 

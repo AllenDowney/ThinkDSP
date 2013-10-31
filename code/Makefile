@@ -1,5 +1,5 @@
 FILES = thinkdsp.py violin.py example1.py example2.py example3.py \
-thinkplot.py
+thinkplot.py rednoise.py noise.py
 
 DATA = 92002__jcveliz__violin-origional.wav \
 18871__zippi1__sound-bell-440hz.wav

@@ -131,16 +131,16 @@ def test_noise(signal, root):
 
 def make_periodogram(signal):
     specs = []
-    for i in range(1000):
-        wave = signal.make_wave(duration=1.0, framerate=32768)
+    for i in range(10000):
+        wave = signal.make_wave(duration=1.0, framerate=1024)
         spec = wave.make_spectrum()
         specs.append(spec)
     
     spectrum = sum(specs)
     print spectrum.estimate_slope()
-    spectrum.plot(exponent=2)
+    spectrum.plot_power(low=1)
     thinkplot.show(xlabel='frequency (Hz)',
-                   ylabel='power',
+                   ylabel='power density',
                    xscale='log',
                    yscale='log')
 
@@ -207,6 +207,10 @@ def process_noise(signal, root='red'):
 def main():
     thinkdsp.random_seed(19)
 
+    signal = thinkdsp.BrownianNoise()
+    make_periodogram(signal)
+    return
+
     signal = thinkdsp.UncorrelatedUniformNoise()
     wave1 = signal.make_wave(duration=1.0, framerate=11025)
     wave2 = signal.make_wave(duration=1.0, framerate=11025)
@@ -254,8 +258,6 @@ def main():
     
 
     return
-    signal = thinkdsp.BrownianNoise()
-    make_periodogram(signal)
 
 
 

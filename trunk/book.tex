@@ -210,7 +210,7 @@ starting with mathematical abstractions like phasors.
 
 With a programming-based approach, I can go top-down, which means I
 can present the most important ideas right away.  By the end of the
-first chapter, you can break down a sound into its harmonics, modify
+first chapter, you can decompose a sound into its harmonics, modify
 the harmonics, and generate new sounds.
 
 This is a work in progress, so comments are welcome.
@@ -1748,14 +1748,7 @@ Can you identify different vowels?
 % noise.py
 \centerline{\includegraphics[height=2.5in]{figs/whitenoise0.pdf}}
 \caption{Waveform of uncorrelated uniform noise.}
-\label{fig.noise0}
-\end{figure}
-
-\begin{figure}
-% noise.py
-\centerline{\includegraphics[height=2.5in]{figs/whitenoise1.pdf}}
-\caption{Spectrum of uncorrelated uniform noise.}
-\label{fig.noise1}
+\label{fig.whitenoise0}
 \end{figure}
 
 In English, ``noise'' means an unwanted or unpleasant sound.  In the
@@ -1796,8 +1789,15 @@ between -1 and 1, which means that every value in that range is
 equally likely.
 
 If you play this wave, it sounds like the static you hear if you tune
-a radio between channels.  Figure~\ref{fig.noise0} shows what the
+a radio between channels.  Figure~\ref{fig.whitenoise0} shows what the
 waveform looks like.  As expected, it looks pretty random.
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise1.pdf}}
+\caption{Spectrum of uncorrelated uniform noise.}
+\label{fig.whitenoise1}
+\end{figure}
 
 Now let's take a look at the spectrum.  Here's the code:
 
@@ -1810,7 +1810,7 @@ Now let's take a look at the spectrum.  Here's the code:
 except that it plots power density against frequency.  Power density
 is the square of amplitude density, expressed in units of power per Hz.
 
-Figure~\ref{fig.noise1} shows the result.  Like the signal, the
+Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
 spectrum looks pretty random.  And it is, but we have to be more
 precise about the word ``random.''  There are at least three things we
 might like to know about a random signal or its spectrum:
@@ -1858,7 +1858,7 @@ the spectrum up to $f$.
 % noise.py
 \centerline{\includegraphics[height=2.5in]{figs/whitenoise2.pdf}}
 \caption{Integrated spectrum of uncorrelated uniform noise.}
-\label{fig.noise2}
+\label{fig.whitenoise2}
 \end{figure}
 
 
@@ -1897,77 +1897,13 @@ we can compute and plot the integrated spectrum like this:
                    ylabel='cumulative power')
 \end{verbatim}
 
-The result, shown in Figure~\ref{fig.noise2}, is a remarkably
+The result, shown in Figure~\ref{fig.whitenoise2}, is a remarkably
 straight line, which indicates that power at all
 frequencies is constant, on average.  Noise with equal power
 at all frequencies is called {\bf white noise} by analogy with light,
 because an equal mixture
 of light at all visible frequencies is white.
 
-
-\section{}
-
-\begin{figure}
-% noise.py
-\centerline{\includegraphics[height=2.5in]{figs/whitenoise4.pdf}}
-\caption{CDF of values in the spectrum of UU noise.}
-\label{fig.noise4}
-\end{figure}
-
-We started by generating uncorrelated uniform noise and computing
-its spectrum.  We found that the spectrum looks random, and has
-equal power at all frequencies, on average.
-
-The next property we will investigate is the distribution of values
-in the spectrum.  Again, a distribution describes a set of values
-and their probabilities.  In Figure~\ref{fig.noise1}, it looks like
-the range of values is from 0 to about 14,000, with more values near
-0 and fewer high values.
-
-To be more precise, we can compute the {\bf cumulative distribution
-  function} (CDF), which is one of several ways to describe a
-distribution.  If you are not familiar with CDFs, you might want to
-read Appendix~\ref{}, which is an exerpt from {\it Think Stats}.  It
-defines the CDF and presents methods to test whether a
-distribution is a good model for a dataset.
-
-Here's the code to compute the CDF of the values in the
-spectrum of UU noise:
-
-\begin{verbatim}
-cdf = thinkstats2.MakeCdfFromList(spectrum.power)
-thinkplot.cdf(cdf)
-\end{verbatim}
-
-Figure~\ref{fig.noise4} shows the distribution of power in this
-spectrum.  To my experienced eye, the shape of this CDF resembles
-an exponential distribution, but there are other analytic distributions
-that also look like this.  We can test how well this sample fits
-an exponential model by plotting the complementary CDF on a 
-log-$y$ scale.  But it is also possible to show mathematically that
-the distribution is approximately exponential.
-
-\begin{exercise}
-
-Use this code to plot the complementary CDF on a log-$y$ scale
-and confirm that the result is a straight line:
-
-\begin{verbatim}
-    thinkplot.cdf(cdf, complement=True)
-    thinkplot.show(xlabel='power density',
-                   ylabel='CDF',
-                   yscale='log')
-\end{verbatim}
-
-\end{exercise}
-
-% If X and Y are normal, then the amplitude of X + iY is chi
-% with df=2, and power is chi2 with df=2, which is exponential
-% (with a scale factor of two)
-
-% http://en.wikipedia.org/wiki/Normal_distribution#Related_distributions
-% http://en.wikipedia.org/wiki/Chi_distribution#Related_distributions
-% http://en.wikipedia.org/wiki/Chi-squared_distribution#Relation_to_other_distributions
 
 
 \section{Brownian noise}
@@ -1976,7 +1912,7 @@ and confirm that the result is a straight line:
 % noise.py
 \centerline{\includegraphics[height=2.5in]{figs/rednoise0.pdf}}
 \caption{Waveform of Brownian noise.}
-\label{fig.noise0}
+\label{fig.rednoise0}
 \end{figure}
 
 UU noise is uncorrelated, which means that each value does not depend
@@ -2022,7 +1958,15 @@ waveform.
 
 Figure~\ref{fig.rednoise0} shows the result.  The waveform
 wanders up and down, but there is a clear correlation between
-successive values.
+successive values.  When the amplitude is high, it tends to stay
+high, and vice versa.
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/rednoise3.pdf}}
+\caption{Spectrum of Brownian noise on a log-log scale.}
+\label{fig.rednoise3}
+\end{figure}
 
 If you plot the spectrum of Brownian noise, it doesn't look like
 much.  Nearly all of the power is at the lowest frequencies; on a
@@ -2044,9 +1988,9 @@ In theory, we expect the result to be a straight line with slope -2.
 To see why, it helps to know that if $H(f)$ is the Fourier transform
 of a wave, $h(t)$, and $g(t)$ is the integral of $h(t)$, then the
 Fourier transform of $g(t)$ is $H(f) / i 2 \pi f$.  In the denominator,
-the factor $i 2 \pi$ isn't important here; the important part is that
-integrating a waveform has the effect of dividing its Fourier
-transform by $f$.
+the factor of $f$ is the important part; it indicates
+that integrating a waveform has the effect of a low-pass filter.
+Each component is attenuated in proportion to its frequency.
 
 Since power is related to the square of amplitude, dividing the
 Fourier components by $f$ has the effect of dividing power by $f^2$.
@@ -2054,19 +1998,19 @@ Since we started with white noise, which has equal power at all
 frequencies, we expect Brownian noise to have power at frequency $f$
 proportional to $1/f^2$, on average.  In other words:
 %
-\[ P(f) = k f^{-2} \]
+\[ P = k f^{-2} \]
 %
 with some unknown constant, $k$.  Taking the log of both sides yields:
 %
 \[ \log P = \log k -2 \log f \]
 %
 Which means that the result, in Figure~\ref{fig.rednoise3}, should be
-a straight line with slope -2.  In fact it is quite noisy, so we can't
-really say whether it is a straight line, but at least we can estimate
+a straight line with slope -2.  It is quite noisy, so we can't
+be sure it is a straight line, but at least we can estimate
 its slope.
 
-Spectrum provides \verb"estimate_slope", which uses linear
-regression:
+Spectrum provides \verb"estimate_slope", which uses {\tt scipy}
+to do linear regression, also known as a least squares fit:
 
 \begin{verbatim}
     def estimate_slope(self):
@@ -2076,12 +2020,11 @@ regression:
         return t
 \end{verbatim}
 
-We discard the first component of the spectrum for two reasons:
-(1) this component corresponds to
-$f=0$, and the log of 0 is undefined, and (2) the amplitude at
-$f=0$ indicates the mean value of the signal (sometimes called the
-``DC offset'' or ``bias.''  Since we unbiased the signal, this
-component should be 0.
+I discard the first component of the spectrum for two reasons: (1)
+this component corresponds to $f=0$, and $\log 0$ is undefined,
+and (2) the amplitude at $f=0$ indicates the mean value of the signal
+(sometimes called the ``DC offset'' or ``bias.''  Since we unbiased
+the signal, this component should be 0 anyway.
 
 \verb"estimate_slope" returns the
 result from {\tt scipy.stats.linregress} which is a tuple that
@@ -2105,7 +2048,24 @@ grateful for any hints.
 \end{verbatim}
 
 
+Coming up:
+
+Pink noise.
+
+Spectral density estimation.
+
+Welch's method, discussion of amplitude, amplitude density, power
+and decibels.
+
+Spectrum of symbal crash, applause.
+
+Estimate the spectrum of a long time series (stock market data?
+astronomical data?)
+
+
 \chapter{Pitch tracking}
+
+Autocorrelation
 
 \section{Spectrum of vowels}
 
@@ -2130,19 +2090,6 @@ Autocorrelation (or maybe this gets introduced in the noise chapter first?)
 \section{Pitch shifting}
 
 Auto-tune?
-
-
-\chapter{Spectral density estimation}
-
-Spectrum of symbal crash, applause.
-
-Synthesize white and pink noise.
-
-Estimate the spectrum of a long time series (stock market data?
-astronomical data?)
-
-Welch's method, discussion of amplitude, amplitude density, power
-and decibels.
 
 
 \chapter{Discrete cosine transform}

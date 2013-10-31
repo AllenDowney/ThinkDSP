@@ -8,14 +8,18 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 import numpy
 import matplotlib.pyplot as pyplot
 import scipy.stats
+import scipy.integrate
 
-duration = 100.0
+duration = 10.0
 framerate = 11025
+dx = 1.0 / framerate
 n = framerate * duration
 print n
 
 dys = numpy.random.uniform(-1, 1, n)
-ys = numpy.cumsum(dys)
+ys = scipy.integrate.cumtrapz(dys, dx=dx)
+#ys = scipy.integrate.simps(dys)
+#ys = numpy.cumsum(dys)
 ys -= numpy.mean(ys)
 
 hs = numpy.fft.rfft(ys)
@@ -33,5 +37,5 @@ print slope
 pyplot.plot(fs[1:], ps[1:])
 pyplot.xscale('log')
 pyplot.yscale('log')
-pyplot.show()
+#pyplot.show()
 
