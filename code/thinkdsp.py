@@ -567,8 +567,12 @@ class Wave(object):
         """Plots the wave.
 
         """
-        n = len(self.ys)
-        ts = numpy.linspace(self.start, self.start + self.duration, n)
+        dt = 1.0 / self.framerate
+        ts = numpy.arange(self.start, self.start + self.duration, dt)
+        # Due to erroneous division, the ts calculated above and below
+        # have slightly different elements
+        #n = len(self.ys)
+        #ts = numpy.linspace(self.start, self.start + self.duration, n)
         thinkplot.plot(ts, self.ys, **options)
 
     def corr(self, other):
