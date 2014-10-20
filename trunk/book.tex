@@ -1,5 +1,5 @@
 % LaTeX source for ``Think DSP: Digital Signal Processing for Programmers''
-% Copyright 2013  Allen B. Downey.
+% Copyright 2014  Allen B. Downey.
 
 % License: Creative Commons Attribution-NonCommercial 3.0 Unported License.
 % http://creativecommons.org/licenses/by-nc/3.0/
@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.5}
+\newcommand{\theversion}{0.6}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -148,7 +148,7 @@ Allen B. Downey\\
 \pagebreak
 \thispagestyle{empty}
 
-Copyright \copyright ~2013 Allen B. Downey.
+Copyright \copyright ~2014 Allen B. Downey.
 
 
 \vspace{0.2in}
@@ -242,7 +242,17 @@ Thanks!
 
 \begin{itemize}
 
-\item 
+\item Before I started writing, my thoughts about this book
+benefited from conversations with Boulos Harb at Google and
+Aurelio Ramos, formerly at Harmonix Music Systems.
+
+\item During the Fall 2013 semester, Nathan Lintz and Ian Daniher
+worked with me on an independent study project and helped me with
+the first draft of this book.
+
+\item On Reddit's DSP forum, the anonymous user RamjetSoundwave
+helped me fix a problem with my implementation of Brownian Noise.
+
 
 % ENDCONTRIB
 
@@ -270,11 +280,11 @@ Thanks!
 
 A {\bf signal} is a representation of a quantity that varies in time,
 or space, or both.  That definition is pretty abstract, so let's start
-with a concrete example, sound.  Sound is variation in air pressure.
+with a concrete example: sound.  Sound is variation in air pressure.
 A sound signal represents variations in air pressure over time.
 
 A microphone is a device that measures these variations and generates
-an electronic signal that represents sound.  A speaker is a device
+an electrical signal that represents sound.  A speaker is a device
 that takes an electrical signal and produces sound.
 Microphones and speakers are called {\bf transducers} because they
 transduce, or convert, signals from one form to another.
@@ -314,8 +324,7 @@ the trigonometric sine function.
 
 You can see that this signal is periodic.  I chose the duration
 to show three full periods, also known as {\bf cycles}.
-The duration of each cycle is
-about 2.3 ms.
+The duration of each cycle is about 2.3 ms.
 
 The {\bf frequency} of a signal is the number of cycles
 per second, which is the inverse of the period.
@@ -325,9 +334,9 @@ abbreviated ``Hz''.
 The frequency of this signal is about 439 Hz, slightly lower than 440
 Hz, which is the standard tuning pitch for orchestral music.  The
 musical name of this note is A, or more specifically, A4.  If you are
-not familiar with ``scientific pitch notation'', the suffix indicates
-which octave the note is in.  A4 is the A above middle C.  A5 is one
-octave higher.  See
+not familiar with ``scientific pitch notation'', the numerical suffix
+indicates which octave the note is in.  A4 is the A above middle C.
+A5 is one octave higher.  See
 \url{http://en.wikipedia.org/wiki/Scientific_pitch_notation}.
 
 \begin{figure}
@@ -350,7 +359,7 @@ I identified the piece using \url{http://www.musipedia.org}.}
 % Parson's code: DUUDDUURDR
 
 Again we can see that the signal is periodic, but the shape of the
-signal is much more complex.  The shape of a periodic signal is called
+signal is more complex.  The shape of a periodic signal is called
 the {\bf waveform}.  Most musical instruments produce waveforms more
 complex than a sinusoid.  The shape of the waveform determines the
 musical {\bf timbre}, which is our perception of the tone quality of the
@@ -401,7 +410,9 @@ musically harmonious with the fundamental:
 \item 880 is the frequency of
 A5, one octave higher than the fundamental.  
 
-\item 1320 is approximately E6, which is a major fifth above A5.
+\item 1320 is approximately E6, which is a major fifth\footnote{If you
+  are not familiar with musical intervals like "major fifth'', see
+  \url{https://en.wikipedia.org/wiki/Interval_(music)}.} above A5.
 
 \item 1760 is A6, two octaves above the fundamental. 
 
@@ -425,9 +436,10 @@ Next we'll see how.
 \section{Signals}
 
 I wrote a Python module called {\tt thinkdsp} that contains
-classes and function for working with signals and spectrums.
-\footnote{In Latin the plural of ``spectrum'' is ``spectra'', but I
-prefer to use standard English plurals.}  You can download
+classes and functions for working with signals and spectrums.
+\footnote{In Latin the plural of ``spectrum'' is ``spectra'', but 
+since I am not writing in Latin, I
+generally use standard English plurals.}  You can download
 it from \url{http://think-dsp.com/thinkdsp.py}.
 
 To represent signals, {\tt thinkdsp} provides a class named
@@ -443,9 +455,9 @@ signals.
 \end{verbatim}
 
 {\tt freq} is frequency in Hz.  {\tt amp} is amplitude in arbitrary
-units.  {\tt offset} is a {\tt phase offset} in radians.
+units.  {\tt offset} is a phase offset in radians.
 
-The phase offset determines where in the period the signal starts
+The {\bf phase offset} determines where in the period the signal starts
 (that is, when {\tt t=0}).  For example, a cosine signal with {\tt
   offset=0} starts at $\cos 0$, which is 1.  With {\tt offset=pi/2} it
 starts at $\cos \pi/2$, which is 0.
@@ -468,12 +480,11 @@ A Signal is basically a Python representation of a mathematical
 function.  Most signals are defined for all values of {\tt t},
 from negative infinity to infinity.
 
-But you can't do much with a
-Signal until you evaluate it.
-In this context, ``evaluate'' means taking a sequence of {\tt ts}
-and computing the corresponding values of the signal, which I
-call {\tt ys}.  I encapsulate {\tt ts} and {\tt ys} in an
-object called a Wave.
+You can't do much with a Signal until you evaluate it.  In this
+context, ``evaluate'' means taking a sequence of {\tt ts} and
+computing the corresponding values of the signal, which I call {\tt
+  ys}.  I encapsulate {\tt ts} and {\tt ys} in an object called a
+Wave.
 
 A Wave represents a signal evaluated at a sequence of points in
 time.  Each point in time is called a {\bf frame} (a term borrowed
@@ -626,6 +637,9 @@ about how these classes are implemented.
 
 
 \section{Exercises}
+
+These exercises are a work in progress.  I will provide details in
+the class lecture notes.
 
 \begin{exercise}
 Read the thinkdsp documentation.
@@ -1936,16 +1950,18 @@ class BrownianNoise(_Noise):
 
     def evaluate(self, ts):
         dys = numpy.random.uniform(-1, 1, len(ts))
-        ys = numpy.cumsum(dys)
+        ys = scipy.integrate.cumtrapz(dys, ts)
         ys = normalize(unbias(ys), self.amp)
         return ys
 \end{verbatim}
 
 We use {\tt numpy.random.uniform} to generate an uncorrelated signal
-and {\tt numpy.cumsum} to compute the cumulative sum.  Since the
-cumulative signal is likely to escape the range from -1 to 1, we
-have to use {\tt unbias} to shift the mean to 0, and
-{\tt normalize} to get the desired maximum amplitude.
+and {\tt scipy.integrate.cumtrapz} to approximate the integral using 
+the trapezoid rule.
+
+Since the integrated signal is likely to escape the range from -1 to
+1, we have to use {\tt unbias} to shift the mean to 0, and {\tt
+  normalize} to get the desired maximum amplitude.
 
 Here's the code that generates a BrownianNoise object and plots the
 waveform.
@@ -2010,7 +2026,7 @@ be sure it is a straight line, but at least we can estimate
 its slope.
 
 Spectrum provides \verb"estimate_slope", which uses {\tt scipy}
-to do linear regression, also known as a least squares fit:
+to do linear regression (also known as a least squares fit):
 
 \begin{verbatim}
     def estimate_slope(self):
@@ -2023,44 +2039,150 @@ to do linear regression, also known as a least squares fit:
 I discard the first component of the spectrum for two reasons: (1)
 this component corresponds to $f=0$, and $\log 0$ is undefined,
 and (2) the amplitude at $f=0$ indicates the mean value of the signal
-(sometimes called the ``DC offset'' or ``bias.''  Since we unbiased
+(sometimes called the ``DC offset'' or ``bias'').  Since we unbiased
 the signal, this component should be 0 anyway.
 
 \verb"estimate_slope" returns the
 result from {\tt scipy.stats.linregress} which is a tuple that
 contains the estimated slope and intercept, coefficient of
-determination, $R^2$, p-value, and standard error.  For now,
+determination ($R^2$), p-value, and standard error.  For now,
 we only need the slope, which for this example is -1.8.
 
-Note for readers of this draft: This result is close to the
-theoretical value of -2, but not as close as I expected.  I am
-working on finding the source of the discrepancy, but I would be
-grateful for any hints.
+Brownian noise is also called ``red noise,'' for the same
+reason that white noise is called ``white.''  If you combine
+visible light with the same relationship between frequency and
+power, most of the power would be at the low-frequency end of
+the spectrum, which is red.
 
+Brownian noise is also sometimes called ``brown
+noise'', but I think that's confusing, so I avoid it.
+
+
+\section{Pink Noise}
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/pinknoise0.pdf}}
+\caption{Waveform of pink noise with $\beta=1$.}
+\label{fig.pinknoise0}
+\end{figure}
+
+To review, for red noise, the relationship between frequency and power is
+%
+\[ P = k f^{-2} \]
+%
+There is nothing special about the exponent -2.  More generally,
+we can synthesize noise with any exponent, $\beta$.
+%
+\[ P = k f^{-\beta} \]
+%
+When $\beta = 0$, power is constant at all frequencies,
+so the result is white noise.  When $\beta=2$ the result is red noise.
+
+When $\beta$ is between 0 and 2, the result is between white and
+red noise, so it is called ``pink noise''
+
+There are several ways to generate pink noise.  The simplest is to
+generate white noise and then apply a low-pass filter with the
+desired exponent.  {\tt thinkdsp} provides a class that represents
+a pink noise signal:
 
 \begin{verbatim}
+class PinkNoise(_Noise):
+
+    def __init__(self, amp=1.0, beta=1.0):
+        self.amp = amp
+        self.beta = beta
 \end{verbatim}
+
+{\tt amp} is the desired amplitude of the signal.
+{\tt beta} is the desired exponent.  {\tt PinkNoise} provides
+\verb"make_wave", which generates a Wave.
 
 \begin{verbatim}
+    def make_wave(self, duration=1, start=0, framerate=11025):
+        signal = WhiteNoise()
+        wave = signal.make_wave(duration, start, framerate)
+        spectrum = wave.make_spectrum()
+
+        spectrum.pink_filter(beta=self.beta)
+
+        wave2 = spectrum.make_wave()
+        wave2.unbias()
+        wave2.normalize()
+        return wave2
 \end{verbatim}
+
+{\tt duration} is the length of the wave in seconds.  {\tt start}
+is the start time of the wave, which is included so that
+\verb"make_wave" has the same interface for all type of noise,
+but for random noises, start time is irrelevant.  And {\tt framerate}
+is the number of samples per second.
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/noise-triple.pdf}}
+\caption{Spectrum of white, pink, and red noise on a log-log scale.}
+\label{fig.noise-triple}
+\end{figure}
+
+\verb"make_wave" creates a white noise wave, computes its spectrum,
+applies a filter with the desired exponent, and then converts the
+filtered spectrum back to a wave.  Then it unbiases and normalizes
+the wave.
+
+{\tt Spectrum} provides \verb"pink_filter":
 
 \begin{verbatim}
+    def pink_filter(self, beta=1.0):
+        denom = self.fs ** (beta/2.0)
+        denom[0] = 1
+        self.hs /= denom
 \end{verbatim}
 
+\verb"pink_filter" divides each element of the spectrum by
+$f^{\beta/2}$, which has the effect of dividing the power at
+each frequency, $f$, by $f^\beta$.  It treats the component
+at $f=0$ as a special case, partly to avoid dividing by 0, but
+also because this element represents the bias of the signal,
+which we are going to set to 0 anyway. 
 
-Coming up:
+Figure~\ref{fig.pinknoise0} shows the resulting waveform.  Like
+Brownian noise, it wanders up and down in a way that suggests
+correlation between successive values, but at least visually, it looks
+more random.  In the next chapter we will come back to this
+observation and I will be more precise about what I mean by
+``correlation'' and ``more random.''
 
-Pink noise.
+Finally, Figure~\ref{fig.noise-triple} shows a spectrum for
+white, pink, and red noise on the same log-log scale.
+The relationship between the exponent, $\beta$, and the slope
+of the spectrum is apparent in this figure.
 
-Spectral density estimation.
 
-Welch's method, discussion of amplitude, amplitude density, power
-and decibels.
 
-Spectrum of symbal crash, applause.
+\section{Exercises}
 
+\begin{exercise}
+The algorithm in this chapter for generating pink noise is
+conceptually simple but computationally expensive.  There are
+more efficient alternatives, like the Voss-McCartney algorithm.
+Research this method, implement it, compute the spectrum of
+the result, and confirm that it has the desired relationship
+between power and frequency.
+\end{exercise}
+
+
+\begin{exercise}
+Spectrum of natural noise sources: symbal crash, applause, etc.
+\end{exercise}
+
+
+\begin{exercise}
 Estimate the spectrum of a long time series (stock market data?
-astronomical data?)
+astronomical data?)  Make a periodogram.
+\end{exercise}
+
 
 
 \chapter{Pitch tracking}
@@ -2604,885 +2726,6 @@ implementation of DCT-IV.  I chose DCT-IV because it is the
 easiest to explain, but in practice it is more common to use
 DCT-II and its inverse, DCT-III.  And unlike DCT-IV, the more
 common versions are available in {\tt scipy}.
-
-
-\appendix
-
-\chapter{Cumulative Distribution Functions}
-
-This appendix is a modified version of a chapter from
-{\it Think Stats}, by Allen B. Downey, also published by
-O'Reilly Media.
-
-The goal of this chapter is to explain the {\bf cumulative
-distribution function}, or {\bf CDF}.
-But before we get start, it might help to 
-talk about percentiles and percentile rank.
-\index{cumulative distribution function}
-\index{CDF}
-
-
-\section{Percentiles}
-\index{percentile rank}
-
-If you have taken a standardized test, you probably got your
-results in the form of a raw score and a {\bf percentile rank}.
-In this context, the percentile rank is the fraction of people who
-scored lower than you (or the same).  So if you are ``in the 90th
-percentile,'' you did as well as or better than 90\% of the people who
-took the exam.
-
-Here's how you could compute the percentile rank of a value,
-\verb"your_score", relative to the scores in the sequence {\tt
-  scores}:
-%
-\begin{verbatim}
-def PercentileRank(scores, your_score):
-    count = 0
-    for score in scores:
-        if score <= your_score:
-            count += 1
-
-    percentile_rank = 100.0 * count / len(scores)
-    return percentile_rank
-\end{verbatim}
-%
-% see score_example.py
-%
-For example, if the scores in the sequence were 55, 66, 77, 88 and 99,
-and you got the 88, then your percentile rank would be {\tt 100 * 4 / 5}
-which is 80.
-
-If you are given a value, it is easy to find its percentile rank; going
-the other way is slightly harder.  If you are given a percentile rank
-and you want to find the corresponding value, one option is to
-sort the values and search for the one you want:
-%
-\begin{verbatim}
-def Percentile(scores, percentile_rank):
-    scores.sort()
-    for score in scores:
-        if PercentileRank(scores, score) >= percentile_rank:
-            return score
-\end{verbatim}
-
-The result of this calculation is a {\bf percentile}.  For example,
-the 50th percentile is the value with percentile rank 50.  In the
-distribution of exam scores, the 50th percentile is 77.
-\index{percentile}
-
-This implementation of {\tt Percentile} is not very efficient.  We
-will see how to do better soon.
-
-
-
-\section{Cumulative distribution functions}
-\index{cumulative distribution function}
-\index{CDF}
-
-\newcommand{\CDF}{\mathrm{CDF}}
-
-Now that we understand percentiles, we are ready to tackle the
-CDF, which is a function that
-maps values to their percentile rank in a distribution.
-
-The CDF is a function of $x$, which is any value that might appear
-in the distribution.  To evaluate $\CDF(x)$ for a particular value of
-$x$, we compute the fraction of the values in the sample less than (or
-equal to) $x$.
-
-Here's what that looks like as a function that takes a sample,
-{\tt t}, and a value, {\tt x}:
-%
-\begin{verbatim}
-def Cdf(t, x):
-    count = 0.0
-    for value in t:
-        if value <= x:
-            count += 1.0
-
-    prob = count / len(t)
-    return prob
-\end{verbatim}
-
-This function should look familiar; it is almost identical to {\tt
-  PercentileRank}, except that the result is in a probability in the
-range 0--1 rather than a percentile rank in the range 0--100.
-
-As an example, suppose a sample has the values \{1, 2, 2, 3, 5\}.
-Here are some values from its CDF:
-
-\[ CDF(0) = 0  \]
-
-\[ CDF(1) = 0.2 \]
-
-\[ CDF(2) = 0.6 \]
-
-\[ CDF(3) = 0.8 \]
-
-\[ CDF(4) = 0.8 \]
-
-\[ CDF(5) = 1 \]
-
-We can evaluate the CDF for any value of $x$, not just
-values that appear in the sample.
-If $x$ is less than the smallest value in the sample, $\CDF(x)$ is 0.
-If $x$ is greater than the largest value, $\CDF(x)$ is 1.
-
-\begin{figure}
-% cumulative.py
-\centerline{\includegraphics[height=2.5in]{figs/example_cdf.pdf}}
-\caption{Example of a CDF.}
-\label{example_cdf}
-\end{figure}
-
-Figure~\ref{example_cdf} is a graphical representation of this CDF.
-The CDF of a sample is a step function.  In the following sections we
-will see distributions whose CDFs are more general mathematical
-functions.
-
-
-\section{Representing CDFs}
-\index{{\tt cdf.py}@{\tt Cdf.py}}
-\index{Cdf object}
-
-I have written a module called
-{\tt thinkstats2.py} that provides classes and functions used in
-{\it Think Stats}.  You can download it from \url{}.  It is also
-included in the code distributed with this book.
-
-{\tt thinkstats2.py} provides a class named
-{\tt Cdf} that represents CDFs.  
-
-Cdfs are implemented with two sorted lists: {\tt xs}, which contains
-the values, and {\tt ps}, which contains the probabilities.  The
-most important methods Cdfs provide are:
-
-\begin{description}
-
-\item[{\tt Prob(x)}:] Given a value $x$, computes the probability $p = \CDF(x)$.
-
-\item[{\tt Value(p)}:] Given a probability $p$, computes the
-corresponding value, $x$; that is, the inverse CDF of $p$.
-
-\end{description}
-
-Because {\tt xs} and {\tt ps} are sorted, these operations use the
-bisection algorithm, which is efficient.  The run time is proportional
-to the logarithm of the number of values.
-\index{bisection algorithm}
-
-The Cdf module provides several functions for making Cdfs, including
-{\tt MakeCdfFromList}, which takes a sequence of values
-and returns their Cdf.
-
-\section{thinkplot.py}
-
-{\tt thinkplot.py} provides functions named {\tt Cdf} and
-{\tt Cdfs} that plot Cdfs as lines.
-\index{{\tt myplot.py}}
-
-Cdf also provides {\tt Render}, which returns two lists, {\tt xs} and
-{\tt ps}, suitable for plotting the CDF.  Because the CDF is a
-step function, these lists have two elements for each unique
-value in the distribution.
-
-The distributions we have used so far are called {\bf
-  empirical distributions} because they are based on empirical
-observations, which are necessarily finite samples.
-
-The alternative is a {\bf continuous distribution}, which is
-characterized by a CDF that is a continuous function (as opposed to a
-step function).  Many real world phenomena can be approximated by
-continuous distributions.
-
-\section{The exponential distribution}
-\index{exponential distribution}
-\index{distribution!exponential}
-
-I'll start with the exponential distribution because it is
-easy to work with.  In the real world, exponential distributions
-come up when we look at a series of events and measure the
-times between events, which are called {\bf interarrival times}.
-If the events are equally likely to occur at any time, the distribution
-of interarrival times tends to look like an exponential distribution.
-\index{interarrival time}
-
-The CDF of the exponential distribution is:
-%
-\[ \CDF(x) = 1 - e^{-\lambda x} \]
-%
-The parameter, $\lambda$, determines the shape of the
-distribution.  Figure~\ref{expo_cdf} shows what this CDF looks like with
-$\lambda = 2$.
-\index{parameter}
-
-
-\begin{figure}
-% continuous.py
-\centerline{\includegraphics[height=2.5in]{figs/expo_cdf.pdf}}
-\caption{CDF of exponential distribution.}
-\label{expo_cdf}
-\end{figure}
-
-In general, the mean of an exponential distribution is $1/
-\lambda$, so the mean of this distribution is 0.5.  The median is
-$ln(2)/\lambda$, which is roughly 0.35.  \index{mean}
-\index{median} \index{Australia} \index{Brisbane}
-
-To see an example of a distribution that is approximately exponential,
-we will look at the interarrival time of babies.
-On December 18, 1997, 44 babies were born in a hospital in Brisbane,
-Australia\footnote{This example is based on information and data from
-  Dunn, ``A Simple Dataset for Demonstrating Common Distributions,''
-  Journal of Statistics Education v.7, n.3 (1999).}.  The times of
-birth for all 44 babies were reported in the local paper; you can
-download the data from \url{http://thinkstats.com/babyboom.dat}.
-\index{birth time}
-
-Figure~\ref{interarrival_cdf} shows the CDF of the interarrival times
-in minutes.  It seems to have the general shape of an exponential
-distribution, but how can we tell?
-\index{complementary CDF}
-\index{CDF!complementary}
-\index{CCDF}
-
-One way is to plot the complementary CDF, $1-\CDF(x)$, on a
-log-$y$ scale.  For data from an exponential distribution, the result
-is a straight line.  Let's see why that works.
-
-If you plot the complementary CDF (CCDF) of a dataset that you think is
-exponential, you expect to see a function like:
-%
-\[ y \approx e^{-\lambda x} \]
-%
-Taking the log of both sides yields:
-
-\[ log y \approx -\lambda x \]
-
-So on a log-$y$ scale the CCDF is a straight line
-with slope $-\lambda$.
-\index{logarithmic scale}
-\index{complementary CDF}
-\index{CDF!complementary}
-\index{CCDF}
-
-\begin{figure}
-% babyboom.py
-\centerline{\includegraphics[height=2.5in]{figs/interarrivals.pdf}}
-\caption{CDF of interarrival times}
-\label{interarrival_cdf}
-\end{figure}
-
-\begin{figure}
-% babyboom.py
-\centerline{\includegraphics[height=2.5in]{figs/interarrivals_logy.pdf}}
-\caption{CCDF of interarrival times.}
-\label{interarrival_ccdf}
-\end{figure}
-
-Figure~\ref{interarrival_ccdf} shows the CCDF of the interarrivals
-on a log-$y$ scale.  It is not exactly straight, which suggests that
-the exponential distribution is only an approximation.  Most likely
-the underlying assumption---that a birth is equally likely at any time
-of day---is not exactly true.
-
-\begin{exercise}
-For small values of $n$, we don't expect an empirical distribution
-to fit a continuous distribution exactly.  One way to evaluate
-the quality of fit is to generate a sample from a continuous
-distribution and see how well it matches the data.
-\index{empirical distribution}
-\index{distribution!empirical}
-\index{random module}
-
-The function {\tt expovariate} in the {\tt random} module generates
-random values from an exponential distribution with a given value of
-$\lambda$.  Use it to generate 44 values from an exponential
-distribution with mean 32.6.  Plot the CCDF on a log-y~scale and
-compare it to Figure~\ref{interarrival_ccdf}.
-\index{pyplot}
-
-Hint: You can use the function {\tt pyplot.yscale} to plot the y~axis
-on a log scale.
-
-% TODO: update this example
-
-Or, if you use {\tt myplot}, the {\tt Cdf} function takes a boolean
-option, {\tt complement}, that determines whether to plot the CDF or
-CCDF, and string options, {\tt xscale} and {\tt yscale}, that
-transform the axes; to plot a CCDF on a log-y~scale:
-%
-\begin{verbatim}
-myplot.Cdf(cdf, complement=True, xscale='linear', yscale='log') 
-\end{verbatim}
-
-\end{exercise}
-
-\begin{exercise}
-Collect the birthdays of the students in your class, sort them, and
-compute the interarrival times in days.  Plot the CDF of the interarrival
-times and the CCDF on a log-y~scale.  Does it look like
-an exponential distribution?
-\index{exponential distribution}
-\index{distribution!exponential}
-\index{birthday}
-
-\end{exercise}
-
-
-\section{The Pareto distribution}
-\index{Pareto distribution}
-\index{distribution!Pareto}
-\index{Pareto, Vilfredo}
-
-The Pareto distribution is named after the economist Vilfredo Pareto,
-who used it to describe the distribution of wealth (see
-\url{http://wikipedia.org/wiki/Pareto_distribution}).  Since then, it has
-been used to describe phenomena in the natural and social
-sciences including sizes of cities and towns, sand particles and
-meteorites, forest fires and earthquakes.
-\index{CDF}
-
-The CDF of the Pareto distribution is:
-%
-\[ CDF(x) = 1 - \left( \frac{x}{x_m} \right) ^{-\alpha} \]
-%
-The parameters $x_{m}$ and $\alpha$ determine the location and shape of
-the distribution. $x_{m}$ is the minimum possible value.
-Figure~\ref{pareto_cdf} shows the CDF of a Pareto distribution with
-parameters $x_{m} = 0.5$ and $\alpha = 1$.
-\index{parameter}
-
-\begin{figure}
-% continuous.py
-\centerline{\includegraphics[height=2.5in]{figs/pareto_cdf.pdf}}
-\caption{CDF of a Pareto distribution.}
-\label{pareto_cdf}
-\end{figure}
-
-The median of this distribution is $x_m 2^{1/\alpha}$, which is 1, but
-the 95th percentile is 10.  By contrast, the exponential distribution
-with median 1 has 95th percentile of only 1.5.  \index{exponential
-  distribution} \index{distribution!exponential} \index{median}
-\index{logarithmic scale}
-
-There is a simple visual test that indicates whether an empirical
-distribution fits a Pareto distribution: on a log-log scale, the CCDF
-looks like a straight line.
-If you plot the CCDF of a sample from a Pareto distribution on a
-linear scale, you expect to see a function like:
-%
-\[ y \approx \left( \frac{x}{x_m} \right) ^{-\alpha} \]
-%
-Taking the log of both sides yields:
-%
-\[ \log y \approx -\alpha(\log x - \log x_{m}) \]
-%
-So if you plot $\log y$ versus $log x$, it should look like a straight
-line with slope $-\alpha$ and intercept
-$\alpha~log x_{m}$.
-
-\begin{exercise}
-The {\tt random} module provides {\tt paretovariate},
-which generates random values from a Pareto distribution.  It takes
-a parameter for $\alpha$, but not $x_{m}$.  The
-default value for $x_{m}$ is 1; you can generate a distribution
-with a different parameter by multiplying by $x_{m}$.
-\index{random module}
-\index{Pareto distribution}
-\index{distribution!Pareto}
-
-Write a wrapper function named {\tt paretovariate} that takes
-$\alpha$ and $x_{m}$ as parameters and uses {\tt
-  random.paretovariate} to generate values from a two-parameter Pareto
-distribution.
-\index{parameter}
-
-Use your function to generate a sample from a Pareto distribution.
-Compute the CCDF and plot it on a log-log scale.  Is it a straight
-line?  What is the slope?
-\index{complementary CDF}
-\index{CDF!complementary}
-\index{CCDF}
-
-\end{exercise}
-
-\begin{exercise}
-To get a feel for the Pareto distribution, imagine what the world
-would be like if the distribution of human height were Pareto.
-Choosing the parameters $x_{m} = 100$ cm and $\alpha = 1.7$, we
-get a distribution with a reasonable minimum, 100 cm,
-and median, 150 cm.
-\index{height}
-
-Generate 6 billion random values from this distribution.  What is the
-mean of this sample?  What fraction of the population is shorter than
-the mean?  How tall is the tallest person in Pareto World?
-\index{Pareto World}
-
-\end{exercise}
-
-\begin{exercise}
-Zipf's law is an observation about how often different words are used.
-The most common words have very high frequencies, but there are many
-unusual words, like ``hapaxlegomenon,'' that appear only a few times.
-Zipf's law predicts that in a body of text, called a ``corpus,'' the
-distribution of word frequencies is roughly Pareto.
-\index{Pareto distribution}
-\index{distribution!Pareto}
-\index{Zipf's law}
-\index{hapaxlegomenon}
-\index{corpus}
-\index{frequency}
-\index{word frequency}
-
-Find a large corpus, in any language, in electronic
-format.  Count how many times each word appears.  Find the CCDF of the
-word counts and plot it on a log-log scale.  Does Zipf's law hold?
-What is the value of $\alpha$, approximately?
-\index{complementary CDF}
-\index{CDF!complementary}
-\index{CCDF}
-
-\end{exercise}
-
-\begin{exercise}
-\label{weibull}
-
-The Weibull distribution is a generalization of the exponential
-distribution that comes up in failure analysis
-(see \url{http://wikipedia.org/wiki/Weibull_distribution}).  Its CDF is
-%
-\[ CDF(x) = 1 - e^{-(x / \lambda)^k} \]
-%
-Can you find a transformation that makes a Weibull distribution look
-like a straight line?  What do the slope and intercept of the
-line indicate?
-\index{Weibull distribution}
-\index{distribution!Weibull}
-\index{exponential distribution}
-\index{distribution!exponential}
-\index{random module}
-
-Use {\tt random.weibullvariate} to generate a sample from a
-Weibull distribution and use it to test your transformation.
-
-\end{exercise}
-
-
-\section{The normal distribution}
-\label{normal}
-\index{normal distribution}
-\index{distribution!normal}
-\index{Gaussian distribution}
-\index{distribution!Gaussian}
-
-\newcommand{\erf}{\mathrm{erf}}
-
-The normal distribution, also called Gaussian, is the most commonly
-used because it describes so many phenomena, at least approximately.
-It turns out that there is a good reason for its ubiquity, which we
-will get to in Section~\ref{CLT}.
-\index{error function}
-\index{CDF}
-
-The normal distribution has many properties that make it amenable for
-analysis, but the CDF is not one of them.  Unlike the
-other distributions we have looked at, there is no closed-form
-expression for the normal CDF; the most common alternative is to write
-it in terms of the {\bf error function}, which is a special function
-written erf(x):
-%
-\[ CDF(x) = \frac{1}{2} \left[ 1 +
-  \erf \left( \frac{x - \mu}{\sigma \sqrt{2}} \right) \right] \]
-%
-\[ \erf(x) = \frac{2}{\sqrt{\pi}} \int_{0}^x e^{-t^2} dt \]
-%
-The parameters $\mu$ and $\sigma$ determine the mean and standard
-deviation of the distribution.
-\index{parameter}
-\index{{\tt erf.py}}
-
-If these formulas make your eyes hurt, don't worry; they are easy to
-implement in Python\footnote{As of Python 3.2, it is even easier; 
-{\tt erf} is in the {\tt math} module.}.  There are many fast and
-accurate ways to approximate $\erf(x)$.  You can download one of them
-from \url{http://thinkstats.com/erf.py}, which provides functions named
-{\tt erf} and {\tt NormalCdf}.
-
-Figure~\ref{normal_cdf} shows the CDF of the normal distribution
-with parameters $\mu = 2.0$ and $\sigma = 0.5$.  The sigmoid shape of
-this curve is a recognizable characteristic of a normal distribution.
-
-\begin{figure}
-% continuous.py
-\centerline{\includegraphics[height=2.5in]{figs/normal_cdf.pdf}}
-\caption{CDF of a normal distribution.}
-\label{normal_cdf}
-\end{figure}
-
-In the previous chapter we looked at the distribution of birth
-weights in the NSFG.  Figure~\ref{nsfg_birthwgt_model} shows the
-empirical CDF of weights for all live births and the CDF of
-a normal distribution with the same mean and variance.
-\index{National Survey of Family Growth}
-\index{NSFG}
-\index{birth weight}
-\index{weight!birth}
-
-\begin{figure}
-% continuous.py
-\centerline{\includegraphics[height=2.5in]{figs/nsfg_birthwgt_model.pdf}}
-\caption{CDF of birth weights with a normal model.}
-\label{nsfg_birthwgt_model}
-\end{figure}
-
-The normal distribution is a good model for this dataset.  A {\bf
-  model} is a useful simplification.  In this case it is useful
-because we can summarize the entire distribution with just two
-numbers, $\mu = 116.5$ and $\sigma = 19.9$, and the resulting error
-(difference between the model and the data) is small.
-\index{model}
-\index{percentile}
-
-Below the 10th percentile there is a discrepancy between the data
-and the model; there are more light babies than we would expect in
-a normal distribution.  If we are interested in studying preterm
-babies, it would be important to get this part of the distribution
-right, so it might not be appropriate to use the normal
-model.
-
-
-
-\begin{exercise}
-Plot the CDF of pregnancy lengths for all live births.  Does it
-look like a normal distribution?
-\index{pregnancy length}
-\index{length!pregnancy}
-
-Compute the mean and standard deviation of the sample and plot the normal
-distribution with the same parameters.  Is the normal distribution a
-good model for this data?  If you had to summarize this distribution
-with two statistics, what statistics would you choose?
-
-\end{exercise}
-
-
-\section{Normal probability plot}
-\index{normal probability plot}
-\index{plot!normal probability}
-\index{exponential distribution}
-\index{distribution!exponential}
-\index{Weibull distribution}
-\index{distribution!Weibull}
-\index{Pareto distribution}
-\index{distribution!Pareto}
-
-For the exponential, Pareto and Weibull distributions, there are
-simple transformations we can use to test whether a continuous
-distribution is a good model of a dataset.
-\index{model}
-\index{normal distribution}
-\index{distribution!normal}
-\index{Gaussian distribution}
-\index{distribution!Gaussian}
-
-For the normal distribution there is no such transformation, but there
-is an alternative called a {\bf normal probability plot}.  It is based
-on {\bf rankits}: if you generate $n$~values from a normal
-distribution and sort them, the $k$th rankit is the mean of the
-distribution for the $k$th value.
-\index{rankit}
-
-\begin{exercise}
-Write a function called {\tt Sample} that generates 6 samples from a
-normal distribution with $\mu = 0$ and $\sigma = 1$.  Sort and return
-the values.
-
-Write a function called {\tt Samples} that calls {\tt Sample} 1000 times and
-returns a list of 1000 lists.
-
-If you apply {\tt zip} to this list of lists, the result is 6 lists
-with 1000 values in each.  Compute the mean of each of these lists
-and print the results.  I predict that you will get something like
-this:
-
-\{-1.2672,   -0.6418,   -0.2016,   0.2016,   0.6418,   1.2672\}
-
-If you increase the number of times you call {\tt Sample}, the
-results should converge on these values.
-
-\end{exercise}
-
-% Algorithms for exact and approximate normal rank stats
-% http://download.osgeo.org/grass/grass6_progman/as177_8c_source.html
-
-Computing rankits exactly is moderately difficult, but there are
-numerical methods for approximating them.  And there is a
-quick-and-dirty method that is even easier to implement:
-
-\begin{enumerate}
-
-\item From a normal distribution with $\mu = 0$ and $\sigma = 1$,
-generate a sample with the same size as your dataset and sort it.
-
-\item Sort the values in the dataset.
-
-\item Plot the sorted values from your dataset versus the random values.
-
-\end{enumerate}
-
-For large datasets, this method works well.
-For smaller datasets, you can improve it by generating $m (n+1) - 1$
-values from a normal distribution, where $n$ is the size of the
-dataset and m~is a multiplier.  Then select every m th element,
-starting with the m th.  
-
-%Hint: use the Python slice operator.
-
-This method works with other distributions as well, as long as
-you know how to generate a random sample.
-
-Figure~\ref{nsfg_birthwgt_normal} is a quick-and-dirty normal
-probability plot for the birth weight data.
-\index{birth weight}
-\index{weight!birth}
-
-\begin{figure}
-% continuous.py
-\centerline{\includegraphics[height=2.5in]{figs/nsfg_birthwgt_normal.pdf}}
-\caption{Normal probability plot of birth weights.}
-\label{nsfg_birthwgt_normal}
-\end{figure}
-
-The curvature in this plot suggests that there are
-deviations from a normal distribution; nevertheless, it is a
-good (enough) model for many purposes.
-\index{model}
-
-\begin{exercise}
-Write a function called {\tt NormalPlot} that takes a sequence of
-values and generates a normal probability plot.  You can download
-a solution from \url{http://thinkstats.com/rankit.py}.
-\index{normal distribution}
-\index{distribution!normal}
-\index{Gaussian distribution}
-\index{distribution!Gaussian}
-\index{{\tt rankit.py}}
-\index{{\tt relay.py}}
-\index{{\tt relay\_normal.py}}
-\index{relay race}
-\index{race!relay}
-
-Use the running speeds from {\tt relay.py} to generate a normal
-probability plot.  Is the normal distribution a good model for this
-data?  You can download a solution from
-\url{http://thinkstats.com/relay_normal.py}.
-
-\end{exercise}
-
-
-\section{The lognormal distribution}
-\label{lognormal}
-\index{lognormal distribution}
-\index{distribution!lognormal}
-\index{CDF}
-
-If the logarithms of a set of values have a normal distribution, the
-values have a {\bf lognormal} distribution.  The CDF of the lognormal
-distribution is the same as the CDF of the normal distribution,
-with log x~substituted for x.
-
-\[ CDF_{lognormal}(x) = CDF_{normal}(log x) \]
- 
-The parameters of the lognormal distribution are usually denoted
-$\mu$ and $\sigma$.  But remember that these parameters are {\em not}
-the mean and standard deviation; the mean of a lognormal distribution
-is $\exp(\mu + \sigma^2/2)$ and the standard deviation is
-ugly\footnote{See \url{http://wikipedia.org/wiki/Log-normal_distribution}.}.
-\index{parameter} \index{weight!adult} \index{adult weight}
-
-It turns out that the distribution of weights for adults is
-approximately lognormal\footnote{I was tipped off to this possibility by a
-  comment (without citation) at
-  \url{http://mathworld.wolfram.com/LogNormalDistribution.html}.
-  Subsequently I found a paper that proposes the log transform and
-  suggests a cause: Penman and Johnson, ``The Changing Shape of the
-  Body Mass Index Distribution Curve in the Population,'' Preventing
-  Chronic Disease, 2006 July; 3(3): A74.  Online
-  at \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1636707}.}.
-
-The National Center for Chronic Disease
-Prevention and Health Promotion conducts an annual survey as part of
-the Behavioral Risk Factor Surveillance System
-(BRFSS)\footnote{Centers for Disease Control and Prevention
-  (CDC). Behavioral Risk Factor Surveillance System Survey
-  Data. Atlanta, Georgia: U.S. Department of Health and Human
-  Services, Centers for Disease Control and Prevention, 2008.}.  In
-2008, they interviewed 414,509 respondents and asked about their
-demographics, health and health risks.
-\index{Behavioral Risk Factor Surveillance System}
-\index{BRFSS}
-
-
-\begin{figure}
-% cumulative.py
-\centerline{
-\includegraphics[height=2.5in]{figs/brfss_weight_log.pdf}
-}
-\caption{CDF of adult weights (log
-  transform).}
-\label{brfss_weight_log}
-\end{figure}
-
-Among the data they collected are the weights in kilograms of
-398,484 respondents.
-Figure~\ref{brfss_weight_log} shows the distribution
-of $\log w$, where $w$ is weight in kilograms, along with a normal
-model.
-\index{respondent}
-\index{model}
-
-The normal model is a good fit for the data, although the highest
-weights exceed what we expect from the normal model even after the log
-transform.  Since the distribution of $\log w$ fits a normal distribution, we
-conclude that $w$ fits a lognormal distribution.
-\index{normal distribution}
-\index{distribution!normal}
-\index{Gaussian distribution}
-\index{distribution!Gaussian}
-\index{lognormal distribution}
-\index{distribution!lognormal}
-
-
-
-\begin{exercise}
-Download the BRFSS data from 
-\url{http://thinkstats.com/CDBRFS08.ASC.gz}, and my code for reading it
-from
-\url{http://thinkstats.com/brfss.py}.  Run {\tt brfss.py} and confirm that
-it prints summary statistics for a few of the variables.
-\index{Behavioral Risk Factor Surveillance System}
-\index{BRFSS}
-\index{{\tt brfss.py}}
-\index{{\tt brfss\_figs.py}}
-\index{weight!adult}
-\index{adult weight}
-
-Write a program that reads adult weights from the BRFSS and
-generates normal probability plots for $w$ and $\log w$.  You can
-download a solution from \url{http://thinkstats.com/brfss_figs.py}.
-
-\end{exercise}
-
-\begin{exercise}
-The distribution of populations for cities and towns has been proposed
-as an example of a real-world phenomenon that can be described
-with a Pareto distribution.
-\index{Pareto distribution}
-\index{distribution!Pareto}
-\index{U.S.~Census Bureau}
-\index{population}
-\index{city size}
-
-The U.S.~Census Bureau publishes data on the population of every
-incorporated city and town in the United States.  I have written a
-small program that downloads this data and stores it in a file.  You
-can download it from \url{http://thinkstats.com/populations.py}.
-\index{{\tt populations.py}}
-
-\begin{enumerate}
-
-\item Read over the program to make sure you know what it does; then
-  run it to download and process the data.
-
-\item Write a program that computes and plots the distribution of
-  populations for the 14,593 cities and towns in the dataset.
-
-\item Plot the CDF on linear and log-x scales so you can get a sense
-  of the shape of the distribution.  Then plot the CCDF on a log-log
-  scale to see if it has the characteristic shape of a Pareto
-  distribution.
-\index{complementary CDF}
-\index{CDF!complementary}
-\index{CCDF}
-
-\item Try out the other transformations and plots in this chapter to
-  see if there is a better model for this data.
-
-\end{enumerate}
-
-What conclusion do you draw about the distribution of sizes
-for cities and towns?  You can download a solution from
-\url{http://thinkstats.com/populations_cdf.py}.
-\index{{\tt populations\_cdf.py}}
-
-\end{exercise}
-
-
-\begin{exercise}
-\label{irs}
-
-The Internal Revenue Service of the United States (IRS) provides data
-about income taxes at \url{http://irs.gov/taxstats}.
-\index{Internal Revenue Service}
-\index{IRS}
-\index{income}
-\index{taxes}
-
-One of their files, containing information about individual incomes
-for 2008, is available from \url{http://thinkstats.com/08in11si.csv}.  I
-converted it to a text format called CSV, which stands for
-``comma-separated values;'' you can read it using the {\tt csv}
-module.
-
-Extract the distribution of incomes from this dataset.  Are any of
-the continuous distributions in this chapter a good model of
-the data?  You can download a solution from \url{http://thinkstats.com/irs.py}.
-\index{{\tt irs.py}}
-
-\end{exercise}
-
-
-\section{Why model?}
-\index{model}
-
-At the beginning of this chapter I said that many real world phenomena
-can be modeled with continuous distributions.  ``So,'' you might ask,
-``what?''
-\index{abstraction}
-
-Like all models, continuous distributions are abstractions, which
-means they leave out details that are considered irrelevant.
-For example, an observed distribution might have measurement errors
-or quirks that are specific to the sample; continuous models smooth
-out these idiosyncrasies.
-\index{smoothing}
-
-Continuous models are also a form of data compression.  When a model
-fits a dataset well, a small set of parameters can summarize a
-large amount of data.
-\index{parameter}
-\index{compression}
-
-It is sometimes surprising when data from a natural phenomenon fit a
-continuous distribution, but these observations can lead to insight
-into physical systems.  Sometimes we can explain why an observed
-distribution has a particular form.  For example, Pareto distributions
-are often the result of generative processes with positive feedback
-(so-called preferential attachment processes: see
-\url{http://wikipedia.org/wiki/Preferential_attachment}.).
-\index{preferential attachment}
-\index{generative process}
-\index{Pareto distribution}
-\index{distribution!Pareto}
-\index{analysis}
-
-Continuous distributions lend themselves to mathematical analysis, as
-we will see in Chapter~\ref{operations}.
-
-
 
 
 
