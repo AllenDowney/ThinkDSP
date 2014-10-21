@@ -20,6 +20,12 @@ from wave import open as open_wave
 
 import matplotlib.pyplot as pyplot
 
+try:
+    from IPython.display import Audio
+except:
+    # TODO: print warning
+    pass
+
 PI2 = math.pi * 2
 
 
@@ -244,7 +250,6 @@ class Spectrum(_SpectrumParent):
         denom = self.fs ** (beta/2.0)
         denom[0] = 1
         self.hs /= denom
-        self.hs[0] = 0
 
     def angles(self, i):
         """Computes phase angles in radians.
@@ -644,6 +649,12 @@ class Wave(object):
         """
         self.write(filename)
         play_wave(filename)
+
+    def make_audio(self):
+        """Makes an IPython Audio object.
+        """
+        audio = Audio(data=self.ys, rate=self.framerate)
+        return audio
 
 
 def unbias(ys):
@@ -1120,7 +1131,7 @@ class PinkNoise(_Noise):
 
         returns: Wave
         """
-        signal = WhiteNoise()
+        signal = UncorrelatedUniformNoise()
         wave = signal.make_wave(duration, start, framerate)
         spectrum = wave.make_spectrum()
 
@@ -1128,7 +1139,7 @@ class PinkNoise(_Noise):
 
         wave2 = spectrum.make_wave()
         wave2.unbias()
-        wave2.normalize()
+        wave2.normalize(self.amp)
         return wave2
 
 

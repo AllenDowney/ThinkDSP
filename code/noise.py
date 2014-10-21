@@ -129,9 +129,14 @@ def test_noise(signal, root):
     return spectrum, integ
 
 
-def make_periodogram(signal):
+def make_periodogram(signal, n=1000):
+    """Generates n spectra and plots their average.
+
+    signal: Signal object
+    n: number of spectra to average
+    """
     specs = []
-    for i in range(10000):
+    for i in range(n):
         wave = signal.make_wave(duration=1.0, framerate=1024)
         spec = wave.make_spectrum()
         specs.append(spec)
@@ -204,9 +209,54 @@ def process_noise(signal, root='red'):
                    ylabel='power density')
 
 
-def main():
-    thinkdsp.random_seed(19)
 
+def TriplePlot():
+    thinkdsp.random_seed(20)
+
+    duration = 1.0
+    framerate = 512
+
+    signal = thinkdsp.UncorrelatedUniformNoise()
+    wave = signal.make_wave(duration=duration, framerate=framerate)
+    white = wave.make_spectrum()
+
+    signal = thinkdsp.PinkNoise()
+    wave = signal.make_wave(duration=duration, framerate=framerate)
+    pink = wave.make_spectrum()
+
+    signal = thinkdsp.BrownianNoise()
+    wave = signal.make_wave(duration=duration, framerate=framerate)
+    red = wave.make_spectrum()
+
+    #thinkplot.preplot(num=3)
+    linewidth = 1
+    white.plot_power(low=1, label='white', color='gray', linewidth=linewidth)
+    pink.plot_power(low=1, label='pink', color='pink', linewidth=linewidth)
+    red.plot_power(low=1, label='red', color='red', linewidth=linewidth)
+    thinkplot.save(root='noise-triple',
+                   xlabel='frequency (Hz)',
+                   ylabel='power',
+                   xscale='log',
+                   yscale='log',
+                   axis=[1, 300, 1e-4, 1e5]
+                   )
+
+
+def main():
+    TriplePlot()
+    return
+
+    thinkdsp.random_seed(20)
+    signal = thinkdsp.PinkNoise(beta=1.0)
+    process_noise(signal, root='pink')
+    return
+
+    thinkdsp.random_seed(18)
+    signal = thinkdsp.BrownianNoise()
+    process_noise(signal, root='red')
+    return
+
+    thinkdsp.random_seed(19)
     signal = thinkdsp.BrownianNoise()
     make_periodogram(signal)
     return
@@ -225,39 +275,6 @@ def main():
     print wave2.corr(wave2)
     return
 
-    signal = thinkdsp.BrownianNoise()
-    process_noise(signal, root='red')
-    return
-
-    signal = thinkdsp.UncorrelatedUniformNoise()
-    process_noise(signal, root='white')
-    return
-
-    signal = thinkdsp.WhiteNoise()
-    white, integ_white = test_noise(signal, 'white-noise')
-    print white.estimate_slope()
-
-    signal = thinkdsp.BrownianNoise()
-    red, integ_red = test_noise(signal, 'red-noise')
-    print red.estimate_slope()
-    return
-
-    signal = thinkdsp.PinkNoise(beta=1.0)
-    pink, integ_pink = test_noise(signal, 'pink-noise')
-    print pink.estimate_slope()
-
-    thinkplot.preplot(num=3)
-    white.plot(low=1, exponent=2, label='white', linewidth=2)
-    pink.plot(low=1, exponent=2, label='pink', linewidth=2)
-    red.plot(low=1, exponent=2, label='red', linewidth=2)
-    thinkplot.show(xlabel='frequency (Hz)',
-                   ylabel='power',
-                   xscale='log',
-                   yscale='log',
-                   axis=[1, 18000, 1e-5, 1e8])
-    
-
-    return
 
 
 

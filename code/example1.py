@@ -1,14 +1,12 @@
 """This file contains code used in "Think DSP",
 by Allen B. Downey, available from greenteapress.com
 
-Copyright 2013 Allen B. Downey
+Copyright 2014 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 import thinkdsp
 import thinkplot
-
-import matplotlib.pyplot as pyplot
 
 
 def mix_cosines():
