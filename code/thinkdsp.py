@@ -240,7 +240,7 @@ class Spectrum(_SpectrumParent):
         """
         for i in xrange(len(self.hs)):
             if low_cutoff < self.fs[i] < high_cutoff:
-                self.hs[i] = 0
+                self.hs[i] *= factor
 
     def pink_filter(self, beta=1):
         """Apply a filter that would make white noise pink.
