@@ -6,6 +6,7 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 import array
+import copy
 import math
 import numpy
 import random
@@ -14,6 +15,7 @@ import scipy.stats
 import struct
 import subprocess
 import thinkplot
+import warnings
 
 from fractions import gcd
 from wave import open as open_wave
@@ -23,8 +25,8 @@ import matplotlib.pyplot as pyplot
 try:
     from IPython.display import Audio
 except:
-    # TODO: print warning
-    pass
+    warnings.warn("Can't import Audio from IPython.display; "
+                  "Wave.make_audio() will not work.")
 
 PI2 = math.pi * 2
 
@@ -126,6 +128,13 @@ class _SpectrumParent(object):
     """Contains code common to Spectrum and DCT.
     """
 
+    def copy(self):
+        """Makes a copy.
+
+        Returns: new Spectrum
+        """
+        return copy.deepcopy(self)
+
     @property
     def max_freq(self):
         return self.framerate / 2.0
@@ -174,6 +183,11 @@ class Spectrum(_SpectrumParent):
     """Represents the spectrum of a signal."""
 
     def __init__(self, hs, framerate):
+        """Initializes a spectrum.
+
+        hs: NumPy array of complex
+        framerate: frames per second
+        """
         self.hs = hs
         self.framerate = framerate
 
@@ -181,6 +195,12 @@ class Spectrum(_SpectrumParent):
         self.fs = numpy.linspace(0, self.max_freq, n)
 
     def __add__(self, other):
+        """Adds two spectrums elementwise.
+
+        other: Spectrum
+
+        returns: new Spectrum
+        """
         if other == 0:
             return self
 
@@ -190,7 +210,6 @@ class Spectrum(_SpectrumParent):
 
     __radd__ = __add__
         
-
     @property
     def real(self):
         """Returns the real part of the hs (read-only property)."""
@@ -298,7 +317,7 @@ class IntegratedSpectrum(object):
         if expo:
             cs = numpy.exp(cs)
 
-        thinkplot.Plot(fs, cs, **options)
+        thinkplot.plot(fs, cs, **options)
 
     def estimate_slope(self, low=1, high=-12000):
         """Runs linear regression on log cumulative power vs log frequency.
@@ -443,6 +462,13 @@ class Wave(object):
         self.framerate = framerate
         self.start = start
 
+    def copy(self):
+        """Makes a copy.
+
+        Returns: new Wave
+        """
+        return copy.deepcopy(self)
+
     def __len__(self):
         return len(self.ys)
 
@@ -581,10 +607,9 @@ class Wave(object):
 
         other: Wave
 
-        returns: 2x2 covariance matrix
+        returns: float coefficient of correlation
         """
-        mat = self.cov_mat(other)
-        corr = mat[0][1] / math.sqrt(mat[0][0] * mat[1][1])
+        corr = numpy.corrcoef(self.ys, other.ys)[0, 1]
         return corr
         
     def cov_mat(self, other):
