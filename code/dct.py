@@ -9,7 +9,6 @@ import math
 import numpy
 import scipy.fftpack
 
-
 import thinkdsp
 import thinkplot
 
@@ -174,7 +173,6 @@ def main():
 
     synthesize_example()
     return
-
 
     test_synthesize(fshift=0, tshift=0)
     test_synthesize(fshift=0.5, tshift=0.5)
