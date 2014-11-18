@@ -12,6 +12,7 @@ import numpy
 import random
 import scipy
 import scipy.stats
+import scipy.fftpack
 import struct
 import subprocess
 import thinkplot
@@ -333,7 +334,7 @@ class IntegratedSpectrum(object):
 
 
 class Dct(_SpectrumParent):
-    """Represents the spectrum of a signal."""
+    """Represents the spectrum of a signal using discrete cosine transform."""
 
     def __init__(self, amps, framerate):
         self.amps = amps
@@ -341,6 +342,22 @@ class Dct(_SpectrumParent):
         n = len(amps)
         self.fs = numpy.arange(n) / float(n) * self.max_freq
 
+    def __add__(self, other):
+        """Adds two DCTs elementwise.
+
+        other: DCT
+
+        returns: new DCT
+        """
+        if other == 0:
+            return self
+
+        assert self.framerate == other.framerate
+        amps = self.amps + other.amps
+        return Dct(amps, self.framerate)
+
+    __radd__ = __add__
+        
     def make_wave(self):
         """Transforms to the time domain.
 
@@ -480,6 +497,29 @@ class Wave(object):
         """
         return len(self.ys) / float(self.framerate)
 
+    def __add__(self, other):
+        """Adds two waves elementwise.
+
+        other: Wave
+
+        returns: new Wave
+        """
+        if other == 0:
+            return self
+
+        assert self.framerate == other.framerate
+        n1, n2 = len(self), len(other)
+        if n1 > n2:
+            ys = self.ys.copy()
+            ys[:n2] += other.ys
+        else:
+            ys = other.ys.copy()
+            ys[:n1] += self.ys
+            
+        return Wave(ys, self.framerate)
+
+    __radd__ = __add__
+        
     def __or__(self, other):
         """Concatenates two waves.
 
@@ -885,7 +925,7 @@ class Sinusoid(Signal):
 
 
 def CosSignal(freq=440, amp=1.0, offset=0):
-    """Makes a consine Sinusoid.
+    """Makes a cosine Sinusoid.
 
     freq: float frequency in Hz
     amp: float amplitude, 1.0 is nominal max
@@ -906,6 +946,22 @@ def SinSignal(freq=440, amp=1.0, offset=0):
     returns: Sinusoid object
     """
     return Sinusoid(freq, amp, offset, func=numpy.sin)
+
+
+class ComplexSignal(Sinusoid):
+    """Represents a complex exponential signal."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        i = complex(0, 1)
+        phases = PI2 * self.freq * ts + self.offset
+        ys = self.amp * numpy.exp(i * phases)
+        return ys
 
 
 class SquareSignal(Sinusoid):
