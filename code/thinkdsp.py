@@ -925,7 +925,7 @@ class Sinusoid(Signal):
 
 
 def CosSignal(freq=440, amp=1.0, offset=0):
-    """Makes a consine Sinusoid.
+    """Makes a cosine Sinusoid.
 
     freq: float frequency in Hz
     amp: float amplitude, 1.0 is nominal max
@@ -946,6 +946,22 @@ def SinSignal(freq=440, amp=1.0, offset=0):
     returns: Sinusoid object
     """
     return Sinusoid(freq, amp, offset, func=numpy.sin)
+
+
+class ComplexSignal(Sinusoid):
+    """Represents a complex exponential signal."""
+
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        i = complex(0, 1)
+        phases = PI2 * self.freq * ts + self.offset
+        ys = self.amp * numpy.exp(i * phases)
+        return ys
 
 
 class SquareSignal(Sinusoid):

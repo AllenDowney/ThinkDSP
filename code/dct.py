@@ -1,9 +1,11 @@
 """This file contains code used in "Think DSP",
 by Allen B. Downey, available from greenteapress.com
 
-Copyright 2013 Allen B. Downey
+Copyright 2014 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
+
+from __future__ import print_function, division
 
 import math
 import numpy
@@ -11,7 +13,6 @@ import scipy.fftpack
 
 import thinkdsp
 import thinkplot
-
 PI2 = math.pi * 2
 
 
@@ -43,21 +44,21 @@ def synthesize2(amps, freqs, ts):
     """
     args = numpy.outer(ts, freqs)
     M = numpy.cos(PI2 * args)
-
-    print 'M'
-    print M
     ys = numpy.dot(M, amps)
-
-    print 'ys'
-    print ys
-
-    print 'Mt M'
-    print numpy.dot(M.T, M)
-
     return ys
 
 
 def analyze1(ys, freqs, ts):
+    """Analyze a mixture of cosines and return amplitudes.
+
+    Works for the general case where M is not orthogonal.
+
+    ys: wave array
+    freqs: frequencies in Hz
+    ts: times where the signal was evaluated    
+
+    returns: vector of amplitudes
+    """
     args = numpy.outer(ts, freqs)
     M = numpy.cos(PI2 * args)
     amps = numpy.linalg.solve(M, ys)
@@ -65,6 +66,16 @@ def analyze1(ys, freqs, ts):
 
 
 def analyze2(ys, freqs, ts):
+    """Analyze a mixture of cosines and return amplitudes.
+
+    Assumes that freqs and ts are chosen so that M is orthogonal.
+
+    ys: wave array
+    freqs: frequencies in Hz
+    ts: times where the signal was evaluated    
+
+    returns: vector of amplitudes
+    """
     args = numpy.outer(ts, freqs)
     M = numpy.cos(PI2 * args)
     amps = numpy.dot(M, ys) / 2
@@ -88,7 +99,11 @@ def dct_iv(ys):
 
 
 def plot(res, index):
+    """
 
+    res:
+    index:
+    """
     slices = [[0, None], [400, 1000], [860, 900]]
     start, end = slices[index]
     xs, ys = zip(*res[start:end])
@@ -100,6 +115,8 @@ def plot(res, index):
 
 
 def synthesize_example():
+    """
+    """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
 
@@ -113,8 +130,8 @@ def synthesize_example():
 
     n = len(freqs)
     amps2 = analyze1(ys[:n], freqs, ts[:n])
-    print amps
-    print amps2
+    print(amps)
+    print(amps2)
 
 
 def test_analyze1():
@@ -126,13 +143,14 @@ def test_analyze1():
     ts = numpy.arange(N) / N * time_unit
     max_freq = N / time_unit / 2
     freqs = numpy.arange(N) / N * max_freq
-    print 'amps', amps
-    print 'ts', ts / time_unit
-    print 'freqs', freqs
+    print('amps', amps)
+    print('ts', ts / time_unit)
+    print('freqs', freqs)
+
     ys = synthesize2(amps, freqs, ts)
     amps2 = analyze1(ys, freqs, ts)
-    print 'amps', amps
-    print 'amps2', amps2
+    print('amps', amps)
+    print('amps2', amps2)
 
 
 def test_analyze2():
@@ -142,13 +160,13 @@ def test_analyze2():
     N = 4.0
     ts = (0.5 + numpy.arange(N)) / N
     freqs = (0.5 + numpy.arange(N)) / 2
-    print 'amps', amps
-    print 'ts', ts
-    print 'freqs', freqs
+    print('amps', amps)
+    print('ts', ts)
+    print('freqs', freqs)
     ys = synthesize2(amps, freqs, ts)
     amps2 = analyze2(ys, freqs, ts)
-    print 'amps', amps
-    print 'amps2', amps2
+    print('amps', amps)
+    print('amps2', amps2)
 
 
 def test_dct():
@@ -161,8 +179,8 @@ def test_dct():
     ys = synthesize2(amps, freqs, ts)
 
     amps2 = dct_iv(ys)
-    print 'amps', amps
-    print 'amps2', amps2
+    print('amps', amps)
+    print('amps2', amps2)
 
 
 def main():
@@ -180,14 +198,14 @@ def main():
 
     cos_sig = thinkdsp.CosSignal(freq=1)
     wave = cos_sig.make_wave(duration=1, start=0, framerate=4)
-    print wave.ys
+    print(wave.ys)
 
     dct = scipy.fftpack.dct(wave.ys, type=2)
-    print dct
+    print(dct)
 
     cos_trans = wave.cos_transform()
     xs, ys = zip(*cos_trans)
-    print ys
+    print(ys)
     return
 
 
