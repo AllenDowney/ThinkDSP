@@ -1,12 +1,12 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%Title: example1.eps
+%%Title: autocorr3.eps
 %%Creator: matplotlib version 1.3.1, http://matplotlib.org/
-%%CreationDate: Tue Oct 21 09:42:37 2014
+%%CreationDate: Thu Dec 18 09:32:24 2014
 %%Orientation: portrait
 %%BoundingBox: 18 180 594 612
 %%EndComments
 %%BeginProlog
-/mpldict 8 dict def
+/mpldict 9 dict def
 mpldict begin
 /m { moveto } bind def
 /l { lineto } bind def
@@ -26,6 +26,108 @@ clip
 newpath
 } bind def
 %!PS-Adobe-3.0 Resource-Font
+%%Title: cmmi10
+%%Copyright: Copyright (C) 1994, Basil K. Malyshev. All Rights Reserved.012BaKoMa Fonts Collection, Level-B.
+%%Creator: Converted from TrueType to type 3 by PPR
+25 dict begin
+/_d{bind def}bind def
+/_m{moveto}_d
+/_l{lineto}_d
+/_cl{closepath eofill}_d
+/_c{curveto}_d
+/_sc{7 -1 roll{setcachedevice}{pop pop pop pop pop pop}ifelse}_d
+/_e{exec}_d
+/FontName /Cmmi10 def
+/PaintType 0 def
+/FontMatrix[.001 0 0 .001 0 0]def
+/FontBBox[-34 -250 1048 750]def
+/FontType 3 def
+/Encoding [ /beta ] def
+/FontInfo 10 dict dup begin
+/FamilyName (cmmi10) def
+/FullName (cmmi10) def
+/Notice (Copyright (C) 1994, Basil K. Malyshev. All Rights Reserved.012BaKoMa Fonts Collection, Level-B. ) def
+/Weight (Regular) def
+/Version (1.1/12-Nov-94) def
+/ItalicAngle 0.0 def
+/isFixedPitch false def
+/UnderlinePosition -133 def
+/UnderlineThickness 20 def
+end readonly def
+/CharStrings 1 dict dup begin
+/beta{{565 0 19 -193 589 705 _sc
+27 -193 _m
+25 -193 23 -191 21 -189 _c
+19 -187 19 -185 19 -183 _c
+173 434 _l
+181 467 194 499 211 531 _c
+228 562 249 591 275 618 _c
+300 644 328 665 359 681 _c
+389 697 422 705 457 705 _c
+481 705 504 699 524 688 _c
+544 677 559 662 571 642 _c
+583 622 589 600 589 576 _c
+589 552 584 530 575 508 _c
+566 486 553 466 537 447 _c
+521 428 503 413 485 402 _c
+}_e{495 395 505 386 513 376 _c
+521 365 528 354 534 342 _c
+539 330 543 318 546 304 _c
+549 290 551 276 551 264 _c
+551 230 543 196 529 163 _c
+514 129 494 99 469 72 _c
+443 45 414 24 382 9 _c
+349 -6 316 -14 282 -14 _c
+244 -14 211 -4 181 16 _c
+151 36 130 63 119 99 _c
+47 -187 _l
+47 -191 44 -193 39 -193 _c
+27 -193 _l
+284 12 _m
+314 12 341 21 365 41 _c
+}_e{389 61 409 86 425 116 _c
+441 146 453 177 461 211 _c
+469 244 474 274 474 302 _c
+474 336 464 362 445 382 _c
+422 373 400 369 378 369 _c
+325 369 299 378 299 396 _c
+299 419 329 431 389 431 _c
+410 431 430 427 448 421 _c
+462 432 475 448 487 470 _c
+499 491 508 513 514 537 _c
+520 560 523 582 523 603 _c
+523 625 517 643 505 657 _c
+493 671 477 679 455 679 _c
+}_e{414 679 376 666 341 641 _c
+306 616 277 584 253 546 _c
+229 508 211 468 201 428 _c
+146 207 _l
+142 191 140 174 139 156 _c
+139 114 152 79 180 52 _c
+207 25 242 12 284 12 _c
+329 399 _m
+339 396 355 395 379 395 _c
+390 395 401 397 413 401 _c
+412 401 411 402 409 402 _c
+401 404 394 405 386 405 _c
+356 405 337 403 329 399 _c
+_cl}_e}_d
+end readonly def
+
+/BuildGlyph
+ {exch begin
+ CharStrings exch
+ 2 copy known not{pop /.notdef}if
+ true 3 1 roll get exec
+ end}_d
+
+/BuildChar {
+ 1 index /Encoding get exch get
+ 1 index /BuildGlyph get exec
+}_d
+
+FontName currentdict end definefont pop
+%!PS-Adobe-3.0 Resource-Font
 %%Title: DejaVu Sans
 %%Copyright: Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved. Copyright (c) 2006 by Tavmjong Bah. All Rights Reserved. DejaVu changes are in public domain 
 %%Creator: Converted from TrueType to type 3 by PPR
@@ -42,7 +144,7 @@ newpath
 /FontMatrix[.001 0 0 .001 0 0]def
 /FontBBox[-1021 -415 1681 1167]def
 /FontType 3 def
-/Encoding [ /space /parenleft /parenright /period /zero /one /two /three /four /five /six /e /i /m /s /t /minus ] def
+/Encoding [ /space /comma /period /zero /one /two /four /five /six /eight /a /c /e /i /k /l /m /n /o /p /r /s /t ] def
 /FontInfo 10 dict dup begin
 /FamilyName (DejaVu Sans) def
 /FullName (DejaVu Sans) def
@@ -54,34 +156,17 @@ newpath
 /UnderlinePosition -130 def
 /UnderlineThickness 90 def
 end readonly def
-/CharStrings 17 dict dup begin
+/CharStrings 23 dict dup begin
 /space{318 0 0 0 0 0 _sc
 }_d
-/parenleft{390 0 86 -131 310 759 _sc
-310 759 _m
-266 683 234 609 213 536 _c
-191 463 181 389 181 314 _c
-181 238 191 164 213 91 _c
-234 17 266 -56 310 -131 _c
-232 -131 _l
-183 -54 146 20 122 94 _c
-98 168 86 241 86 314 _c
-86 386 98 459 122 533 _c
-146 607 182 682 232 759 _c
-310 759 _l
-_cl}_d
-/parenright{390 0 80 -131 304 759 _sc
-80 759 _m
-158 759 _l
-206 682 243 607 267 533 _c
-291 459 304 386 304 314 _c
-304 241 291 168 267 94 _c
-243 20 206 -54 158 -131 _c
-80 -131 _l
-123 -56 155 17 177 91 _c
-198 164 209 238 209 314 _c
-209 389 198 463 177 536 _c
-155 609 123 683 80 759 _c
+/comma{318 0 77 -115 220 124 _sc
+117 124 _m
+220 124 _l
+220 40 _l
+140 -115 _l
+77 -115 _l
+117 40 _l
+117 124 _l
 _cl}_d
 /period{318 0 107 0 210 124 _sc
 107 124 _m
@@ -147,38 +232,6 @@ _cl}_d
 504 422 484 390 454 354 _c
 446 344 420 317 376 272 _c
 332 227 271 164 192 83 _c
-_cl}_e}_d
-/three{{636 0 76 -13 556 742 _sc
-406 393 _m
-453 383 490 362 516 330 _c
-542 298 556 258 556 212 _c
-556 140 531 84 482 45 _c
-432 6 362 -13 271 -13 _c
-240 -13 208 -10 176 -4 _c
-144 1 110 10 76 22 _c
-76 117 _l
-103 101 133 89 166 81 _c
-198 73 232 69 268 69 _c
-330 69 377 81 409 105 _c
-441 129 458 165 458 212 _c
-458 254 443 288 413 312 _c
-383 336 341 349 287 349 _c
-}_e{202 349 _l
-202 430 _l
-291 430 _l
-339 430 376 439 402 459 _c
-428 478 441 506 441 543 _c
-441 580 427 609 401 629 _c
-374 649 336 659 287 659 _c
-260 659 231 656 200 650 _c
-169 644 135 635 98 623 _c
-98 711 _l
-135 721 170 729 203 734 _c
-235 739 266 742 296 742 _c
-370 742 429 725 473 691 _c
-517 657 539 611 539 553 _c
-539 513 527 479 504 451 _c
-481 423 448 403 406 393 _c
 _cl}_e}_d
 /four{636 0 49 0 580 729 _sc
 378 643 _m
@@ -252,6 +305,96 @@ _cl}_e}_d
 396 742 421 739 447 735 _c
 472 730 498 723 526 713 _c
 _cl}_e}_d
+/eight{{636 0 68 -13 568 742 _sc
+318 346 _m
+271 346 234 333 207 308 _c
+180 283 167 249 167 205 _c
+167 161 180 126 207 101 _c
+234 76 271 64 318 64 _c
+364 64 401 76 428 102 _c
+455 127 469 161 469 205 _c
+469 249 455 283 429 308 _c
+402 333 365 346 318 346 _c
+219 388 _m
+177 398 144 418 120 447 _c
+96 476 85 511 85 553 _c
+85 611 105 657 147 691 _c
+188 725 245 742 318 742 _c
+}_e{390 742 447 725 489 691 _c
+530 657 551 611 551 553 _c
+551 511 539 476 515 447 _c
+491 418 459 398 417 388 _c
+464 377 501 355 528 323 _c
+554 291 568 251 568 205 _c
+568 134 546 80 503 43 _c
+459 5 398 -13 318 -13 _c
+237 -13 175 5 132 43 _c
+89 80 68 134 68 205 _c
+68 251 81 291 108 323 _c
+134 355 171 377 219 388 _c
+183 544 _m
+183 506 194 476 218 455 _c
+}_e{242 434 275 424 318 424 _c
+360 424 393 434 417 455 _c
+441 476 453 506 453 544 _c
+453 582 441 611 417 632 _c
+393 653 360 664 318 664 _c
+275 664 242 653 218 632 _c
+194 611 183 582 183 544 _c
+_cl}_e}_d
+/a{{613 0 60 -13 522 560 _sc
+343 275 _m
+270 275 220 266 192 250 _c
+164 233 150 205 150 165 _c
+150 133 160 107 181 89 _c
+202 70 231 61 267 61 _c
+317 61 357 78 387 114 _c
+417 149 432 196 432 255 _c
+432 275 _l
+343 275 _l
+522 312 _m
+522 0 _l
+432 0 _l
+432 83 _l
+411 49 385 25 355 10 _c
+325 -5 287 -13 243 -13 _c
+187 -13 142 2 109 33 _c
+76 64 60 106 60 159 _c
+}_e{60 220 80 266 122 298 _c
+163 329 224 345 306 345 _c
+432 345 _l
+432 354 _l
+432 395 418 427 391 450 _c
+364 472 326 484 277 484 _c
+245 484 215 480 185 472 _c
+155 464 127 453 100 439 _c
+100 522 _l
+132 534 164 544 195 550 _c
+226 556 256 560 286 560 _c
+365 560 424 539 463 498 _c
+502 457 522 395 522 312 _c
+_cl}_e}_d
+/c{{550 0 55 -13 488 560 _sc
+488 526 _m
+488 442 _l
+462 456 437 466 411 473 _c
+385 480 360 484 334 484 _c
+276 484 230 465 198 428 _c
+166 391 150 339 150 273 _c
+150 206 166 154 198 117 _c
+230 80 276 62 334 62 _c
+360 62 385 65 411 72 _c
+437 79 462 90 488 104 _c
+488 21 _l
+462 9 436 0 410 -5 _c
+383 -10 354 -13 324 -13 _c
+242 -13 176 12 128 64 _c
+}_e{79 115 55 185 55 273 _c
+55 362 79 432 128 483 _c
+177 534 244 560 330 560 _c
+358 560 385 557 411 551 _c
+437 545 463 537 488 526 _c
+_cl}_e}_d
 /e{{615 0 55 -13 562 560 _sc
 562 296 _m
 562 252 _l
@@ -288,6 +431,27 @@ _cl}_e}_d
 94 646 _l
 94 760 _l
 _cl}_d
+/k{579 0 91 0 576 760 _sc
+91 760 _m
+181 760 _l
+181 311 _l
+449 547 _l
+564 547 _l
+274 291 _l
+576 0 _l
+459 0 _l
+181 267 _l
+181 0 _l
+91 0 _l
+91 760 _l
+_cl}_d
+/l{278 0 94 0 184 760 _sc
+94 760 _m
+184 760 _l
+184 0 _l
+94 0 _l
+94 760 _l
+_cl}_d
 /m{{974 0 91 0 889 560 _sc
 520 442 _m
 542 482 569 511 600 531 _c
@@ -318,6 +482,87 @@ _cl}_d
 397 560 430 550 458 530 _c
 486 510 506 480 520 442 _c
 _cl}_e}_d
+/n{634 0 91 0 549 560 _sc
+549 330 _m
+549 0 _l
+459 0 _l
+459 327 _l
+459 379 448 417 428 443 _c
+408 469 378 482 338 482 _c
+289 482 251 466 223 435 _c
+195 404 181 362 181 309 _c
+181 0 _l
+91 0 _l
+91 547 _l
+181 547 _l
+181 462 _l
+202 494 227 519 257 535 _c
+286 551 320 560 358 560 _c
+420 560 468 540 500 501 _c
+532 462 549 405 549 330 _c
+_cl}_d
+/o{612 0 55 -13 557 560 _sc
+306 484 _m
+258 484 220 465 192 427 _c
+164 389 150 338 150 273 _c
+150 207 163 156 191 118 _c
+219 80 257 62 306 62 _c
+354 62 392 80 420 118 _c
+448 156 462 207 462 273 _c
+462 337 448 389 420 427 _c
+392 465 354 484 306 484 _c
+306 560 _m
+384 560 445 534 490 484 _c
+534 433 557 363 557 273 _c
+557 183 534 113 490 63 _c
+445 12 384 -13 306 -13 _c
+227 -13 165 12 121 63 _c
+77 113 55 183 55 273 _c
+55 363 77 433 121 484 _c
+165 534 227 560 306 560 _c
+_cl}_d
+/p{{635 0 91 -207 580 560 _sc
+181 82 _m
+181 -207 _l
+91 -207 _l
+91 547 _l
+181 547 _l
+181 464 _l
+199 496 223 520 252 536 _c
+281 552 316 560 356 560 _c
+422 560 476 533 518 481 _c
+559 428 580 359 580 273 _c
+580 187 559 117 518 65 _c
+476 13 422 -13 356 -13 _c
+316 -13 281 -5 252 10 _c
+223 25 199 49 181 82 _c
+487 273 _m
+487 339 473 390 446 428 _c
+418 466 381 485 334 485 _c
+}_e{286 485 249 466 222 428 _c
+194 390 181 339 181 273 _c
+181 207 194 155 222 117 _c
+249 79 286 61 334 61 _c
+381 61 418 79 446 117 _c
+473 155 487 207 487 273 _c
+_cl}_e}_d
+/r{411 0 91 0 411 560 _sc
+411 463 _m
+401 469 390 473 378 476 _c
+366 478 353 480 339 480 _c
+288 480 249 463 222 430 _c
+194 397 181 350 181 288 _c
+181 0 _l
+91 0 _l
+91 547 _l
+181 547 _l
+181 462 _l
+199 495 224 520 254 536 _c
+284 552 321 560 365 560 _c
+371 560 378 559 386 559 _c
+393 558 401 557 411 555 _c
+411 463 _l
+_cl}_d
 /s{{521 0 54 -13 472 560 _sc
 443 531 _m
 443 446 _l
@@ -370,13 +615,6 @@ _cl}_e}_d
 93 702 _l
 183 702 _l
 _cl}_d
-/minus{838 0 106 272 732 355 _sc
-106 355 _m
-732 355 _l
-732 272 _l
-106 272 _l
-106 355 _l
-_cl}_d
 end readonly def
 
 /BuildGlyph
@@ -419,84 +657,30 @@ grestore
 1 setlinejoin
 2 setlinecap
 [] 0 setdash
-0.000 0.000 1.000 setrgbcolor
+0.031 0.114 0.345 setrgbcolor
 gsave
 446.4 345.6 72 43.2 clipbox
-72 327.484 m
-78.0188 350.795 l
-84.0375 360.751 l
-90.0563 353.018 l
-96.075 326.495 l
-102.094 283.773 l
-108.113 230.745 l
-114.131 175.441 l
-120.15 126.369 l
-126.169 90.7345 l
-132.188 72.9759 l
-138.206 73.9398 l
-144.225 90.8938 l
-150.244 118.356 l
-156.263 149.526 l
-162.281 177.962 l
-168.3 199.093 l
-174.319 211.188 l
-180.338 215.567 l
-186.356 216.008 l
-192.375 217.512 l
-198.394 224.751 l
-204.413 240.603 l
-210.431 265.15 l
-216.45 295.412 l
-222.469 325.884 l
-228.488 349.775 l
-234.506 360.632 l
-240.525 353.968 l
-246.544 328.477 l
-252.563 286.545 l
-258.581 233.9 l
-264.6 178.494 l
-270.619 128.854 l
-276.638 92.3064 l
-282.656 73.474 l
-288.675 73.4159 l
-294.694 89.588 l
-300.713 116.63 l
-306.731 147.773 l
-312.75 176.511 l
-318.769 198.133 l
-324.788 210.733 l
-330.806 215.467 l
-336.825 216.003 l
-342.844 217.311 l
-348.863 224.124 l
-354.881 239.456 l
-360.9 263.561 l
-366.919 293.626 l
-372.938 324.264 l
-378.956 348.712 l
-384.975 360.455 l
-390.994 354.855 l
-397.013 330.405 l
-403.031 289.281 l
-409.05 237.047 l
-415.069 181.566 l
-421.088 131.383 l
-427.106 93.9365 l
-433.125 74.0337 l
-439.144 72.9452 l
-445.163 88.3178 l
-451.181 114.918 l
-457.2 146.012 l
-463.219 175.036 l
-469.238 197.142 l
-475.256 210.252 l
-481.275 215.354 l
-487.294 216.001 l
-493.313 217.129 l
-499.331 223.526 l
-505.35 238.338 l
-511.369 261.992 l
-517.388 291.843 l
+72 39.9045 m
+94.32 60.3381 l
+116.64 81.1659 l
+138.96 109.38 l
+161.28 131.514 l
+183.6 170.633 l
+205.92 198.424 l
+228.24 233.421 l
+250.56 260.3 l
+272.88 282.926 l
+295.2 313.436 l
+317.52 330.777 l
+339.84 339.153 l
+362.16 358.765 l
+384.48 359.979 l
+406.8 370.145 l
+429.12 368.71 l
+451.44 370.676 l
+473.76 371.838 l
+496.08 371.952 l
+518.4 372.263 l
 stroke
 grestore
 0.500 setlinewidth
@@ -544,13 +728,11 @@ grestore
 12.000 scalefont
 setfont
 gsave
-55.609375 30.075000 translate
+63.250000 30.075000 translate
 0.000000 rotate
 0.000000 0.000000 m /zero glyphshow
 7.634766 0.000000 m /period glyphshow
 11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /zero glyphshow
 grestore
 gsave
 /o {
@@ -569,7 +751,7 @@ grestore
 stroke
 grestore
 } bind def
-137.472 43.2 o
+183.6 43.2 o
 grestore
 gsave
 /o {
@@ -588,487 +770,10 @@ grestore
 stroke
 grestore
 } bind def
-137.472 388.8 o
+183.6 388.8 o
 grestore
 gsave
-121.237625 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /one glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-202.944 43.2 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 -4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-202.944 388.8 o
-grestore
-gsave
-186.756500 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /two glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-268.416 43.2 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 -4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-268.416 388.8 o
-grestore
-gsave
-252.111313 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /three glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-333.888 43.2 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 -4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-333.888 388.8 o
-grestore
-gsave
-317.434875 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /four glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-399.36 43.2 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 -4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-399.36 388.8 o
-grestore
-gsave
-383.094375 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /five glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-464.832 43.2 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-0 -4 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-464.832 388.8 o
-grestore
-gsave
-448.425750 30.075000 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-19.083984 0.000000 m /zero glyphshow
-26.718750 0.000000 m /six glyphshow
-grestore
-gsave
-272.442187 13.450000 translate
-0.000000 rotate
-0.000000 0.000000 m /t glyphshow
-4.705078 0.000000 m /i glyphshow
-8.039062 0.000000 m /m glyphshow
-19.728516 0.000000 m /e glyphshow
-27.111328 0.000000 m /space glyphshow
-30.925781 0.000000 m /parenleft glyphshow
-35.607422 0.000000 m /s glyphshow
-41.859375 0.000000 m /parenright glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-72 48.7742 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
--4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-518.4 48.7742 o
-grestore
-gsave
-41.156250 45.461694 translate
-0.000000 rotate
-0.000000 0.000000 m /minus glyphshow
-10.054688 0.000000 m /one glyphshow
-17.689453 0.000000 m /period glyphshow
-21.503906 0.000000 m /five glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-72 104.516 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
--4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-518.4 104.516 o
-grestore
-gsave
-40.906250 101.203629 translate
-0.000000 rotate
-0.000000 0.000000 m /minus glyphshow
-10.054688 0.000000 m /one glyphshow
-17.689453 0.000000 m /period glyphshow
-21.503906 0.000000 m /zero glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-72 160.258 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
--4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-518.4 160.258 o
-grestore
-gsave
-41.156250 156.945565 translate
-0.000000 rotate
-0.000000 0.000000 m /minus glyphshow
-10.054688 0.000000 m /zero glyphshow
-17.689453 0.000000 m /period glyphshow
-21.503906 0.000000 m /five glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-72 216 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
--4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-518.4 216 o
-grestore
-gsave
-50.500000 212.687500 translate
-0.000000 rotate
-0.000000 0.000000 m /zero glyphshow
-7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /zero glyphshow
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
-4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-72 271.742 o
-grestore
-gsave
-/o {
-gsave
-newpath
-translate
-0.5 setlinewidth
-1 setlinejoin
-0 setlinecap
-0 0 m
--4 0 l
-gsave
-0.000 setgray
-fill
-grestore
-stroke
-grestore
-} bind def
-518.4 271.742 o
-grestore
-gsave
-50.750000 268.429435 translate
+174.975000 30.075000 translate
 0.000000 rotate
 0.000000 0.000000 m /zero glyphshow
 7.634766 0.000000 m /period glyphshow
@@ -1083,6 +788,221 @@ translate
 1 setlinejoin
 0 setlinecap
 0 0 m
+0 4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+295.2 43.2 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+0 -4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+295.2 388.8 o
+grestore
+gsave
+286.707812 30.075000 translate
+0.000000 rotate
+0.000000 0.000000 m /one glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /zero glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+0 4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+406.8 43.2 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+0 -4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+406.8 388.8 o
+grestore
+gsave
+398.432812 30.075000 translate
+0.000000 rotate
+0.000000 0.000000 m /one glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /five glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+0 4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 43.2 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+0 -4 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 388.8 o
+grestore
+gsave
+509.689062 30.075000 translate
+0.000000 rotate
+0.000000 0.000000 m /two glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /zero glyphshow
+grestore
+gsave
+223.700000 12.575000 translate
+0.000000 rotate
+/DejaVuSans findfont
+12.0 scalefont
+setfont
+0.000000 0.875000 moveto
+/p glyphshow
+
+7.617188 0.875000 moveto
+/i glyphshow
+
+10.951172 0.875000 moveto
+/n glyphshow
+
+18.556641 0.875000 moveto
+/k glyphshow
+
+25.505859 0.875000 moveto
+/space glyphshow
+
+29.320312 0.875000 moveto
+/n glyphshow
+
+36.925781 0.875000 moveto
+/o glyphshow
+
+44.267578 0.875000 moveto
+/i glyphshow
+
+47.601562 0.875000 moveto
+/s glyphshow
+
+53.853516 0.875000 moveto
+/e glyphshow
+
+61.236328 0.875000 moveto
+/space glyphshow
+
+65.050781 0.875000 moveto
+/p glyphshow
+
+72.667969 0.875000 moveto
+/a glyphshow
+
+80.021484 0.875000 moveto
+/r glyphshow
+
+84.955078 0.875000 moveto
+/a glyphshow
+
+92.308594 0.875000 moveto
+/m glyphshow
+
+103.998047 0.875000 moveto
+/e glyphshow
+
+111.380859 0.875000 moveto
+/t glyphshow
+
+116.085938 0.875000 moveto
+/e glyphshow
+
+123.468750 0.875000 moveto
+/r glyphshow
+
+128.402344 0.875000 moveto
+/comma glyphshow
+
+132.216797 0.875000 moveto
+/space glyphshow
+
+/Cmmi10 findfont
+12.0 scalefont
+setfont
+136.031250 0.875000 moveto
+/beta glyphshow
+
+
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
 4 0 l
 gsave
 0.000 setgray
@@ -1091,7 +1011,7 @@ grestore
 stroke
 grestore
 } bind def
-72 327.484 o
+72 43.2 o
 grestore
 gsave
 /o {
@@ -1110,12 +1030,12 @@ grestore
 stroke
 grestore
 } bind def
-518.4 327.484 o
+518.4 43.2 o
 grestore
 gsave
-51.015625 324.171371 translate
+50.500000 39.887500 translate
 0.000000 rotate
-0.000000 0.000000 m /one glyphshow
+0.000000 0.000000 m /zero glyphshow
 7.634766 0.000000 m /period glyphshow
 11.449219 0.000000 m /zero glyphshow
 grestore
@@ -1136,7 +1056,7 @@ grestore
 stroke
 grestore
 } bind def
-72 383.226 o
+72 109.029 o
 grestore
 gsave
 /o {
@@ -1155,14 +1075,216 @@ grestore
 stroke
 grestore
 } bind def
-518.4 383.226 o
+518.4 109.029 o
 grestore
 gsave
-51.265625 379.913306 translate
+50.906250 105.716071 translate
+0.000000 rotate
+0.000000 0.000000 m /zero glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /two glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+72 174.857 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+-4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 174.857 o
+grestore
+gsave
+50.375000 171.544643 translate
+0.000000 rotate
+0.000000 0.000000 m /zero glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /four glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+72 240.686 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+-4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 240.686 o
+grestore
+gsave
+50.468750 237.373214 translate
+0.000000 rotate
+0.000000 0.000000 m /zero glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /six glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+72 306.514 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+-4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 306.514 o
+grestore
+gsave
+50.531250 303.201786 translate
+0.000000 rotate
+0.000000 0.000000 m /zero glyphshow
+7.634766 0.000000 m /period glyphshow
+11.449219 0.000000 m /eight glyphshow
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+72 372.343 o
+grestore
+gsave
+/o {
+gsave
+newpath
+translate
+0.5 setlinewidth
+1 setlinejoin
+0 setlinecap
+0 0 m
+-4 0 l
+gsave
+0.000 setgray
+fill
+grestore
+stroke
+grestore
+} bind def
+518.4 372.343 o
+grestore
+gsave
+51.015625 369.030357 translate
 0.000000 rotate
 0.000000 0.000000 m /one glyphshow
 7.634766 0.000000 m /period glyphshow
-11.449219 0.000000 m /five glyphshow
+11.449219 0.000000 m /zero glyphshow
+grestore
+gsave
+42.875000 166.117188 translate
+90.000000 rotate
+0.000000 0.000000 m /s glyphshow
+6.251953 0.000000 m /e glyphshow
+13.634766 0.000000 m /r glyphshow
+18.568359 0.000000 m /i glyphshow
+21.902344 0.000000 m /a glyphshow
+29.255859 0.000000 m /l glyphshow
+32.589844 0.000000 m /space glyphshow
+36.404297 0.000000 m /c glyphshow
+43.001953 0.000000 m /o glyphshow
+50.343750 0.000000 m /r glyphshow
+55.027344 0.000000 m /r glyphshow
+59.710938 0.000000 m /e glyphshow
+67.093750 0.000000 m /l glyphshow
+70.427734 0.000000 m /a glyphshow
+77.781250 0.000000 m /t glyphshow
+82.486328 0.000000 m /i glyphshow
+85.820312 0.000000 m /o glyphshow
+93.162109 0.000000 m /n glyphshow
 grestore
 1.000 setlinewidth
 gsave

@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.6}
+\newcommand{\theversion}{0.7}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -769,7 +769,7 @@ usually chosen so 1.0 corresponds to the maximum input from a
 microphone or maximum output to a speaker.
 
 \item {\tt offset}: where in its period the signal starts, at $t=0$.
-In units of radians, for reasons I explain below.
+{\tt offset} is in units of radians, for reasons I explain below.
 
 \item {\tt func}: a Python function used
 to evaluate the signal at a particular point in time.  It is
@@ -801,7 +801,7 @@ of sample times.
 \verb"make_wave" invokes {\tt evaluate}, which has to be provided
 by the child class of {\tt Signal}, in this case {\tt Sinusoid}.
 
-{\tt evaluate} takes the sequence of samples times and returns an array of
+{\tt evaluate} takes the sequence of sample times and returns an array of
 corresponding quantities:
 
 \begin{verbatim}
@@ -810,6 +810,8 @@ corresponding quantities:
         ys = self.amp * self.func(phases)
         return ys
 \end{verbatim}
+
+{\tt PI2} is a constant set to $2 \ pi$.
 
 {\tt ts} and {\tt ys} are NumPy arrays.  I use NumPy and SciPy
 throughout the book.  If you are familiar with these libraries,
@@ -823,10 +825,10 @@ Let's unwind this function one step at time:
 each element of {\tt ts} a time in seconds, so their product is
 the number of cycles since the start time.
 
-\item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying
-by {\tt PI2} converts from cycles to {\bf phase}.  You can
-think of phase as ``cycles since the start time'' except that the number
-of cycles is in units of radians, so each cycle is $2 \pi$ radians.
+\item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying by
+  {\tt PI2} converts from cycles to {\bf phase}.  You can think of
+  phase as ``cycles since the start time'' expressed in radians; each
+  cycle is $2 \pi$ radians.
 
 \item {\tt self.offset} is the phase, in radians, at the start time.
   It has the effect of shifting the signal left or right in time.
@@ -866,8 +868,10 @@ a new {\tt Spectrum} object.
 the discrete Fourier transform using an algorithm called
 {\bf Fast Fourier Transform} or FFT.
 
-The result of {\tt fft} is a sequence of complex numbers, {\tt hs},
-which is stored in a Spectrum.  There are two ways to think about
+The result of {\tt rfft} is a sequence of complex numbers, {\tt hs},
+which is stored in a Spectrum.
+
+There are two ways to think about
 complex numbers:
 
 \begin{itemize}
@@ -890,7 +894,7 @@ to the amplitude of the corresponding component.
 The angle of each element is the phase offset (relative to a cosine
 signal).
 
-{\tt NumPy} provides {\tt absolute}, which computes
+NumPy provides {\tt absolute}, which computes
 the magnitude of a complex number, also called the ``absolute value,''
 and {\tt angle}, which computes the angle.
 
@@ -921,8 +925,8 @@ soon.
 Finally, {\tt amps} contains the magnitude of {\tt hs}, which
 is proportional to the amplitude of the components.
 
-{\tt Spectrum} also provides {\tt plot}, which plots the magnitude for each
-frequency:
+{\tt Spectrum} also provides {\tt plot}, which plots the magnitude for
+each frequency:
 
 \begin{verbatim}
     def plot(self, low=0, high=None):
@@ -1007,7 +1011,7 @@ Here's the code that generates Figure~\ref{fig.triangle.200.1}:
 Next we can compute the spectrum of this waveform:
 
 \begin{verbatim}
-    wave = signal.make_wave(duration=0.5, framerate=framerate)
+    wave = signal.make_wave(duration=0.5, framerate=10000)
     spectrum = wave.make_spectrum()
     spectrum.plot()
 \end{verbatim}
@@ -1033,7 +1037,7 @@ Another feature of this spectrum is the relationship between the
 amplitude and frequency of the harmonics.  The amplitude of the
 harmonics drops off in proportion to frequency squared.  For example
 the frequency ratio of the first two harmonics (200 and 600 Hz) is 3, and the
-amplitude ration is approximately 9.  The frequency ratio of the
+amplitude ratio is approximately 9.  The frequency ratio of the
 next two harmonics (600 and 1000 Hz) is 1.7, and the amplitude ratio
 is approximately $1.7^2 = 2.9$.
 
@@ -1099,12 +1103,11 @@ squared).
 \end{figure}
 
 I have a confession.  I chose the examples in the previous section
-carefully,
-to avoid showing you something confusing.  But now it's time to get
-confused.
+carefully, to avoid showing you something confusing.  But now it's
+time to get confused.
 
-Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave at 1100 Hz, sampled
-at 10,000 frames per second.
+Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave
+at 1100 Hz, sampled at 10,000 frames per second.
 
 As expected, there are peaks at 1100 and 3300 Hz, but the third
 peak is at 4500, not 5500 Hz as expected.  There is a small fourth peak
@@ -1187,7 +1190,8 @@ Listen to the various non-sinusoidal waveforms.
 Start with a sawtooth.  Compute the DFT.  Remove all harmonics above
 the $i$th.
 Compute the inverse DFT and see what it looks like.
-Repeat for a range of values of $i$.
+Repeat for a range of values of $i$.  How does the sound change as
+you remove harmonics?
 \end{exercise}
 
 \begin{exercise}
@@ -1196,10 +1200,6 @@ happens if the signal is discontinuous?  What if the signal is continuous
 but the slope is discontinuous?
 \end{exercise}
 
-\begin{exercise}
-Make a frequency-limited sawtooth wave and see what it looks like
-and sounds like.
-See \url{http://en.wikipedia.org/wiki/Sawtooth_wave}.
 
 \begin{exercise}
 What does a square wave sound like underwater?
@@ -1216,8 +1216,6 @@ Compute the spectrum of an 1100 Hz square wave.
 \end{exercise}
 
 
-\end{exercise}
-
 
 \chapter{Non-periodic signals}
 
@@ -1226,7 +1224,7 @@ Compute the spectrum of an 1100 Hz square wave.
 
 The signals we have worked with so far are periodic, which means
 that they repeat forever.  It also means that their spectrums do
-no vary in time.  In this chapter, we consider non-periodic signals,
+not vary in time.  In this chapter, we consider non-periodic signals,
 which includes any signal whose frequency components change over time.
 In other words, pretty much all sound signals.
 
@@ -1256,8 +1254,8 @@ to {\tt end}.  Here is the function that evaluates the signal:
 
 {\tt ts} is the sequence of points in time where the signal should
 be evaluated.  If the length of {\tt ts} is $n$, you can think of
-it as a sequence of $n-1$ segments of time.  To compute the frequency
-during each segment, we use {\tt numpy.linspace}.
+it as a sequence of $n-1$ intervals of time.  To compute the frequency
+during each interval, we use {\tt numpy.linspace}.
 
 \verb"_evaluate" is a helper function that does the rest of the
 math:\footnote{Beginning a method name with an underscore makes it
@@ -1274,46 +1272,23 @@ be used outside the class definition.}
 \end{verbatim}
 
 {\tt numpy.diff} computes the difference between adjacent elements
-of {\tt ts}, returning the length of each segment in seconds.  In
+of {\tt ts}, returning the length of each interval in seconds.  In
 the usual case where the elements of {\tt ts} are equally spaced,
 the {\tt dts} are all the same.
 
 The next step is to figure out how much the phase changes during
-each segment.  Since we know the frequency and duration of each
-segment, the {\em change} in phase during each integral is
-{\tt PI2 * freqs * dts}.
+each interval.  Since we know the frequency and duration of each
+interval, the {\em change} in phase during each interval is
+{\tt dps = PI2 * freqs * dts}.  In math notation:
 
-Given the changes in phase, {\tt numpy.cumsum} computes the total
-phase at the end of each segment.  Finally {\tt numpy.cos}
+\[ \Delta \phi = 2 \pi f(t) \Delta t \]
+
+{\tt numpy.cumsum} computes the cumulative sum, which you can think
+of as a simple kind of integration.  The result is
+a NumPy array where the {\tt i}th element contains the sum of
+the first {\tt i} terms from {\tt dps}; that is, the total
+phase at the end of the {\tt i}th interval.  Finally, {\tt numpy.cos}
 maps from phase to amplitude.
-
-It might not be obvious how this function works, so here's another
-way to think about it.  When $f$ is constant, phase increases linearly
-over time.  Mathematically:
-
-\[ \phi = 2 \pi f t \]
-
-If $f$ varies in time, we can find the relationship between phase
-and the instantaneous value of $f$ by taking the time derivative
-of both sides:
-
-\[ \frac{d\phi}{dt} = 2 \pi f \]
-
-In other words, frequency is the derivative of phase.  Or equivalently,
-phase is the integral of frequency.  We can write the same
-equation in differential form:
-
-\[ d\phi = 2 \pi f dt \]
-
-which looks a whole lot like this line from \verb"_evaluate":
-
-\begin{verbatim}
-        dps = PI2 * freqs * dts
-\end{verbatim}
-
-To find the total phase, you can imagine adding up the elements of
-{\tt dps}, or if you like calculus, you can think of it as a
-numerical solution of an integral.
 
 Here's the code that creates and plays a chirp from 220 to 880 Hz, which
 is two octaves from A3 to A5:
@@ -1482,7 +1457,7 @@ which applies a Hamming window:
 \end{verbatim}
 
 {\tt numpy.hamming} computes the Hamming window with the given number
-of elements.  {\tt numpy} provides functions to compute other window
+of elements.  NumPy provides functions to compute other window
 functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
 and {\tt kaiser}.  One of the exercises at the end of this chapter
 asks you to experiment with these other windows.
@@ -1507,7 +1482,7 @@ its spectrum:
     spectrum = wave.make_spectrum()
 \end{verbatim}
 
-Figure~\ref{fig.chirp2} shows the result.  The spectrum shows
+Figure~\ref{fig.chirp1} shows the result.  The spectrum shows
 components at every frequency from 220 to 440 Hz with variations,
 caused by leakage, that look a little like the Eye of Sauron.
 
@@ -1536,7 +1511,7 @@ the chirp into segments and plot the spectrum of each segment.  The
 result is called a {\bf short-time Fourier transform} (STFT).
 
 There are several ways to visualize a STFT, but the most common
-is a {\bf spectrogram}, which shows time on the x-axis, and frequency
+is a {\bf spectrogram}, which shows time on the x-axis and frequency
 on the y-axis.  Each column in the spectrogram shows the spectrum of
 a short segment, using color or grayscale to represent amplitude.
 
@@ -1569,6 +1544,7 @@ spectrogram.
 
 
 \section{The Gabor limit}
+\label{gabor}
 
 The {\bf time resolution} of the spectrogram is the duration of the
 segments, which corresponds to the width of the cells in the
@@ -1576,7 +1552,7 @@ spectrogram.  Since each segment is 512 frames, and there are 11,025
 frames per second, there are 0.046 seconds per segment.
 
 The {\bf frequency resolution} is the frequency range between
-components in the spectrum, which corresponds to the height of the
+elements in the spectrum, which corresponds to the height of the
 cells.  With 512 frames, we get 256 frequency components over a range
 from 0 to 5012.5 Hz, so the range between components is 21.5 Hz.
 
@@ -1631,7 +1607,7 @@ Here is the {\tt Wave} method that computes spectrograms:
             start += step
             end += step
 
-        return Spectrogram(spec_map, seg_length, window_func)
+        return Spectrogram(spec_map, seg_length)
 \end{verbatim}
 
 \verb"seg_length" is the number of samples in each segment.
@@ -1685,9 +1661,9 @@ the frequencies of the components in the spectrums.
 {\tt array} is a numpy array that holds the amplitudes from the
 spectrums, with one column for each point in time and one row
 for each frequency.  The {\tt for} loop iterates through the times
-and copies each spectrum into a column of the array.
+and copies the amplitudes from each spectrum into a column of the array.
 
-Finally {\tt thinkplot.color} is a wrapper around {\tt pyplot.pcolor},
+Finally {\tt thinkplot.pcolor} is a wrapper around {\tt pyplot.pcolor},
 which generates the pseudocolor plot.
 
 So that's how Spectrograms are implemented.
@@ -1708,6 +1684,7 @@ looks like, and then plot it.  The effect of aliasing should be
 visually apparent, and if you listen carefully, you can hear it.
 \end{exercise}
 
+
 \begin{exercise}
 Another way to generate a sawtooth chirp is to add up a harmonic
 series of sinusoidal chirps.  Write another version of {\tt
@@ -1725,12 +1702,12 @@ play a glissando by extending the trombone slide while blowing
 continuously.  As the slide extends, the total length of the tube gets
 longer, and the resulting pitch is inversely proportional to length.
 
-Write a function that simulates a trombone glissando from C4 up to F4
-and back down to C4.  C3 is 262 Hz; F3 is 349 Hz.
-
 Assuming that the player moves the slide at a constant speed, how
 does frequency vary with time?  Is a trombone glissando more like
 a linear or exponential chirp?
+
+Write a function that simulates a trombone glissando from C3 up to F3
+and back down to C3.  C3 is 262 Hz; F3 is 349 Hz.
 \end{exercise}
 
 
@@ -1821,18 +1798,20 @@ Now let's take a look at the spectrum.  Here's the code:
 \end{verbatim}
 
 \verb"Spectrum.plot_power" is similar to \verb"Spectrum.plot",
-except that it plots power density against frequency.  Power density
-is the square of amplitude density, expressed in units of power per Hz.
+except that it plots power density instead of amplitude.  Power 
+density is the square of amplitude, expressed in units of power per Hz.
+
+% TODO: why power here rather than amplitude?
 
 Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
 spectrum looks pretty random.  And it is, but we have to be more
 precise about the word ``random.''  There are at least three things we
-might like to know about a random signal or its spectrum:
+might like to know about a noise signal or its spectrum:
 
 \begin{itemize}
 
 \item Distribution: The distribution of a random signal is the set of
-  possibly values and their probabilities.  For example, in the
+  possible values and their probabilities.  For example, in the
   uniform noise signal, the set of values is the range from -1 to 1,
   and all values have the same probability.  An alternative is
   {\bf Gaussian noise}, where the set of values is the range from negative
@@ -1852,7 +1831,7 @@ might like to know about a random signal or its spectrum:
 
 \item Relationship between power and frequency: In the spectrum of UU
   noise, the power at all frequencies is drawn from the same
-  distribution; that is, the is no relationship between power and
+  distribution; that is, there is no relationship between power and
   frequency (or, if you like, the relationship is a constant).  An
   alternative is {\bf pink noise}, where power is inversely related
   to frequency; that is, the power at frequency $f$ is drawn from
@@ -1885,8 +1864,7 @@ the spectrum up to $f$.
         return IntegratedSpectrum(cs, self.fs)
 \end{verbatim}
 
-{\tt self.power} is an array containing power, which is the square
-of amplitude, for each frequency.
+{\tt self.power} is an array of power for each frequency.
 {\tt numpy.cumsum} computes the cumulative sum of the powers.
 Dividing through by the last element normalizes the integrated
 spectrum so it runs from 0 to 1.
@@ -1940,9 +1918,12 @@ described using a {\bf random walk}, which is a mathematical model
 of a path where the distance between steps is characterized by a
 random distribution.
 
-The simplest way to generate Brownian noise is to generate an
-uncorrelated signal and then compute it cumulative sum.
+In a one-dimensional random walk, the particle moves left or right
+by a random amount at each time step.  The location of the particle
+at any point in time is the sum of all previous steps.
 
+This observation suggests a way to generate Brownian noise:
+generate an uncorrelated signal and then compute its discrete integral.
 Here is a class definition that implements this algorithm:
 
 \begin{verbatim}
@@ -2000,16 +1981,23 @@ and frequency on a log-log scale.  Here's the code:
                    yscale='log')
 \end{verbatim}
 
-In theory, we expect the result to be a straight line with slope -2.
-To see why, it helps to know that if $H(f)$ is the Fourier transform
-of a wave, $h(t)$, and $g(t)$ is the integral of $h(t)$, then the
-Fourier transform of $g(t)$ is $H(f) / i 2 \pi f$.  In the denominator,
-the factor of $f$ is the important part; it indicates
-that integrating a waveform has the effect of a low-pass filter.
-Each component is attenuated in proportion to its frequency.
+Integrating a noise signal attenuates high frequency components.
+Specifically, it attenuates the power at each frequency, $f$, in
+proportion to $1/f^2$.
 
-Since power is related to the square of amplitude, dividing the
-Fourier components by $f$ has the effect of dividing power by $f^2$.
+This behavior follows from a mathematical property of
+the Fourier transform: given a periodic signal, $h(t)$, and its
+Fourier transform, $H(f)$, we can compute the Fourier transform
+of the integral of $h(t)$:
+
+\[ g = \int h \]
+
+\[ G(f) = H(f) / 2 \pi i f \]
+
+Integration attentuates each component by a factor proportional
+to $f$.  Since power is the square of magnitude, the power of each
+component is attentuated by a factor proportional to $f^2$.
+
 Since we started with white noise, which has equal power at all
 frequencies, we expect Brownian noise to have power at frequency $f$
 proportional to $1/f^2$, on average.  In other words:
@@ -2020,13 +2008,14 @@ with some unknown constant, $k$.  Taking the log of both sides yields:
 %
 \[ \log P = \log k -2 \log f \]
 %
-Which means that the result, in Figure~\ref{fig.rednoise3}, should be
-a straight line with slope -2.  It is quite noisy, so we can't
-be sure it is a straight line, but at least we can estimate
-its slope.
+Which means that Figure~\ref{fig.rednoise3}, which shows the power
+spectrum on a log-log scale, should be
+a straight line with slope -2.
 
-Spectrum provides \verb"estimate_slope", which uses {\tt scipy}
-to do linear regression (also known as a least squares fit):
+It is quite noisy, so we can't be sure it is a straight line, but at
+least we can estimate its slope.  Spectrum provides
+\verb"estimate_slope", which uses {\tt scipy} to do linear regression
+(also known as a least squares fit):
 
 \begin{verbatim}
     def estimate_slope(self):
@@ -2174,68 +2163,440 @@ between power and frequency.
 
 
 \begin{exercise}
-Spectrum of natural noise sources: symbal crash, applause, etc.
+``A Soft Murmur'' is a web site that plays a mixture of natural
+noise sources, including rain, waves, wind, etc.  At
+\url{http://asoftmurmur.com/about/} you can find their list
+of recordings, most of which are at \url{http://freesound.org}.
+
+Download a few of these files and compute the spectrum of each
+signal.  Does the power spectrum look like white noise, pink noise,
+or Brownian noise?  How does the spectrum vary over time?
 \end{exercise}
 
 
 \begin{exercise}
-Estimate the spectrum of a long time series (stock market data?
-astronomical data?)  Make a periodogram.
+In a white noise signal, the mixture of frequencies changes over time.
+In the long run, we expect the power at all frequencies to be equal,
+but in any sample, the power at each frequency is random.
+
+To estimate the long-term average power at each frequency, we can
+break a long signal into segments, compute the power spectral
+density for each segment, and then compute the average across
+the segments.  You can read more about this algorithm at
+\url{http://en.wikipedia.org/wiki/Bartlett's_method}.
+
+At \url{http://www.coindesk.com/price/} you can download the daily
+price of a BitCoin as a CSV file.  Read this file and compute
+the power spectrum of BitCoin prices as a function of time.
+Does it resemble white, pink, or Brownian noise?
 \end{exercise}
 
 
 
-\chapter{Pitch tracking}
+\chapter{Autocorrelation}
 
-Autocorrelation
+In the previous chapter I characterized white noise as ``uncorrelated'',
+which means that each value is independent of the others, and Brownian
+noise as ``correlated'', because each value depends on the preceding
+value.  In this chapter I define these terms more precisely and
+present the {\bf autocorrelation function}, which is a useful tool
+signal analysis.
 
-\section{Spectrum of vowels}
+But before we get to autocorrelation, let's start with correlation.
 
-\section{Spectrum of a piano}
 
-\section{Music synthesis}
+\section{Correlation}
 
-Additive synthesis.
+In general, correlation between variables means that if you know the
+value of one, you have some information about the other.  There are
+several ways to quantify correlation, but the most common is the
+Pearson product-moment correlation coefficient, usually denoted
+$\rho$.  For two variables that contain $N$ values, $x_i$ and $y_i$:
 
-Envelope generation.
+\[ \rho = \frac{ \sum_i (x_i - \mu_x) (y_i - \mu_y)}{N \sigma_x \sigma_y} \]
 
-\section{Convert music notation to a signal}
+Where $\mu_x$ and $\mu_y$ are the means of $x_i$ and $y_i$, and
+$\sigma_x$ and $\sigma_y$ are their standard deviations.
 
-\section{Compute the spectrogram of an idealized performance}
+Pearson's correlation is always between -1 and +1 (including both).
+If $\rho$ is positive, we say that the correlation is positive,
+which means that when one variable is high, the other tends to be
+high.  If $\rho$ is negative, the correlation is negative, so
+when one variable is high, the other is low.
 
-\section{Compute the spectrogram of an actual performance}
+The magnitude of $\rho$ indicates the strength of the correlation.  If
+$\rho$ is 1 or -1, the variables are perfectly correlated, which means
+that if you know one, you can make a perfect prediction about the
+other.
 
-\section{Pitch tracking algorithm}
+If $\rho$ is near zero, the correlation might be weak, or there might
+be a nonlinear relationship that is not captured by this coefficient
+of correlation.  Nonlinear relationships are often important in
+statistics, but less commonly relevant for signal processing, so I
+won't say more about them here.
 
-Autocorrelation (or maybe this gets introduced in the noise chapter first?)
+In the context of signal processing, we are often working with
+unbiased waves, where the mean is 0, and normalized waves, where the
+standard deviation is 1.  In that case, the definition of $\rho$
+simplifies to:
 
-\section{Pitch shifting}
+\[ \rho = \frac{1}{N} \sum_i x_i y_i \]
 
-Auto-tune?
+If you think of $x$ and $y$ as vectors, you might recognize this
+formula as the dot product, normalized by the length of the vectors.
+The magnitude of the dot product indicates the degree to which
+the vectors are similar.  Unit vectors pointing in the same direction
+have dot product 1; if they are orthogonal (perpedicular), they
+have dot product 0.
+
+Python provides several ways to compute correlations.  {\tt
+  numpy.corrcoef} takes any number of variables and computes a {\bf
+  correlation matrix} that includes correlations between each pair of
+variables.  
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr1.pdf}}
+\caption{Two sine waves that differ by a phase offset of 1 radian;
+their coefficient of correlation is 0.54.}
+\label{fig.autocorr1}
+\end{figure}
+
+I'll present an example with only two variables.  First, I define
+a function that constructs sine waves with different phase offsets:
+
+\begin{verbatim}
+def make_wave(offset):
+    signal = thinkdsp.SinSignal(freq=440, offset=offset)
+    wave = signal.make_wave(duration=0.5, framerate=10000)
+    return wave
+\end{verbatim}
+
+Next I instantiate two waves with different offsets:
+
+\begin{verbatim}
+    wave1 = make_wave(offset=0)
+    wave2 = make_wave(offset=1)
+\end{verbatim}
+
+Figure~\ref{fig.autocorr1} shows what the first few periods of these
+waves look like.  When one wave is high, the other is usually high, so we
+expect them to be correlated.
+
+\begin{verbatim}
+>>> corr_matrix = numpy.corrcoef(wave1.ys, wave2.ys)
+[[ 1.    0.54]
+ [ 0.54  1.  ]]
+\end{verbatim}
+
+The first element of this array is the correlation of {\tt wave1}
+with itself, which is always 1.  Similarly, the last element
+is the correlation of {\tt wave2} with itself.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr2.pdf}}
+\caption{The correlation of two sine waves as a function of the
+phase offset between them.  The result is a cosine.}
+\label{fig.autocorr2}
+\end{figure}
+
+The off-diagonal elements contain the values we're interested in,
+the correlation of {\tt wave1} and {\tt wave2}.  The value 0.54
+indicates that the strength of the correlation is moderate.
+
+As the phase offset increases, this correlation decreases until
+the waves are 180 degrees out of phase, which yields correlation
+-1.  Then it increases until the offset differs by 360 degrees.
+At that point we have come full circle and the correlation is 1.
+
+Figure~\ref{fig.autocorr2} shows the relationship between correlation and
+phase offset for a sine wave.  The shape of that curve should look
+familiar; it is a cosine.  This result makes sense if you remember
+that the dot product of unit vectors is $\cos \theta$, where $\theta$
+is the angle between the vectors.
+
+{\tt thinkdsp} also provides a simple interface for computing the
+correlation between waves:
+
+\begin{verbatim}
+>>> wave1.corr(wave2)
+0.54
+\end{verbatim}
+
+
+\section{Serial correlation}
+
+Many signals represent measurements of quantities that vary in
+time.  For example, the sound signals we've worked with represent
+measurements of voltage (or current), which represent the changes
+in air pressure we perceive as sound.
+
+Measurements like this almost always have serial correlation, which
+is the correlation between each element and the next (or the previous).
+To compute serial correlation, we can shift a signal and then compute
+the correlation of the shifted version with the original.
+
+\begin{verbatim}
+def serial_corr(wave, lag=1):
+    n = len(wave)
+    y1 = wave.ys[lag:]
+    y2 = wave.ys[:n-lag]
+    corr = numpy.corrcoef(y1, y2)[0, 1]
+    return corr
+\end{verbatim}
+
+{\tt lag} is the integer number of places to shift the waves,
+with the default value 1.
+
+We can test this function with the noise signals from the previous
+chapter.  We expect UU noise to be uncorrelated, based on the
+way it's generated (not to mention the name):
+
+\begin{verbatim}
+signal = thinkdsp.UncorrelatedGaussianNoise()
+wave = signal.make_wave(duration=0.5, framerate=11025)
+serial_corr(wave)
+\end{verbatim}
+
+When I ran this example, I got 0.006, which indicates a very
+small serial correlation.  You might get a different value when you run
+it, but it should be comparably small.
+
+In a Brownian noise signal, each value is the sum of the previous
+value and a random ``step,'' so we expect a strong serial
+correlation:
+
+\begin{verbatim}
+signal = thinkdsp.BrownianNoise()
+wave = signal.make_wave(duration=0.5, framerate=11025)
+serial_corr(wave)
+\end{verbatim}
+
+Sure enough, the result I got is greater than 0.999.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr3.pdf}}
+\caption{Serial correlation for pink noise with a range of
+parameters.}
+\label{fig.autocorr3}
+\end{figure}
+
+Since pink noise is in some sense between Brownian noise and UU noise,
+we might expect an intermediate correlation:
+
+\begin{verbatim}
+signal = thinkdsp.PinkNoise(beta=1)
+wave = signal.make_wave(duration=0.5, framerate=11025)
+serial_corr(wave)
+\end{verbatim}
+
+With parameter $\beta=1$, I got a serial correlation of 0.851.
+As we vary the parameter from $\beta=0$, which is uncorrelated
+noise, to $\beta=2$, which is Brownian, serial correlation
+ranges from 0 to almost 1, as shown in Figure~\ref{fig.autocorr3}.
+
+
+\section{Autocorrelation}
+
+In the previous section we computed the correlation between each
+value and the next, so we shifted the elements of the array by 1.
+But if you noticed the {\tt lag} parameter in \verb"serial_corr",
+you realize we can compute serial correlations with
+different lags.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr4.pdf}}
+\caption{Autocorrelation functions for pink noise with a range
+of parameters.}
+\label{fig.autocorr4}
+\end{figure}
+
+In fact, we can think of \verb"serial_corr" as a function that
+maps from each value of lag to the corresponding correlation, and we
+can plot that function by looping through values of {\tt lag}:
+
+\begin{verbatim}
+def autocorr(wave):
+    lags = range(len(wave.ys)//2)
+    corrs = [serial_corr(wave, lag) for lag in lags]
+    return lags, corrs
+\end{verbatim}
+
+{\tt autocorr} takes a Wave object and returns the autocorrelation
+function as a pair of sequences: {\tt lags} is a sequence of
+integers from 0 to half of the length of the wave; {\tt corrs}
+is the sequence of serial correlations for each lag.
+
+Figure~\ref{fig.autocorr4} shows autocorrelation functions for pink
+noise with three values of $\beta$.  For low values of $\beta$, the
+signal is less correlated, and the autocorrelation function drops off
+toward zero relatively quickly.  For larger values, serial correlation
+is stronger and drops off more slowly.  Even for long lags, serial
+correlation is quite strong; this phenomenon is called {\bf long-range
+  dependence}, because it indicates that each value in the signal
+depends on many preceding values.
+
+If you plot these autocorrelation functions on a log-x scale, they
+are approximately straight lines, which indicates that they are
+decreasing exponentially.  An exponential autocorrelation function
+is one of the identifying characteristics of pink noise.
+
+
+\section{Autocorrelation of periodic signals}
+
+The autocorrelation of pink noise has interesting mathematical
+properties, but limited applications.  The autocorrelation of
+periodic signals is more useful.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr5.pdf}}
+\caption{Spectrogram of a vocal chirp.}
+\label{fig.autocorr5}
+\end{figure}
+
+As an example, I downloaded from \url{freesound.org} a recording of
+someone singing a chirp; the repository for this book includes the
+file: \url{28042__bcjordan__voicedownbew.wav}.  And you can use the
+IPython notebook for this chapter, {\tt chap05.ipynb}, to play it.
+
+Figure~\ref{fig.autocorr5} shows the spectrogram of this wave.
+The fundamental frequency and some of the harmonics show up clearly.
+The chirp starts near 500 Hz and drops down to about 300 Hz, roughly
+from C5 to E4.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr6.pdf}}
+\caption{}
+\label{fig.autocorr6}
+\end{figure}
+
+To estimate pitch at a particular point in time, we can take
+a short segment from the wave and plot its spectrum:
+
+\begin{verbatim}
+    duration = 0.01
+    segment = wave.segment(start=0.2, duration=duration)
+    spectrum = segment.make_spectrum()
+    spectrum.plot(high=15)
+\end{verbatim}
+
+Figure~\ref{fig.autocorr6} shows the result.  There is a clear peak near
+400 Hz, but it is hard to identify the pitch precisely.  The length of
+the segment is 441 samples at a framerate of 44100 Hz, so the
+frequency resolution is 100 Hz (see Section~\ref{gabor}).
+
+If we take a longer segment, we get better frequency resolution, but
+since the pitch is changing over time, we would see ``motion blur'';
+that is, the peak would be spread between the start and end pitch
+of the segment.
+
+We can estimate pitch more precisely using autocorrelation.
+If a signal is periodic, we expect the autocorrelation to spike
+when the lag equals the period.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr7.pdf}}
+\caption{Two segments from a chirp, one starting 0.0023 seconds
+after the other.}
+\label{fig.autocorr7}
+\end{figure}
+
+To show why that works, I'll plot two segments from the same
+recording.
+
+\begin{verbatim}
+def plot_shifted(wave, shift=0.0023, start=0.2):
+    thinkplot.preplot(2)
+    segment1 = wave.segment(start=start, duration=0.01)
+    segment1.plot(linewidth=2, alpha=0.8)
+
+    segment2 = wave.segment(start=start-shift, duration=0.01)
+    segment2.plot(linewidth=2, alpha=0.4)
+
+    thinkplot.config(xlabel='time (s)', ylim=[-1, 1])
+\end{verbatim} 
+
+On segment starts at 0.2 seconds; the other starts 0.0023 seconds
+later.  Figure~\ref{fig.autocorr7} shows the result.  The segments
+are very similar, and their correlation is 0.94.  This result suggests
+that the period is near 0.0023 seconds, which corresponds to a frequency
+of 435 Hz.
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr8.pdf}}
+\caption{Autocorrelation function for a segment from a chirp.}
+\label{fig.autocorr8}
+\end{figure}
+
+In this example, I estimated the period by trial and error.  To automate
+this process, we can use the autocorrelation function.
+
+\begin{verbatim}
+    lags, corrs = autocorr(segment)
+    thinkplot.plot(lags, corrs)
+\end{verbatim}
+
+Figure~\ref{fig.autocorr8} shows the autocorrelation function for
+the segment starting at $t=0.2$ seconds.  The first peak occurs at
+{\tt lag=101}.  Then we can compute the frequency that corresponds
+to that period:
+
+\begin{verbatim}
+period = lag / segment.framerate
+frequency = 1 / period
+\end{verbatim}
+
+The estimated fundamental frequency is 437 Hz.  To evaluate the
+precision of the estimate, we can run the same computation with
+lags 100 and 102, which correspond to frequencies 432 and 441 Hz.
+So the frequency precision using autocorrelation is less than 10 Hz,
+compared with 100 Hz using the spectrum.
+
+
+\section{Exercises}
+
+\begin{exercise}
+If you did the exercises in the previous chapter, you downloaded
+the historical price of BitCoins and estimated the power spectrum
+of the price changes.  Using the same data, compute the autocorrelation
+of BitCoin prices.  Does the autocorrelation function decay
+exponentially?  Is there evidence of periodic behavior?
+\end{exercise}
 
 
 \chapter{Discrete cosine transform}
 
-The topic of the next two chapters is the {\bf Discrete Cosine
+The code from this chapter is available from
+\url{http://think-dsp.com/dct.py}.
+
+The topic of this chapter is the {\bf Discrete Cosine
   Transform} (DCT), which is used in MP3 and related formats for
 compressing music, JPEG and similar formats for images, and the MPEG
 family of formats for video.
 
-DCT is similar in many ways to the discrete Fourier transform (DFT).
+DCT is similar in many ways to the discrete Fourier transform (DFT),
+which we have been using for spectral analysis.
 Once we learn how DCT works, it will be easier to explain DFT.
 
-Here are the steps we will follow to get there:
+Here are the steps we'll follow to get there:
 
 \begin{enumerate}
 
 \item We'll start with the synthesis problem: given a set of frequency
   components and their amplitudes, how can we construct a waveform?
 
-\item Next we'll rewrite the synthesis problem using numpy arrays.
+\item Next we'll rewrite the synthesis problem using NumPy arrays.
   This move is good for performance, and also provides insight
-  into the analysis problem.
+  for the next step.
 
-\item Next we'll look at the analysis problem: given a signal and a
+\item We'll look at the analysis problem: given a signal and a
   set of frequencies, how can we find the amplitude of each frequency
   component?  We'll start with a solution that is conceptually simple
   but slow.
@@ -2296,9 +2657,8 @@ signal for one second at 11,025 frames per second and plays the
 resulting wave.
 
 Conceptually, synthesis is pretty simple.  But in this form it doesn't
-help much with {\bf analysis}; that is, given the wave, identifying
-the frequency components and their amplitudes.  To do that, we have
-to take another approach.
+help much with {\bf analysis}, which is the inverse problem: given the
+wave how do we identify the frequency components and their amplitudes?
 
 
 \section{Synthesis with arrays}
@@ -2343,12 +2703,13 @@ Let's see how it works:
 
 \end{enumerate}
 
-In the diagram, each row of the matrix, {\tt M}, corresponds to a time 
+Figure~\ref{fig.synthesis} shows the structure of this computation.
+Each row of the matrix, {\tt M}, corresponds to a time 
 from 0.0 to 1.0 s; $t_k$ is the time of the $k$th row.
 Each column corresponds to a frequency from
 100 to 400 Hz; $f_j$ is the frequency of the $j$th column.
 
-I have labeled the $k$th row with the letters $a$ through $d$; as an
+I labeled the $k$th row with the letters $a$ through $d$; as an
 example, the value of $a$ is $\cos [2 \pi (220) t_k]$.
 
 The result of the dot product, {\tt ys}, is a vector with one element
@@ -2360,7 +2721,7 @@ of products:
 And likewise with the other elements of {\tt ys}.  So each element
 of {\tt y} is the sum of four frequency components, evaluated at
 a point in time, and multiplied by the corresponding amplitudes.
-And that's exactly what we wanted.  We can use the test code from
+And that's exactly what we wanted.  We can use the code from
 the previous section to
 check that the two versions of {\tt synthesize} produce the same results.
 
@@ -2371,25 +2732,25 @@ check that the two versions of {\tt synthesize} produce the same results.
     ts = numpy.linspace(0, 1, framerate)
     ys1 = synthesize1(amps, freqs, ts)
     ys2 = synthesize2(amps, freqs, ts)
-    print max(abs(ys1 == ys2))
+    print max(abs(ys1 - ys2))
 \end{verbatim}
 
 The biggest difference between {\tt ys1} and {\tt y2} is about {\tt
-  1e-13}, which is about what we expect due to floating-point errors.
+  1e-13}, which is what we expect due to floating-point errors.
 
 One note on linear algebra vocabulary: I am using ``matrix'' to refer
 to a two-dimensional array, and ``vector'' for a one-dimensional array
-or sequence.  To be a bit pedantic, it would be more correct to think
-of matrices and vectors as abstract mathematical concepts, and {\tt
-  numpy} arrays as one way (and not the only way) to represent them.
+or sequence.  To be pedantic, it would be more correct to think
+of matrices and vectors as abstract mathematical concepts, and NumPy
+arrays as one way (and not the only way) to represent them.
 
 One advantage of linear algebra is that it provides concise notation
 for operations on matrices and vectors.  For example, we could write
 {\tt synthesize} like this:
 %
 \begin{eqnarray*}
-M = \cos [2 \pi (t \otimes f)] \\
-y = M a
+M &=& \cos (2 \pi t \otimes f) \\
+y &=& M a
 \end{eqnarray*}
 %
 where $a$ is a vector of amplitudes,
@@ -2406,9 +2767,9 @@ component?  In other words, given {\tt ys}, {\tt ts} and {\tt freqs},
 can you recover {\tt amps}?
 
 In terms of linear algebra, the first step is the same as for
-synthesis: we compute $M = \cos[2 \pi (t \otimes f)]$.  Then we want
+synthesis: we compute $M = \cos (2 \pi t \otimes f)$.  Then we want
 to find $a$ so that $y = M a$; in other words, we want to solve a
-linear system.  {\tt numpy} provides {\tt linalg.solve}, which does
+linear system.  NumPy provides {\tt linalg.solve}, which does
 exactly that.
 
 Here's what the code looks like:
@@ -2424,15 +2785,23 @@ def analyze1(ys, freqs, ts):
 The first two lines use {\tt ts} and {\tt freqs} to build the
 matrix, {\tt M}.  Then {\tt numpy.linalg.solve} computes {\tt amps}.
 
-But there's a catch.  In general we can only solve a system of linear
+But there's a hitch.  In general we can only solve a system of linear
 equations if the matrix is square; that is, the number of equations
 (rows) is the same as the number of unknowns (columns).
 
 In this example, we have only 4 frequencies, but we evaluated the
 signal at 11,025 times.  So we have many more equations than unknowns.
-That suggests that we should be able to recover $a$ using only
-4 elements of {\tt ys}.  Here's what that looks like:
 
+But in general if {\tt ys}
+contains more than 4 elements, it is unlikely that we can analyze it
+using only 4 frequencies.
+
+But in this case, we know that the {\tt ys} were actually generated by
+adding only 4 frequency components, so we can use any 4 values from
+the wave array to recover {\tt amps}.
+
+For simplicity, I'll use the first 4 samples from
+the signal.
 Using the values of {\tt ys}, {\tt freqs} and {\tt ts} from
 the previous section, we can run {\tt analyze1} like this:
 
@@ -2444,21 +2813,12 @@ the previous section, we can run {\tt analyze1} like this:
 And sure enough, we get
 
 \begin{verbatim}
-amps2 = [ 0.6   0.25  0.1   0.05]
+amps2 = [ 0.6   0.25  0.1   0.05 ]
 \end{verbatim}
 
-In this case, we know that the {\tt ys} were actually generated by
-adding only 4 frequency components, so we can use any 4 values from
-the wave array to recover {\tt amps}.  But in general if {\tt ys}
-contains more than 4 elements, it is unlikely that we can analyze it
-using only 4 frequencies.
-
-We'll come back to this issue later, but first I want to address
-a different problem -- this algorithm is slow.  Solving a linear
+So this algorithm works, but it is slow.  Solving a linear
 system of equations takes time proportional to $n^3$, where $n$ is
-the number of columns in $M$.
-
-It turns out that we can do better.
+the number of columns in $M$.  We can do better.
 
 
 \section{Orthogonal matrixes}
@@ -2481,15 +2841,14 @@ If we multiply $I$ by any vector $a$, the result is $a$, so
 %
 \[ M^{-1}y = a \]
 %
-This implies that if we can compute $M^{-1}$ efficiently, we can solve
-for $a$ with a simple matrix multiplication (using {\tt numpy.dot}).
-That takes time proportional to $n^2$, which is much better than
-$n^3$.
+This implies that if we can compute $M^{-1}$ efficiently, we can find
+$a$ with a simple matrix multiplication (using {\tt numpy.dot}).  That
+takes time proportional to $n^2$, which is better than $n^3$.
 
 In general inverting a matrix is slow, but some special cases are
 faster.  In particular, if $M$ is {\bf orthogonal}, the inverse of $M$
-is just the transpose of $M$, written $M^T$.  And in {\tt numpy}
-computing the transpose is usually a constant-time operation.  It
+is just the transpose of $M$, written $M^T$.  In NumPy
+transposing an array is a constant-time operation.  It
 doesn't actually move the elements of the array; instead, it creates a
 ``view'' that changes the way the elements are accessed.
 
@@ -2540,7 +2899,7 @@ With these values of {\tt ts} and {\tt freqs}, the matrix, $M$, is:
 You might recognize 0.707 as an approximation of $\sqrt{2}/2$,
 which is $\cos \pi/4$.  You also might notice that this matrix
 is {\bf symmetric}, which means that the element at $(j, k)$ always
-equals the element at $k, j$.  This implies that $M$ is its own
+equals the element at $(k, j)$.  This implies that $M$ is its own
 transpose; that is $M^T = M$.
 
 But sadly, $M$ is not orthogonal.  If we compute $M^TM$, we get:
@@ -2559,18 +2918,16 @@ And that's not the identity matrix.
 
 But if we choose {\tt ts} and {\tt freqs} carefully,
 we can make $M$ orthogonal.  There are several ways to do it, which
-is why there are several version of the discrete cosine transform (DCT).
+is why there are several versions of the discrete cosine transform (DCT).
 
-One simple option is to shift {\tt
-  ts} and {\tt freqs} by a half unit.  This version is called DCT-IV,
-where ``IV'' is a roman numeral indicating that this is the fourth of
-eight versions used often enough to deserve a name.
+One simple option is to shift {\tt ts} and {\tt freqs} by a half unit.
+This version is called DCT-IV, where ``IV'' is a roman numeral
+indicating that this is the fourth of eight versions of the DCT.
 
-Here's an updated version of
-{\tt test1}:
+Here's an updated version of {\tt test1}:
 
 \begin{verbatim}
-def test2()
+def test2():
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
     ts = (0.5 + numpy.arange(N)) / N
@@ -2700,14 +3057,8 @@ wrote to compute DCT-IV also computes the inverse DCT.
 For the analysis problem, we started with a solution that
 takes time proportional to $n^3$ and improved it to take time
 proportional to $n^2$.  It turns out that there is another optimization
-that get the run time down to $n \log n$.  That algorithm is implemented
-in {\tt scipy}, so we will use it in the next chapter.  And then in
-Chapter~\ref{} we will see how it works.
-
-The code from this chapter is available from
-\url{http://think-dsp.com/example4.py}.
-
-
+that gets the run time down to $n \log n$.  We'll see how that works
+in Chapter~\ref{???}.
 
 
 
@@ -2718,15 +3069,42 @@ Test the algorithmic complexity of {\tt analyze1}, {\tt analyze2}
 and {\tt scipy.fftpack.dct}.
 \end{exercise}
 
+\begin{exercise}
+One of the major applications of the DCT is compression for both
+sound and images.  For example, MP3 uses a compression algorithm
+based on the DCT.  In it's simplest form, DCT-based compression
+works like this:
 
-\chapter{Using the DCT}
+\begin{enumerate}
 
-In the previous chapter we derived the DCT and wrote a simple
-implementation of DCT-IV.  I chose DCT-IV because it is the
-easiest to explain, but in practice it is more common to use
-DCT-II and its inverse, DCT-III.  And unlike DCT-IV, the more
-common versions are available in {\tt scipy}.
+\item Break a long signal into segments.
 
+\item Compute the DCT of each segment.
+
+\item Identify frequency components with amplitudes so low they are
+  inaudible, and remove them.  Store only the frequencies and
+  amplitudes that remain.
+
+\item To play back the signal, load the frequencies and amplitudes
+  for each segment and apply the inverse DCT.
+
+\end{enumerate}
+
+Implement a version of this algorithm and apply it to a recording
+of music or speech.  How many components can you eliminate before
+the difference is perceptible?
+
+\end{exercise}
+
+
+
+\chapter{Discrete Fourier Transform}
+
+\chapter{Filtering and Convolution}
+
+\chapter{Signals and Systems}
+
+\chapter{Fourier analysis of images}
 
 
 \end{document}
