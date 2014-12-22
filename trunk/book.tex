@@ -302,6 +302,9 @@ a signal that varies in two-dimensional space {\it and} time.
 
 But we start with simple one-dimensional sound.
 
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
+
 
 \section{Periodic signals}
 
@@ -728,6 +731,8 @@ seawater'' at
 \chapter{Harmonics}
 \label{harmonics}
 
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
 
 \section{Implementing Signals and Spectrums}
 
@@ -1218,6 +1223,9 @@ Compute the spectrum of an 1100 Hz square wave.
 
 
 \chapter{Non-periodic signals}
+
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
 
 
 \section{Chirp}
@@ -1757,7 +1765,15 @@ signals we saw in previous chapters.
 
 \end{enumerate}
 
-This chapter is about noise in the second sense.  The simplest way
+This chapter is about noise in the second sense.
+
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
+
+
+\section{Uncorrelated noise}
+
+  The simplest way
 to understand noise is to generate it, and the simplest way to generate
 it is uncorrelated uniform noise (UU noise).  ``Uniform'' means that the values
 that make up the signal are drawn at random from a uniform distribution,
@@ -2204,6 +2220,9 @@ signal analysis.
 
 But before we get to autocorrelation, let's start with correlation.
 
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
+
 
 \section{Correlation}
 
@@ -2573,7 +2592,7 @@ exponentially?  Is there evidence of periodic behavior?
 
 \chapter{Discrete cosine transform}
 
-The code from this chapter is available from
+The code for this chapter is available from
 \url{http://think-dsp.com/dct.py}.
 
 The topic of this chapter is the {\bf Discrete Cosine
@@ -2611,6 +2630,7 @@ Let's get started.
 
 
 \section{Synthesis}
+\label{synth1}
 
 Suppose I give you a list of amplitudes and a list of frequencies,
 and ask you to construct a signal that is the sum of these frequency
@@ -3099,6 +3119,254 @@ the difference is perceptible?
 
 
 \chapter{Discrete Fourier Transform}
+
+We've been using the discrete Fourier transform (DFT) since Chapter 1,
+but I haven't explained how it works.  Now is the time.
+
+If you understand the discrete cosine transform (DCT), you will
+understand the DFT.  The only difference is that instead of using the
+cosine function, we'll use the complex exponential function.  I'll
+start by explaining complex exponentials, then I'll follow the
+same progression you saw in Chapter~\ref{dct}:
+
+\begin{enumerate}
+
+\item As in the previous chapter, I'll start with the synthesis
+  problem: given a set of frequency components and their amplitudes,
+  how can we construct a signal?  The synthesis problem is 
+  equivalent to the inverse DFT.
+
+\item Then I'll rewrite the synthesis problem in the form of matrix
+  multiplication using NumPy arrays.
+
+\item Next we'll solve the analysis problem, which is equivalent to
+  the DFT: given a signal, how to we find the amplitude and phase
+  of its frequency components?
+
+\item Finally, we'll use linear algebra to find a more efficient way
+  to compute the DFT.
+
+\end{enumerate}
+
+The code from this chapter is available from
+\url{http://think-dsp.com/XXX.py}.
+
+
+\section{Complex exponentials}
+
+One of the more interesting moves in mathematics is the generalization
+of an operation from one type to another.  For example, factorial
+is a function that operates on integers; the natural definition of
+factorial of $n$ is the product of all integers from 1 to $n$.
+
+Being a troublemaker, you might wonder how to compute the factorial
+of a non-integer like 3.5.  Since the natural definition doesn't apply,
+you might look for other ways to compute the factorial function,
+ways that would work with non-integers.
+
+In 1730, Leonhard Euler found one, a generalization of the factorial
+function that we know as the gamma function (see
+\url{http://en.wikipedia.org/wiki/Gamma_function}).
+
+Euler also found one of the most useful generalizations in applied
+mathematics, the complex exponential function.
+
+The natural definition of exponentiation is repeated multiplication.
+For example, $\phi^3 = \phi \cdot \phi \cdot \phi$.  But this
+definition doesn't apply to non-integers, including complex numbers.
+
+Exponentiation can be written as a power series:
+
+\[ e^\phi = 1 + \phi + \phi^2/2! + \phi^3/3! + ... \]
+
+This definition works with imaginary numbers and, by a simple
+extension, with complex numbers.  It turns out that:
+
+\[ e^{i\phi} = \cos \phi + i \sin \phi \]
+
+You can see the derivation at
+\url{http://en.wikipedia.org/wiki/Euler's_formula}.  This formula
+implies that $e^{i\phi}$ is a complex number with magnitude 1; if you
+think of it as a point in the complex plane, it is always on the unit
+circle.  And if you think of it as a vector, the angle in radians
+between the vector and the positive x-axis is the argument, $\phi$.
+
+In the case where the argument is a complex number, we have:
+
+\[ e^{x + i\phi} = e^x e^{i\phi} = A e^{i\phi} \]
+
+where $A$ is a real number that indicates amplitude and
+$e^{i\phi}$ is a complex number with magnitude 1.
+
+NumPy provides a version of {\tt exp} that works with
+complex numbers:
+
+\begin{verbatim}
+>>> i = complex(0, 1)
+>>> phi = 1.5
+>>> z = numpy.exp(i * phi)
+>>> z
+(0.0707+0.997j)
+\end{verbatim}
+
+{\tt complex} is a built-in function that takes the real and
+imaginary parts of a complex number and returns a Python
+complex object.  Note that Python uses {\tt j} to represent
+the imaginary unit, rather than {\tt i}.
+
+When the argument to
+{\tt numpy.exp} is imaginary or complex, the result is a complex
+number; specifically, a {\tt numpy.complex128}, which
+is represented by two 64-bit floating-point numbers.
+
+Complex numbers have attributes {\tt real} and {\tt imag}:
+
+\begin{verbatim}
+>>> z.real
+0.0707
+>>> z.imag
+0.997
+\end{verbatim}
+
+To get the magnitude, you can use the built-in function {\tt abs}
+or {\tt numpy.absolute}:
+
+\begin{verbatim}
+>>> abs(z)
+1.0
+>>> numpy.absolute(z)
+1.0
+\end{verbatim}
+
+To get the angle, you can use {\tt numpy.angle}:
+
+\begin{verbatim}
+>>> numpy.angle(z)
+1.5
+\end{verbatim}
+
+This example confirms that $e^{i \phi}$ is a complex number with
+magnitude 1 and angle $\phi$ radians.
+
+
+\section{Complex signals}
+
+If $\phi(t)$ is a function of time, $e^{i \phi(t)}$ is also a function
+of time.  Specifically,
+
+\[ e^{i \phi(t)} = \cos \phi(t) + i \sin \phi(t) \]
+
+This function describes a quantity that varies in time, so it is
+a signal.  Specifically, it is a {\bf complex exponential signal}.
+
+In the special case where the frequency of the signal is constant;
+that is, when $\phi(t) = 2 \pi f t$, the result is a {\bf complex
+sinusoid}:
+
+\[ e^{i 2 \pi f t} = \cos 2 \pi f t + i \sin 2 \pi f t \]
+
+Or more generally, the signal might start at a phase offset
+$\phi_0$, yielding
+
+\[ e^{i 2 \pi f t + \phi_0}\]
+
+{\tt thinkdsp} provides an implementation of this signal,
+{\tt ComplexSignal}:
+
+\begin{verbatim}
+class ComplexSinusoid(Sinusoid):
+ 
+   def evaluate(self, ts):
+        i = complex(0, 1)
+        phases = PI2 * self.freq * ts + self.offset
+        ys = self.amp * numpy.exp(i * phases)
+        return ys
+\end{verbatim}
+
+{\tt ComplexSinusoid} inherits \verb"__init__" from
+{\tt Sinusoid}.  It provides a version of {\tt evaluate}
+that is almost identical to {\tt Sinusoid.evaluate}; the
+difference is that it uses {\tt numpy.exp} instead of
+{\tt numpy.sin} or {\tt numpy.cos}.
+
+The result is a NumPy array of complex numbers:
+
+\begin{verbatim}
+>>> signal = thinkdsp.ComplexSinusoid(freq=1, amp=0.6, offset=1)
+>>> wave = signal.make_wave(duration=1, framerate=4)
+>>> print(wave.ys)
+[ 0.324+0.505j -0.505+0.324j -0.324-0.505j  0.505-0.324j]
+\end{verbatim}
+
+The frequency of this signal is 1 cycle per second; the amplitude
+is 0.6 (in unspecified units); and the phase offset is 1 radian.
+
+This example evaluates the signal at 4 places equally spaced between
+0 and 1 second.
+
+\section{The synthesis problem}
+
+We can create more complicated signals by adding up complex
+sinusoids with different frequencies.  And that brings us
+to the synthesis problem: the frequency and amplitude of
+each component, how do we evaluate the signal.
+
+The simplest solution is to instantiate {\tt ComplexSignal}
+objects and add them up.
+
+\begin{verbatim}
+def synthesize1(amps, freqs, ts):
+    components = [thinkdsp.ComplexSinusoid(freq, amp)
+                  for amp, freq in zip(amps, freqs)]
+    signal = thinkdsp.SumSignal(*components)
+    ys = signal.evaluate(ts)
+    return ys
+\end{verbatim}
+
+This solution is almost identical to {\tt synthesize1} in
+Section~\ref{synth1}; the only difference is that I replaced
+{\tt CosSignal} with {\tt ComplexSinusoid}.
+
+Here's an example:
+
+\begin{verbatim}
+>>> amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+>>> freqs = [100, 200, 300, 400]
+>>> framerate = 11025
+>>> ts = numpy.linspace(0, 1, framerate)
+>>> ys = synthesize1(amps, freqs, ts)
+>>> print(ys)
+[ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
+  0.979 -1.803e-01j  0.995 -9.093e-02j  1.000 -5.081e-15j]
+\end{verbatim}
+
+At the lowest level, a complex signal is a sequence of complex
+numbers.  But how should we interpret it?  We have some intuition for
+real signals: they represent quantities that vary in time; in
+the case of sound signal, they represent changes in air pressure.
+But nothing we measure in the real world yields complex numbers.
+
+So what is a complex signal?  I don't have a good answer to this
+question.  The best I can offer is two bad answers:
+
+% mathematical abstraction useful for intermediate results
+
+% two real signals
+
+A segment of this signal is shown in Figure~\ref{fig.dft1}.
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
+
+
+
+
 
 \chapter{Filtering and Convolution}
 
