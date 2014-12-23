@@ -1,15 +1,22 @@
 """This file contains code used in "Think DSP",
 by Allen B. Downey, available from greenteapress.com
 
-Copyright 2013 Allen B. Downey
+Copyright 2014 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
+
+from __future__ import print_function, division
 
 import thinkdsp
 import thinkplot
 
 
 def segment_violin(start=1.2, duration=0.6):
+    """Load a violin recording and plot its spectrum.
+
+    start: start time of the segment in seconds
+    duration: in seconds
+    """
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
 
     # extract a segment
@@ -29,7 +36,7 @@ def segment_violin(start=1.2, duration=0.6):
     # print the top 5 peaks
     peaks = spectrum.peaks()
     for amp, freq in peaks[:10]:
-        print freq, amp
+        print(freq, amp)
 
     # compare the segments to a 440 Hz Triangle wave
     note = thinkdsp.make_note(69, 0.6, 
@@ -44,13 +51,15 @@ def segment_violin(start=1.2, duration=0.6):
 
 
 def sin_spectrum():
+    """Plots the spectrum of a sine wave.
+    """
     wave = thinkdsp.make_note(69, 0.5, SinSignal)
     spectrum = wave.spectrum()
     spectrum.plot()
     thinkplot.Show()
 
     peaks = spectrum.peaks()
-    print peaks[0]
+    print(peaks[0])
 
     wave2 = spectrum.make_wave()
 
@@ -80,7 +89,7 @@ def plot_violin(start=1.30245, duration=0.00683):
     """
     period = duration/3
     freq = 1/period
-    print freq
+    print(freq)
 
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
 
@@ -96,11 +105,12 @@ def plot_violin(start=1.30245, duration=0.00683):
 def plot_tuning(start=7.0, duration=0.006835):
     """Plots three cycles of a tuning fork playing A4.
 
+    start: start time in seconds
     duration: float
     """
     period = duration/3
     freq = 1/period
-    print period, freq
+    print(period, freq)
 
     wave = thinkdsp.read_wave('18871__zippi1__sound-bell-440hz.wav')
 
@@ -115,9 +125,7 @@ def plot_tuning(start=7.0, duration=0.006835):
 
 def main():
     segment_violin()
-
     plot_tuning()
-
     plot_sinusoid()
     plot_violin()
 
