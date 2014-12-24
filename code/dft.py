@@ -77,30 +77,33 @@ def analyze2(ys, freqs, ts):
 
     returns: vector of amplitudes
     """
+
+def analyze2(ys, freqs, ts):
     args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.dot(M, ys) / 2
+    M = numpy.exp(i * PI2 * args)
+    amps = M.conj().transpose().dot(ys) / N
     return amps
 
 
-def idft(ys):
-    """Computes the inverse DFT.
-
-    ys: wave array
-
-    returns: vector of amplitudes
-    """
+def dft(ys):
     i = complex(0, 1)
     N = len(ys)
     ts = numpy.arange(N) / N
     freqs = numpy.arange(N)
     args = numpy.outer(ts, freqs)
     M = numpy.exp(i * PI2 * args)
-    amps = numpy.dot(M, ys)
+    amps = M.conj().transpose().dot(ys)
     return amps
 
 
+def idft(amps):
+    ys = dft(amps) / N
+    return ys
+
+
 def make_figures():
+    """Makes figures showing complex signals.
+    """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
     framerate = 11025
@@ -133,13 +136,25 @@ def make_figures():
                    loc='lower right')
 
 
+    framerate = 10000
+    signal = thinkdsp.SawtoothSignal(freq=500)
+    wave = signal.make_wave(duration=0.1, framerate=framerate)
+    hs = dft(wave.ys)
+    amps = numpy.absolute(hs)
+
+    N = len(hs)
+    fs = numpy.arange(N) * framerate / N
+    thinkplot.plot(fs, amps)
+    thinkplot.save(root='dft3',
+                   xlabel='frequency (Hz)', 
+                   ylabel='amplitude',
+                   legend=False)
+
+
+
 def main():
     numpy.set_printoptions(precision=3, suppress=True)
-
     make_figures()
-
-    test1()
-    test2()
 
 
 if __name__ == '__main__':

@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.8}
+\newcommand{\theversion}{0.9}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -796,7 +796,7 @@ seawater'' at
 \chapter{Harmonics}
 \label{harmonics}
 
-The code for this chapter is in {\tt harmonics.py}, which is in the
+The code for this chapter is in {\tt aliasing.py}, which is in the
 repository for this book (see Section~\ref{code}).
 
 
@@ -870,7 +870,7 @@ per second.
 of sample times.
 
 \verb"make_wave" invokes {\tt evaluate}, which has to be provided
-by the child class of {\tt Signal}, in this case {\tt Sinusoid}.
+by a child class of {\tt Signal}, in this case {\tt Sinusoid}.
 
 {\tt evaluate} takes the sequence of sample times and returns an array of
 corresponding quantities:
@@ -892,9 +892,9 @@ Let's unwind this function one step at time:
 
 \begin{enumerate}
 
-\item {\tt self.freq} is frequency in cycles per second, and
-each element of {\tt ts} a time in seconds, so their product is
-the number of cycles since the start time.
+\item {\tt self.freq} is frequency in cycles per second, and each
+  element of {\tt ts} a time in seconds, so their product is the
+  number of cycles since the start time.
 
 \item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying by
   {\tt PI2} converts from cycles to {\bf phase}.  You can think of
@@ -913,12 +913,12 @@ the number of cycles since the start time.
 \end{enumerate}
 
 In math notation, {\tt evaluate} is written like this:
-
-\[ A \cos (2 \pi f t + \phi) \]
-
-where $A$ is amplitude, $f$ is frequency, $t$ is time, and $\phi$
+%
+\[ A \cos (2 \pi f t + \phi_0) \]
+%
+where $A$ is amplitude, $f$ is frequency, $t$ is time, and $\phi_0$
 is the phase offset.  It may seem like I wrote a lot of code
-to evaluate one simple function, but as we will see, this code
+to evaluate one simple function, but as we'll see, this code
 provides a framework for dealing with all kinds of signals, not
 just sinusoids.
 
@@ -952,22 +952,21 @@ part, often written $x + iy$, where $i$ is the imaginary unit, $\sqrt{-1}$.
 You can think of $x$ and $y$ as Cartesian coordinates.
 
 \item A complex number is also the product of a magnitude
-and a complex exponential, $r e^{i \phi}$, where $r$ is the
+and a complex exponential, $A e^{i \phi}$, where $A$ is the
 {\bf magnitude} and $\phi$ is the
 {\bf angle} in radians, also called the ``argument.''   You
-can think of $r$ and $\phi$ as polar coordinates.
+can think of $A$ and $\phi$ as polar coordinates.
 
 \end{itemize}
 
-Each element of {\tt hs} corresponds to a
-frequency component.  The magnitude of each element is proportional
-to the amplitude of the corresponding component.
-The angle of each element is the phase offset (relative to a cosine
-signal).
+Each element of {\tt hs} corresponds to a frequency component.  The
+magnitude of each element is proportional to the amplitude of the
+corresponding component.  The angle of each element is the phase
+offset.
 
-NumPy provides {\tt absolute}, which computes
-the magnitude of a complex number, also called the ``absolute value,''
-and {\tt angle}, which computes the angle.
+NumPy provides {\tt absolute}, which computes the magnitude of a
+complex number, also called the ``absolute value,'' and {\tt angle},
+which computes the angle.
 
 Here is the definition of {\tt Spectrum}:
 
@@ -1001,7 +1000,7 @@ each frequency:
 
 \begin{verbatim}
     def plot(self, low=0, high=None):
-        thinkplot.Plot(self.fs[low:high], self.amps[low:high])
+        thinkplot.plot(self.fs[low:high], self.amps[low:high])
 \end{verbatim}
 
 {\tt low} and {\tt high} specify the slice of the Spectrum that
@@ -1022,9 +1021,9 @@ investigate the relationship between waveforms and their DFTs.
 \label{fig.triangle.200.1}
 \end{figure}
 
-The triangle waveform is like a straight-line version of a sinusoid.
-Figure~\ref{fig.triangle.200.1} shows a triangle waveform with
-frequency 200 Hz.
+I'll start with a triangle waveform, which is like a straight-line
+version of a sinusoid.  Figure~\ref{fig.triangle.200.1} shows a
+triangle waveform with frequency 200 Hz.
 
 To generate a triangle wave, you can use {\tt thinkdsp.TriangleSignal}:
 
@@ -1058,9 +1057,9 @@ part, stored in {\tt frac}, and the integer part, which is ignored.
 means, ``I don't intend to use this value.''}
 
 \item {\tt frac} is a sequence that ramps from 0 to 1 with the given
-frequency.  Subtracting
-0.5 yields values between -0.5 and 0.5.  Taking the absolute value
-yields a waveform that zig-zags between 0.5 and 0.
+  frequency.  Subtracting 0.5 yields values between -0.5 and 0.5.
+  Taking the absolute value yields a waveform that zig-zags between
+  0.5 and 0.
 
 \item {\tt unbias} shifts the waveform down so it is centered at 0, then
 {\tt normalize} scales it to the given amplitude, {\tt amp}.
@@ -1071,13 +1070,20 @@ Here's the code that generates Figure~\ref{fig.triangle.200.1}:
 
 \begin{verbatim}
     signal = thinkdsp.TriangleSignal(200)
-    duration = signal.period*3
+    duration = signal.period * 3
     segment = signal.make_wave(duration, framerate=10000)
     segment.plot()
 \end{verbatim}
 
 
 \section{Harmonics}
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/triangle-200-2.pdf}}
+\caption{Spectrum of a triangle signal at 200 Hz.}
+\label{fig.triangle.200.2}
+\end{figure}
 
 Next we can compute the spectrum of this waveform:
 
@@ -1086,13 +1092,6 @@ Next we can compute the spectrum of this waveform:
     spectrum = wave.make_spectrum()
     spectrum.plot()
 \end{verbatim}
-
-\begin{figure}
-% example2.py
-\centerline{\includegraphics[height=2.5in]{figs/triangle-200-2.pdf}}
-\caption{Spectrum of a triangle signal at 200 Hz.}
-\label{fig.triangle.200.2}
-\end{figure}
 
 Figure~\ref{fig.triangle.200.2} shows the result.  As expected, the
 highest peak is at the fundamental frequency, 200 Hz, and there
@@ -1107,10 +1106,17 @@ odd multiples of the fundamental frequency, in this example
 Another feature of this spectrum is the relationship between the
 amplitude and frequency of the harmonics.  The amplitude of the
 harmonics drops off in proportion to frequency squared.  For example
-the frequency ratio of the first two harmonics (200 and 600 Hz) is 3, and the
-amplitude ratio is approximately 9.  The frequency ratio of the
-next two harmonics (600 and 1000 Hz) is 1.7, and the amplitude ratio
-is approximately $1.7^2 = 2.9$.
+the frequency ratio of the first two harmonics (200 and 600 Hz) is 3,
+and the amplitude ratio is approximately 9.  The frequency ratio of
+the next two harmonics (600 and 1000 Hz) is 1.7, and the amplitude
+ratio is approximately $1.7^2 = 2.9$.
+
+\begin{figure}
+% example2.py
+\centerline{\includegraphics[height=2.5in]{figs/square-100-1.pdf}}
+\caption{Segment of a square signal at 100 Hz.}
+\label{fig.square.100.1}
+\end{figure}
 
 {\tt thinkdsp} also provides {\tt SquareSignal}, which represents
 a square signal.  Here's the class definition:
@@ -1140,13 +1146,6 @@ wave that jumps between {\tt -amp} and {\tt amp}.
 
 \begin{figure}
 % example2.py
-\centerline{\includegraphics[height=2.5in]{figs/square-100-1.pdf}}
-\caption{Segment of a square signal at 100 Hz.}
-\label{fig.square.100.1}
-\end{figure}
-
-\begin{figure}
-% example2.py
 \centerline{\includegraphics[height=2.5in]{figs/square-100-2.pdf}}
 \caption{Spectrum of a square signal at 100 Hz.}
 \label{fig.square.100.2}
@@ -1164,6 +1163,7 @@ squared).
 
 
 \section{Aliasing}
+\label{aliasing}
 
 \begin{figure}
 % example2.py
@@ -1185,7 +1185,7 @@ peak is at 4500, not 5500 Hz as expected.  There is a small fourth peak
 at 2300, not 7700 Hz.  And if you look very closely, the peak that should
 be at 9900 is actually at 100 Hz.  What's going on?
 
-The fundamental problem is that when you evaluate the signal at
+The problem is that when you evaluate the signal at
 discrete points in time, you lose information about what happens
 between samples.  For low frequency components, that's not a
 problem, because you have lots of samples per period.
@@ -1254,36 +1254,42 @@ one at 4300 Hz.
 \section{Exercises}
 
 \begin{exercise}
-Listen to the various non-sinusoidal waveforms.
+If you use IPython, load {\tt chap02.ipynb} and try out the
+examples.  You can also view the notebook at \url{}.
 \end{exercise}
 
 \begin{exercise}
-Start with a sawtooth.  Compute the DFT.  Remove all harmonics above
-the $i$th.
-Compute the inverse DFT and see what it looks like.
-Repeat for a range of values of $i$.  How does the sound change as
-you remove harmonics?
-\end{exercise}
+A sawtooth signal has a waveform that ramps up linearly from -1 to 1,
+then drops to -1 and repeats. See
+\url{http://en.wikipedia.org/wiki/Sawtooth_wave}
 
-\begin{exercise}
-Write a new Signal type, compute it's DFT and listen to it.  What
-happens if the signal is discontinuous?  What if the signal is continuous
-but the slope is discontinuous?
-\end{exercise}
+Write a class called
+{\tt SawtoothSignal} that extends {\tt Signal} and provides
+{\tt evaluate} to evaluate a sawtooth signal.
 
-
-\begin{exercise}
-What does a square wave sound like underwater?
+Compute the spectrum of a sawtooth wave.  How does the harmonic
+structure compare to triangle and square waves?
 \end{exercise}
 
 \begin{exercise}
 Sample an 1100 Hz triangle at 10000 frames per second and listen to it.
-Can you hear the aliased harmonic?  Might help to play a sequence of
+Can you hear the aliased harmonic?  It might help if you play a sequence of
 notes with increasing pitch.
 \end{exercise}
 
 \begin{exercise}
-Compute the spectrum of an 1100 Hz square wave.
+Compute the spectrum of an 1100 Hz square wave sampled at 10 kHz, and
+compare it to the spectrum of a triangle wave in
+Figure~\ref{fig.triangle.1100.2}
+\end{exercise}
+
+\begin{exercise}
+The triangle and square waves have odd harmonics only; the sawtooth
+wave has both even and odd harmonics.  The harmonics of the
+square and sawtooth waves drop off in proportion to $1/f$; the
+harmonics of the triangle wave drop off like $1/f^2$.  Can you
+find a waveform that has even and odd harmonics that drop off
+like $1/f$?
 \end{exercise}
 
 
@@ -1291,7 +1297,7 @@ Compute the spectrum of an 1100 Hz square wave.
 \chapter{Non-periodic signals}
 
 The code from this chapter is available from
-\url{http://think-dsp.com/XXX.py}.
+\url{http://think-dsp.com/chirp.py}.
 
 
 \section{Chirp}
@@ -1354,9 +1360,9 @@ The next step is to figure out how much the phase changes during
 each interval.  Since we know the frequency and duration of each
 interval, the {\em change} in phase during each interval is
 {\tt dps = PI2 * freqs * dts}.  In math notation:
-
+%
 \[ \Delta \phi = 2 \pi f(t) \Delta t \]
-
+%
 {\tt numpy.cumsum} computes the cumulative sum, which you can think
 of as a simple kind of integration.  The result is
 a NumPy array where the {\tt i}th element contains the sum of
@@ -2071,11 +2077,11 @@ This behavior follows from a mathematical property of
 the Fourier transform: given a periodic signal, $h(t)$, and its
 Fourier transform, $H(f)$, we can compute the Fourier transform
 of the integral of $h(t)$:
-
+%
 \[ g = \int h \]
-
+%
 \[ G(f) = H(f) / 2 \pi i f \]
-
+%
 Integration attentuates each component by a factor proportional
 to $f$.  Since power is the square of magnitude, the power of each
 component is attentuated by a factor proportional to $f^2$.
@@ -2297,9 +2303,9 @@ value of one, you have some information about the other.  There are
 several ways to quantify correlation, but the most common is the
 Pearson product-moment correlation coefficient, usually denoted
 $\rho$.  For two variables that contain $N$ values, $x_i$ and $y_i$:
-
+%
 \[ \rho = \frac{ \sum_i (x_i - \mu_x) (y_i - \mu_y)}{N \sigma_x \sigma_y} \]
-
+%
 Where $\mu_x$ and $\mu_y$ are the means of $x_i$ and $y_i$, and
 $\sigma_x$ and $\sigma_y$ are their standard deviations.
 
@@ -2324,9 +2330,9 @@ In the context of signal processing, we are often working with
 unbiased waves, where the mean is 0, and normalized waves, where the
 standard deviation is 1.  In that case, the definition of $\rho$
 simplifies to:
-
+%
 \[ \rho = \frac{1}{N} \sum_i x_i y_i \]
-
+%
 If you think of $x$ and $y$ as vectors, you might recognize this
 formula as the dot product, normalized by the length of the vectors.
 The magnitude of the dot product indicates the degree to which
@@ -2657,6 +2663,7 @@ exponentially?  Is there evidence of periodic behavior?
 
 
 \chapter{Discrete cosine transform}
+\label{dct}
 
 The code for this chapter is available from
 \url{http://think-dsp.com/dct.py}.
@@ -3244,14 +3251,14 @@ For example, $\phi^3 = \phi \cdot \phi \cdot \phi$.  But this
 definition doesn't apply to non-integers, including complex numbers.
 
 But exponentiation can also be expressed as a power series:
-
+%
 \[ e^\phi = 1 + \phi + \phi^2/2! + \phi^3/3! + ... \]
-
+%
 This definition works with imaginary numbers and, by a simple
 extension, with complex numbers.  It turns out that:
-
+%
 \[ e^{i\phi} = \cos \phi + i \sin \phi \]
-
+%
 You can see the derivation at
 \url{http://en.wikipedia.org/wiki/Euler's_formula}.  This formula
 implies that $e^{i\phi}$ is a complex number with magnitude 1; if you
@@ -3260,9 +3267,9 @@ circle.  And if you think of it as a vector, the angle in radians
 between the vector and the positive x-axis is the argument, $\phi$.
 
 In the case where the argument is a complex number, we have:
-
+%
 \[ e^{a + i\phi} = e^a e^{i\phi} = A e^{i\phi} \]
-
+%
 where $A$ is a real number that indicates amplitude and
 $e^{i\phi}$ is a complex number with magnitude 1.
 
@@ -3321,23 +3328,23 @@ magnitude 1 and angle $\phi$ radians.
 
 If $\phi(t)$ is a function of time, $e^{i \phi(t)}$ is also a function
 of time.  Specifically,
-
+%
 \[ e^{i \phi(t)} = \cos \phi(t) + i \sin \phi(t) \]
-
+%
 This function describes a quantity that varies in time, so it is
 a signal.  Specifically, it is a {\bf complex exponential signal}.
 
 In the special case where the frequency of the signal is constant,
 so $\phi(t) = 2 \pi f t$, the result is a {\bf complex
   sinusoid}:
-
+%
 \[ e^{i 2 \pi f t} = \cos 2 \pi f t + i \sin 2 \pi f t \]
-
+%
 Or more generally, the signal might start at a phase offset
 $\phi_0$, yielding
-
+%
 \[ e^{i (2 \pi f t + \phi_0)}\]
-
+%
 {\tt thinkdsp} provides an implementation of this signal,
 {\tt ComplexSignal}:
 
@@ -3507,9 +3514,9 @@ amplitude and a complex exponential, $A e^{i \phi_0}$.  Using the
 second interpretation, we can see what happens when we multiply
 a complex amplitude by a complex sinusoid.  For each frequency, $f$,
 we have:
-
+%
 \[ A e^{i \phi_0} \cdot e^{i 2 \pi f t} = A e^{i 2 \pi f t + \phi_0} \]
-
+%
 In other words, the angle of the complex amplitude becomes
 the phase offset of the complex sinusoid.
 
@@ -3723,14 +3730,86 @@ matter.
 
 \section{Just one more thing}
 
-% unpacking the frequency components of the DFT, negative frequencies
+\begin{figure}
+% dft.py
+\centerline{\includegraphics[height=2.5in]{figs/dft3.pdf}}
+\caption{DFT of a 500 Hz sawtooth signal sampled at 10 kHz.}
+\label{fig.dft3}
+\end{figure}
+
+The Spectrum class in {\tt thinkdsp} is based on {\tt numpy.ftt.rfft},
+which computes the ``real FFT''; that is, it works with real signals.
+The DFT is more general than the real FFT; it works with complex
+signals.
+
+So what happens when we apply DFT to a real signal?  Let's look at
+an example:
 
 \begin{verbatim}
+    framerate = 10000
+    signal = thinkdsp.SawtoothSignal(freq=500)
+    wave = signal.make_wave(duration=0.1, framerate=framerate)
+    hs = dft(wave.ys)
+    amps = numpy.absolute(hs)
 \end{verbatim}
+
+This code makes a sawtooth wave with frequency 500 Hz, sampled at
+framerate 10 kHz.  {\tt hs} contains the complex DFT of the wave;
+{\tt amps} contains the amplitude at each frequency.  But what
+frequency do these amplitudes correspond to.  If we look at the
+body of {\tt dft}, we see:
+
+\begin{verbatim}
+    fs = numpy.arange(N)
+\end{verbatim}
+
+So it's tempting to think that these values are the right frequencies.
+The problem is that {\tt dft} doesn't know the sampling rate.  The
+DFT assumes that the duration of the wave is 1 time unit, so the sampling
+rate is $N$ per time unit.  In order to interpret the frequencies,
+we have to convert from these arbitrary time units back to seconds,
+like this:
+
+\begin{verbatim}
+    fs = numpy.arange(N) * framerate / N
+\end{verbatim}
+
+With this change, the range of frequencies is from 0 to the actual
+framerate, 10 kHz.  Now we can plot the spectrum:
+
+\begin{verbatim}
+    thinkplot.plot(fs, amps)
+    thinkplot.config(xlabel='frequency (Hz)', 
+                     ylabel='amplitude')
+\end{verbatim}
+
+Figure~\ref{fig.dft3} shows the amplitude of the signal for each
+frequency component from 0 to 1 kHz.  The left half of the figure
+is what we should expect: the dominant frequency is at 500 Hz, with
+harmonics dropping off like $1/f$.
+
+But the right half of the figure is a surprise.  Past 5000 Hz, the
+amplitude of the harmonics start growing again, peaking at 9500 Hz.
+What's going on?
+
+The answer: aliasing.  Remember that with framerate 10000 Hz, the
+folding frequency is 5000 Hz.  As we saw in Section~\ref{aliasing}
+a component at 5500 Hz is indistinguishable from a component
+at 4500 Hz.  So when we evaluate the DFT at 5500 Hz, we get the same
+value as at 4500 Hz.  Similarly, the value at 6000 Hz is the same
+as the one at 4000 Hz, and so on.
+
+So the DFT of a real signal is symmetric around the folding frequency.
+Since there is no additional information past this point, we can
+save time be evaluating only the first half of the DFT,
+and that's exactly what {\tt rfft} does.
 
 
 \section{Exercises}
 
+\begin{exercise}
+Implement FFT.
+\end{exercise}
 
 
 \chapter{Filtering and Convolution}
