@@ -5,6 +5,8 @@ Copyright 2013 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
+from __future__ import print_function, division
+
 import array
 import copy
 import math
@@ -192,8 +194,17 @@ class Spectrum(_SpectrumParent):
         self.hs = hs
         self.framerate = framerate
 
+        # the frequency for each component of the spectrum depends
+        # on whether the length of the wave is even or odd.
+        # see http://docs.scipy.org/doc/numpy/reference/generated/
+        # numpy.fft.rfft.html
         n = len(hs)
-        self.fs = numpy.linspace(0, self.max_freq, n)
+        if n%2 == 0:
+            max_freq = self.max_freq
+        else:
+            max_freq = self.max_freq * (n-1) / n
+            
+        self.fs = numpy.linspace(0, max_freq, n)
 
     def __add__(self, other):
         """Adds two spectrums elementwise.
@@ -702,7 +713,7 @@ class Wave(object):
 
         filename: string
         """
-        print 'Writing', filename
+        print('Writing', filename)
         wfile = WavFileWriter(filename, self.framerate)
         wfile.write(self)
         wfile.close()
@@ -754,7 +765,7 @@ def quantize(ys, bound, dtype):
     returns: quantized signal
     """
     if max(ys) > 1 or min(ys) < -1:
-        print 'Warning: normalizing before quantizing.'
+        warnings.warn('Warning: normalizing before quantizing.')
         ys = normalize(ys)
         
     zs = (ys * bound).astype(dtype)
@@ -776,7 +787,7 @@ def apodize(ys, framerate, denom=20, duration=0.1):
     """
     # a fixed fraction of the segment
     n = len(ys)
-    k1 = n / denom
+    k1 = n // denom
 
     # a fixed duration of time
     k2 = int(duration * framerate)
@@ -948,7 +959,7 @@ def SinSignal(freq=440, amp=1.0, offset=0):
     return Sinusoid(freq, amp, offset, func=numpy.sin)
 
 
-class ComplexSignal(Sinusoid):
+class ComplexSinusoid(Sinusoid):
     """Represents a complex exponential signal."""
 
     def evaluate(self, ts):
@@ -1184,9 +1195,7 @@ class BrownianNoise(_Noise):
         
         returns: float wave array
         """
-        #dys = numpy.random.normal(0, 1, len(ts))
         dys = numpy.random.uniform(-1, 1, len(ts))
-        #ys = numpy.cumsum(dys)
         ys = scipy.integrate.cumtrapz(dys, ts)
         ys = normalize(unbias(ys), self.amp)
         return ys
@@ -1328,13 +1337,13 @@ def main():
     wave = cos_wave(440, offset=math.pi/2)
     cos_cov = cos_basis.cov(wave)
     sin_cov = sin_basis.cov(wave)
-    print cos_cov, sin_cov, mag((cos_cov, sin_cov))
+    print(cos_cov, sin_cov, mag((cos_cov, sin_cov)))
     return
 
     wfile = WavFileWriter()
     for sig_cons in [SinSignal, TriangleSignal, SawtoothSignal, 
                      GlottalSignal, ParabolicSignal, SquareSignal]:
-        print sig_cons
+        print(sig_cons)
         sig = sig_cons(440)
         wave = sig.make_wave(1)
         wave.apodize()

@@ -5,7 +5,8 @@ Copyright 2013 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
-import Image as PIL
+from __future__ import print_function, division
+
 import math
 import numpy
 
@@ -24,28 +25,28 @@ def linear_chirp_evaluate(ts, low=440, high=880, amp=1.0):
     high: ending frequency
     amp: amplitude
     """
-    print 'ts', ts
+    print('ts', ts)
 
     freqs = numpy.linspace(low, high, len(ts)-1)
-    print 'freqs', freqs
+    print('freqs', freqs)
 
     dts = numpy.diff(ts)
-    print 'dts', dts
+    print('dts', dts)
 
     dphis = numpy.insert(PI2 * freqs * dts, 0, 0)
-    print 'dphis', dphis
+    print('dphis', dphis)
 
     phases = numpy.cumsum(dphis)
-    print 'phases', phases
+    print('phases', phases)
 
     ys = amp * numpy.cos(phases)
-    print 'ys', ys
+    print('ys', ys)
 
     return ys
 
 
 def discontinuity(num_periods=30, hamming=False):
-    """Plots the spectrum of a sinusoid.
+    """Plots the spectrum of a sinusoid with/without windowing.
 
     num_periods: how many periods to compute
     hamming: boolean whether to apply Hamming window
@@ -57,7 +58,7 @@ def discontinuity(num_periods=30, hamming=False):
     if hamming:
         wave.hamming()
 
-    print len(wave.ys), wave.ys[0], wave.ys[-1]
+    print(len(wave.ys), wave.ys[0], wave.ys[-1])
     spectrum = wave.make_spectrum()
     spectrum.plot(high=60)
 
@@ -109,15 +110,15 @@ def window_plot():
 
     thinkplot.subplot(1)
     wave1.plot()
-    thinkplot.Config(axis=[0, duration, -1.07, 1.07])
+    thinkplot.config(axis=[0, duration, -1.07, 1.07])
 
     thinkplot.subplot(2)
     window.plot()
-    thinkplot.Config(axis=[0, duration, -1.07, 1.07])
+    thinkplot.config(axis=[0, duration, -1.07, 1.07])
 
     thinkplot.subplot(3)
     wave2.plot()
-    thinkplot.Config(axis=[0, duration, -1.07, 1.07],
+    thinkplot.config(axis=[0, duration, -1.07, 1.07],
                      xlabel='time (s)')
 
     thinkplot.save(root='windowing2')
@@ -142,9 +143,9 @@ def chirp_spectrogram():
     wave = signal.make_wave(duration=1, framerate=11025)
     spectrogram = wave.make_spectrogram(seg_length=512)
 
-    print 'time res', spectrogram.time_res
-    print 'freq res', spectrogram.freq_res
-    print 'product', spectrogram.time_res * spectrogram.freq_res
+    print('time res', spectrogram.time_res)
+    print('freq res', spectrogram.freq_res)
+    print('product', spectrogram.time_res * spectrogram.freq_res)
 
     spectrogram.plot(high=32)
 
@@ -153,23 +154,6 @@ def chirp_spectrogram():
                    ylabel='frequency (Hz)')
     
     
-def violin_spectrogram():
-    """Makes a spectrogram of a violin recording.
-    """
-    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
-
-    seg_length = 2048
-    spectrogram = wave.make_spectrogram(seg_length)
-    spectrogram.plot(high=seg_length/8)
-
-    # TODO: try imshow?
-
-    thinkplot.save('spectrogram1',
-                   xlabel='time (s)',
-                   ylabel='frequency (Hz)',
-                   formats=['pdf'])
-    
-
 def overlapping_windows():
     """Makes a figure showing overlapping hamming windows.
     """
@@ -200,73 +184,15 @@ def invert_spectrogram():
 
     for i, (y1, y2) in enumerate(zip(wave.ys, wave2.ys)):
         if abs(y1 - y2) > 1e-14:
-            print i, y1, y2
+            print(i, y1, y2)
 
     
-def invert_image():
-    img = PIL.open('Welsh seascape.png')
-    array = numpy.asarray(img) / 255.0
-    print array.shape
-
-    array = numpy.mean(array, axis=2)
-    nrows, ncols = array.shape
-    
-    res = []
-    for i in xrange(ncols):
-        col = array[:,i]
-        ys = numpy.fft.ifft(col)
-        print ys
-        res.append(ys)
-
-
-def sawtooth_chirp():
-    signal = thinkdsp.SawtoothChirp(start=220, end=880)
-    wave = signal.make_wave(duration=2, framerate=44100)
-    wave.apodize()
-    wave.play()
-
-    sp = wave.make_spectrogram(1024)
-    sp.plot()
-    thinkplot.show()
-
-
 def main():
     chirp_spectrogram()
     chirp_spectrum()
-    return
-
-    violin_spectrogram()
-    return
-
-    invert_image()
-    return
-
-    invert_spectrogram()
-    return
-
     overlapping_windows()
-    return
-
     window_plot()
-
     three_spectrums()
-    return
-
-    linear_chirp_evaluate(range(4))
-
-    signal = thinkdsp.Chirp(start=220, end=880)
-    wave1 = signal.make_wave(duration=2)
-    wave1.apodize()
-
-    signal = thinkdsp.ExpoChirp(start=220, end=880)
-    wave2 = signal.make_wave(duration=2)
-    wave2.apodize()
-
-    filename = 'chirp.wav'
-    wfile = thinkdsp.WavFileWriter(filename, wave1.framerate)
-    wfile.write(wave1)
-    wfile.write(wave2)
-    wfile.close
 
 
 if __name__ == '__main__':

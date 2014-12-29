@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9}
+\newcommand{\theversion}{0.9.2}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -1254,8 +1254,8 @@ one at 4300 Hz.
 \section{Exercises}
 
 \begin{exercise}
-If you use IPython, load {\tt chap02.ipynb} and try out the
-examples.  You can also view the notebook at \url{}.
+If you use IPython, load {\tt chap02.ipynb} and try out the examples.
+You can also view the notebook at \url{http://tinyurl.com/thinkdsp02}.
 \end{exercise}
 
 \begin{exercise}
@@ -1296,8 +1296,8 @@ like $1/f$?
 
 \chapter{Non-periodic signals}
 
-The code from this chapter is available from
-\url{http://think-dsp.com/chirp.py}.
+The code for this chapter is in {\tt chirp.py}, which is in the
+repository for this book (see Section~\ref{code}).
 
 
 \section{Chirp}
@@ -1305,7 +1305,7 @@ The code from this chapter is available from
 The signals we have worked with so far are periodic, which means
 that they repeat forever.  It also means that their spectrums do
 not vary in time.  In this chapter, we consider non-periodic signals,
-which includes any signal whose frequency components change over time.
+which include signals whose frequency components change over time.
 In other words, pretty much all sound signals.
 
 We'll start with a {\bf chirp}, which is a signal with variable
@@ -1337,16 +1337,16 @@ be evaluated.  If the length of {\tt ts} is $n$, you can think of
 it as a sequence of $n-1$ intervals of time.  To compute the frequency
 during each interval, we use {\tt numpy.linspace}.
 
-\verb"_evaluate" is a helper function that does the rest of the
-math:\footnote{Beginning a method name with an underscore makes it
-``private,'' indicating that it is not part of the API that should
-be used outside the class definition.}
+\verb"_evaluate" is a private method\footnote{Beginning a method name
+  with an underscore makes it ``private,'' indicating that it is not
+  part of the API that should be used outside the class definition.}
+that does the rest of the math:
 
 \begin{verbatim}
     def _evaluate(self, ts, freqs):
         dts = numpy.diff(ts)
-        dps = PI2 * freqs * dts
-        phases = numpy.cumsum(dps)
+        dphis = PI2 * freqs * dts
+        phases = numpy.cumsum(dphis)
         ys = self.amp * numpy.cos(phases)
         return ys
 \end{verbatim}
@@ -1359,14 +1359,14 @@ the {\tt dts} are all the same.
 The next step is to figure out how much the phase changes during
 each interval.  Since we know the frequency and duration of each
 interval, the {\em change} in phase during each interval is
-{\tt dps = PI2 * freqs * dts}.  In math notation:
+{\tt dphis = PI2 * freqs * dts}.  In math notation:
 %
 \[ \Delta \phi = 2 \pi f(t) \Delta t \]
 %
 {\tt numpy.cumsum} computes the cumulative sum, which you can think
 of as a simple kind of integration.  The result is
 a NumPy array where the {\tt i}th element contains the sum of
-the first {\tt i} terms from {\tt dps}; that is, the total
+the first {\tt i} terms from {\tt dphis}; that is, the total
 phase at the end of the {\tt i}th interval.  Finally, {\tt numpy.cos}
 maps from phase to amplitude.
 
@@ -1382,7 +1382,8 @@ is two octaves from A3 to A5:
     thinkdsp.play_wave(filename)
 \end{verbatim}
 
-Before you go on, run this code and listen.
+You can run this code in {\tt chap03.ipynb} or view the notebook
+at \url{http://tinyurl.com/thinkdsp03}.
 
 
 \section{Exponential chirp}
@@ -1392,11 +1393,11 @@ rises quickly at first and then slows down.
 The chirp spans two octaves, but it only takes 2/3 s to span
 the first octave, and twice as long to span the second.  
 
-The reason is that our perception of pitch depends on the
-logarithm of frequency.  As a result, the {\bf interval} we hear between
-two notes depends on the {\em ratio} of their frequencies, not
-the difference.  ``Interval'' is the musical term for the
-perceived difference between two pitches.
+The reason is that our perception of pitch depends on the logarithm of
+frequency.  As a result, the {\bf interval} we hear between two notes
+depends on the {\em ratio} of their frequencies, not the difference.
+``Interval'' is the musical term for the perceived difference between
+two pitches.
 
 For example, an octave is an interval where the ratio of two
 pitches is 2.  So the interval from 220 to 440 is one octave
@@ -1445,22 +1446,23 @@ sound more like music than the linear chirp.
 \section{Leakage}
 
 \begin{figure}
-% example3.py
+% chirp.py
 \centerline{\includegraphics[height=2.5in]{figs/windowing1.pdf}}
 \caption{Spectrum of (a) a periodic segment of a sinusoid, (b)
 a non-periodic segment, (c) a tapered non-periodic segment.}
 \label{fig.windowing1}
 \end{figure}
 
-In previous chapters, we used FFT to compute the spectrum of a wave.
-Later, when we discuss how FFT works, we will learn that the algorithm
-is based on the assumption that the signal is periodic.  In theory, we
-should not use FFT on non-periodic signals, but in practice it happens
-all the time.  But there are a few things you have to be careful about.
+In previous chapters, we used the Fast Fourier Transform (FFT) to
+compute the spectrum of a wave.  When we discuss how FFT works in
+Chapter~\ref{dft}, we will learn that it is based on the assumption
+that the signal is periodic.  In theory, we should not use FFT on
+non-periodic signals.  In practice it happens all the time, but there
+are a few things you have to be careful about.
 
 One common problem is dealing with discontinuities at the beginning
 and end of a segment.  Because FFT assumes that the signal is periodic,
-in a sense it connects the end of the segment back to the beginning
+it implicitly connects the end of the segment back to the beginning
 to make a loop.  If the end does not connect smoothly to the beginning,
 the discontinuity creates additional frequency components in the
 segment that are not in the signal.
@@ -1483,7 +1485,9 @@ beginning, and FFT behaves well.
 \end{verbatim}
 
 Figure~\ref{fig.windowing1}a shows the result.  As expected, there is
-a single peak at 440 Hz.  But if the duration is not a multiple of the
+a single peak at 440 Hz.
+
+But if the duration is not a multiple of the
 period, bad things happen.  With {\tt duration = signal.period *
   30.25}, the signal starts at 0 and ends at 1.
 Figure~\ref{fig.windowing1}b shows the spectrum of this segment.
@@ -1492,15 +1496,15 @@ spread out from 240 to 640 Hz.  This spread is called ``spectral
 leakage'', because some of the energy at the fundamental frequency
 leaks into other frequencies.
 
-In this case leakage happens because we are using FFT on a segment
+In this example, leakage happens because we are using FFT on a segment
 that is not periodic.
 
 
 \section{Windowing}
 
 \begin{figure}
-% example3.py
-\centerline{\includegraphics[height=2.5in]{figs/windowing2.pdf}}
+% chirp.py
+\centerline{\includegraphics[height=3.5in]{figs/windowing2.pdf}}
 \caption{(a) Segment of a sinusoid, (b) Hamming window, (c) product
 of the segment and the window.}
 \label{fig.windowing2}
@@ -1517,7 +1521,8 @@ connect smoothly to the beginning.
 
 Figure~\ref{fig.windowing2}b shows a ``Hamming window'', one of the
 more common window functions.  No window function is perfect, but some
-can be shown to be optimal for different applications.
+can be shown to be optimal for different applications, and Hamming
+is a commonly-used, all-purpose window.
 
 Figure~\ref{fig.windowing2}c shows the result of multiplying the
 window by the original signal.  Where the window is close to 1, the
@@ -1546,7 +1551,7 @@ asks you to experiment with these other windows.
 \section{Spectrum of a chirp}
 
 \begin{figure}
-% example3.py
+% chirp.py
 \centerline{\includegraphics[height=2.5in]{figs/chirp1.pdf}}
 \caption{Spectrum of a one-second one-octave chirp.}
 \label{fig.chirp1}
@@ -1564,7 +1569,8 @@ its spectrum:
 
 Figure~\ref{fig.chirp1} shows the result.  The spectrum shows
 components at every frequency from 220 to 440 Hz with variations,
-caused by leakage, that look a little like the Eye of Sauron.
+caused by leakage, that look a little like the Eye of Sauron
+(see \url{http://en.wikipedia.org/wiki/Sauron}).
 
 The spectrum is approximately flat between 220 and 440 Hz, which
 indicates that the signal spends equal time at each frequency in this
@@ -1580,7 +1586,7 @@ the frequency went up or down, or both.
 \section{Spectrogram}
 
 \begin{figure}
-% example3.py
+% chirp.py
 \centerline{\includegraphics[height=2.5in]{figs/chirp2.pdf}}
 \caption{Spectrogram of a one-second one-octave chirp.}
 \label{fig.chirp2}
@@ -1637,10 +1643,13 @@ cells.  With 512 frames, we get 256 frequency components over a range
 from 0 to 5012.5 Hz, so the range between components is 21.5 Hz.
 
 More generally, if $n$ is the segment length, the spectrum contains
-$n/2$ components.  If the framerate is $r$, the maximum frequency
-in the spectrum is $r/2$.
-So the time resolution is $n/r$ and the frequency resolution is 
-$r/2$ divided by $n/2$, which is $r/n$.
+$n/2$ components.  If the framerate is $r$, the maximum frequency in
+the spectrum is $r/2$.  So the time resolution is $n/r$ and the
+frequency resolution is
+%
+\[ \frac{r/2}{n/2} \]
+%
+which is $r/n$.
 
 Ideally we would like time resolution to be small, so we can see rapid
 changes in frequency.  And we would like frequency resolution to be
@@ -1651,7 +1660,7 @@ resolution, $r/n$.  So if one gets smaller, the other gets bigger.
 For example, if you double the segment length, you cut frequency
 resolution in half (which is good), but you double time resolution
 (which is bad).  Even increasing the framerate doesn't help.  You get
-more samples to play with, but the range of frequencies increases at
+more samples, but the range of frequencies increases at
 the same time.
 
 This tradeoff is called the ``Gabor limit'' and it is a fundamental
@@ -1661,7 +1670,7 @@ limitation of this kind of time-frequency analysis.
 \section{Implementing spectrograms}
 
 \begin{figure}
-% example3.py
+% chirp.py
 \centerline{\includegraphics[height=2.5in]{figs/windowing3.pdf}}
 \caption{Overlapping Hamming windows.}
 \label{fig.windowing3}
@@ -1709,12 +1718,17 @@ Finally, the method constructs and returns a Spectrogram.  Here
 is the definition of Spectrogram:
 
 \begin{verbatim}
+class Spectrogram(object):
+
     def __init__(self, spec_map, seg_length):
         self.spec_map = spec_map
         self.seg_length = seg_length
 \end{verbatim}
 
-And {\tt Spectrogram} provides {\tt plot}, which generates a
+Like many \verb"__init__" methods, this one just stores the
+parameters as attributes.
+
+{\tt Spectrogram} provides {\tt plot}, which generates a
 pseudocolor plot:
 
 \begin{verbatim}
@@ -1746,10 +1760,21 @@ and copies the amplitudes from each spectrum into a column of the array.
 Finally {\tt thinkplot.pcolor} is a wrapper around {\tt pyplot.pcolor},
 which generates the pseudocolor plot.
 
-So that's how Spectrograms are implemented.
+And that's how Spectrograms are implemented.
 
 
 \section{Exercises}
+
+\begin{exercise}
+Run and listen to the examples in {\tt chap03.ipynb}, which is
+in the repository for this book, and also available at
+\url{http://tinyurl.com/thinkdsp03}.
+
+In the leakage example, try replacing the Hamming window with one of
+the other windows provided by NumPy, and see what effect they have on
+leakage.  See
+\url{http://docs.scipy.org/doc/numpy/reference/routines.window.html}
+\end{exercise}
 
 \begin{exercise}
 Write a class called {\tt SawtoothChirp} that extends {\tt Chirp}
@@ -1768,12 +1793,8 @@ visually apparent, and if you listen carefully, you can hear it.
 \begin{exercise}
 Another way to generate a sawtooth chirp is to add up a harmonic
 series of sinusoidal chirps.  Write another version of {\tt
-  SawtoothChirp} that uses this method and plot the histogram.
-
-If you truncate the harmonic series at the Nyquist frequency, you
-should be able to avoid aliasing.
+  SawtoothChirp} that uses this method and plot the spectrogram.
 \end{exercise}
-
 
 \begin{exercise}
 In musical terminology, a ``glissando'' is a note that slides from one
@@ -1792,25 +1813,18 @@ and back down to C3.  C3 is 262 Hz; F3 is 349 Hz.
 
 
 \begin{exercise}
-Try other window functions.
-\end{exercise}
-
-\begin{exercise}
-Make a spectrogram of the clarinet glissando at the beginning of
-Rhapsody in Blue.
+George Gershwin's {\it Rhapsody in Blue} starts with a famous
+clarinet glissando.  Find a recording of this piece and plot
+a spectrogram of the first few seconds.
 
 % http://archive.org/details/rhapblue11924
 \end{exercise}
 
 \begin{exercise}
-Make a recording of a series of vowel sounds and look at the spectrogram.
-Can you identify different vowels?
+Make or find a recording of a series of vowel sounds and look at the
+spectrogram.  Can you identify different vowels?
 \end{exercise}
 
-%\begin{exercise}
-%Compute the inverse spectrogram of an image and listen to it.
-%Landscape images might work best.
-%\end{exercise}
 
 
 \chapter{Noise}
@@ -3193,6 +3207,7 @@ the difference is perceptible?
 
 
 \chapter{Discrete Fourier Transform}
+\label{dft}
 
 We've been using the discrete Fourier transform (DFT) since
 Chapter~\ref{sounds}, but I haven't explained how it works.  Now is
