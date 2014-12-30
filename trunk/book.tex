@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.2}
+\newcommand{\theversion}{0.9.3}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -669,6 +669,7 @@ It uses {\tt aplay} by default, but you can provide another player.
 
 
 \section{Spectrums}
+\label{spectrums}
 
 {\tt Wave} provides \verb"make_spectrum", which returns a
 {\tt Spectrum}:
@@ -2150,6 +2151,7 @@ noise'', but I think that's confusing, so I avoid it.
 
 
 \section{Pink Noise}
+\label{pink}
 
 \begin{figure}
 % noise.py
@@ -3823,11 +3825,382 @@ and that's exactly what {\tt rfft} does.
 \section{Exercises}
 
 \begin{exercise}
-Implement FFT.
+In this chapter, I showed how we can express the DFT and inverse
+DFT as matrix multiplications.  These operations are relatively
+fast, taking time proportional to $N^2$, where $N$ is the length
+of the wave array.  And that would be fast enough for many applications,
+but it turns out that there is a faster algorithm, the
+Fast Fourier Transform (FFT), which takes time proportional to 
+$N \log N$.
+
+Read about the FFT at
+\url{http://en.wikipedia.org/wiki/Cooley-Tukey_FFT_algorithm}, and
+write an implementation.  Hint: I suggest you write a simple version
+as a recursive function; don't worry about ``data reordering, bit
+reversal, and in-place algorithms.''
 \end{exercise}
 
 
 \chapter{Filtering and Convolution}
+
+In this chapter I present one of the most important and useful
+ideas related to signal processing: the Convolution Theorem.
+Before we can understand the Convolution Theorem, we have to understand
+convolution.  I'll start with one of the simplest examples: smoothing.
+
+Then we'll see how the Convolution Theorem works and, for
+those who are interested, I'll try to explain {\em why} it works.
+
+The code for this chapter is in {\tt convolution.py}, which is in the
+repository for this book (see Section~\ref{code}).
+
+
+\section{Smoothing}
+
+\begin{figure}
+% convolution1.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution1.pdf}}
+\caption{Daily changes in the price of Bitcoin and a 30-day moving
+average.}
+\label{fig.convolution1}
+\end{figure}
+
+
+Smoothing is an operation that tries to remove short-term variations
+from a signal in order to reveal long-term trends.  For example, if
+you plot daily changes in the price of a stock, it would look noisy;
+a smoothing operator might make it easier to see whether the price
+was generally going up or down over time.  
+
+A common smoothing algorithm is a moving average, which computes
+the mean of the previous $n$ values, for some value of $n$.
+
+For example, Figure~\ref{fig.convolution1} shows the daily percent
+change in the price of Bitcoin from July 18, 2010 to December 28,
+2014 (downloaded from \url{http://www.coindesk.com}).  The gray line
+is the raw data, the darker line shows the 30-day moving average.
+In the short term, the price of Bitcoin is quite volatile, often
+changing by more than 10\% in a day.  Smoothing removes the most
+extreme changes and makes it easier to see long-term trends.
+
+Smoothing operations also apply to sound signals.  As an example,
+I'll start with a square wave at 440 Hz.  As we saw in Section~\ref{},
+the harmonics of a square wave drop off slowly, so it contains many
+high-frequency components.
+
+\begin{verbatim}
+    signal = thinkdsp.SquareSignal(freq=440)
+    wave = signal.make_wave(duration=1, framerate=44100)
+    segment = wave.segment(duration=0.01)
+\end{verbatim}
+
+{\tt wave} is a 1-second segment of the signal; {\tt segment}
+is a shorter segment I'll use for plotting.
+
+You can try out this example, and listen to it, in
+{\tt chap08.ipynb}, which is in the repository for this
+book and also available at \url{http://tinyurl.com/thinkdsp08}.
+
+To compute the moving average of this signal, I'll create
+a window with 11 elements and normalize it so the elements
+add up to 1.
+
+\begin{verbatim}
+    window = numpy.ones(11)
+    window /= sum(window)
+\end{verbatim}
+
+Now I can compute the average of the first 11 elements by
+multiplying the window by the wave array:
+
+\begin{verbatim}
+    padded = numpy.zeros_like(segment.ys)
+    padded[:len(window)] = window
+    prod = padded * segment.ys
+\end{verbatim}
+
+{\tt padded} is a version of the window with zeros added to
+the end so it has the same length as {\tt segment.ys}.
+{\tt prod} is the product of the window and the wave array.
+
+The first 11 elements of this wave array are -1, so their
+average is -1, and (sure enough) that's the value of {\tt prod}.
+
+To compute the next element of the smoothed signal, we shift
+the right and compute the average of 11 elements of the wave
+array, starting with the second.
+
+\begin{figure}
+% convolution2.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution2.pdf}}
+\caption{A square signal at 400 Hz (gray) and an 11-element
+moving average (darker).}
+\label{fig.convolution2}
+\end{figure}
+
+
+The following code computes the rolling average for the whole
+wave:
+
+\begin{verbatim}
+    smoothed = numpy.zeros_like(segment.ys)
+    rolled = padded
+    for i in range(len(segment.ys)):
+        smoothed[i] = sum(rolled * segment.ys)
+        rolled = numpy.roll(rolled, 1)
+\end{verbatim}
+
+{\tt smoothed} is the wave array where I store the results.
+{\tt rolled} is a copy of {\tt padded} that gets shifted to
+the right by one element each time through the loop.  Inside
+the loop, we multiply the segment by {\tt rolled} to select
+11 elements, and then add them up.
+
+Figure~\ref{fig.convolution2} shows the result.  The gray line
+is the original signal; the darker line is the smoothed signal.
+The smoothed signal starts to ramp up when the leading edge of
+the window reaches the first transition, and levels off when
+the window crosses the transition.  As a result, the transitions
+are less abrupt, and the corners less sharp.  If you listen
+to the smoothed signal, it sounds less buzzy and slightly muffled.
+
+
+\section{Convolution}
+
+The operation we just computed is called {\bf convolution},
+and it is such a common operation that NumPy provides an
+implementation that is simpler and faster than my version:
+
+\begin{verbatim}
+    ys = numpy.convolve(segment.ys, window, mode='valid')
+    smooth2 = thinkdsp.Wave(ys, framerate=wave.framerate)
+\end{verbatim}
+
+{\tt numpy.convolve} computes the convolution of the wave
+array and the window.  The mode flag {\tt valid} indicates
+that it should only compute values when the window and the
+wave array overlap completely, so it stops when the right
+edge of the window reaches the end of the wave array.  Other
+than that, the result is the same as in Figure~\ref{fig.convolution2}.
+
+\newcommand{\conv}{\ast}
+
+Actually, there is one other difference.  The loop in the
+previous section actually computes {\bf cross-correlation}:
+%
+\[ (f \star g)[i] = \sum_{j=0}^{N-1} f[j] g[j-i]  \]
+%
+where $f$ is a wave array with length $N$, $g$ is the window,
+and $\star$ is the symbol for cross-correlation.  To
+compute the $i$th element of the result, we shift $g$ to
+the right, which is why the index is $j-i$.
+
+The mathematical definition of convolution is slightly different:
+%
+\[ (f \conv g)[i] = \sum_{j=0}^{N-1} f[j] g[i-j]  \]
+%
+The symbol $\conv$ represents convolution.  The difference is
+that the index of $g$ has been negated, which has the same
+effect as reversing the elements of $g$ (assuming that negative
+indices wrap around to the end of the array).
+
+Because the window we are using is symmetric,
+cross-correlation and convolution yield the same result.
+When we use other windows, we will have to be more careful.
+
+You might wonder why convolution is defined the way it is.
+I can't answer that question yet, but I will, in
+Section~\ref{whyflip}.
+
+
+\section{The frequency domain}
+
+\begin{figure}
+% convolution4.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution4.pdf}}
+\caption{Spectrum of the square wave before and after smoothing.}
+\label{fig.convolution4}
+\end{figure}
+
+Smoothing makes the transitions in a square signal less abrupt,
+and makes the sound slightly muffled.  Let's see what effect this
+operation has on the spectrum.  First I'll plot the spectrum
+of the original wave:
+
+\begin{verbatim}
+    spectrum = wave.make_spectrum()
+    spectrum.plot(color='0.7')
+\end{verbatim}
+
+Then the smoothed wave:
+
+\begin{verbatim}
+    ys = numpy.convolve(wave.ys, window, mode='same')
+    smooth = thinkdsp.Wave(ys, framerate=wave.framerate)
+    spectrum2 = smooth.make_spectrum()
+    spectrum2.plot()
+\end{verbatim}
+
+Figure~\ref{fig.convolution4} shows the result.  The fundamental
+frequency is almost unchanged; the first few harmonics are
+attenuated, and the higher harmonics are almost eliminated.  So
+smoothing has the effect of a low-pass filter, which we
+saw in Section~\ref{spectrums} and Section~\ref{pink}.
+
+To see how much each component has been attenuated, we can
+compute the ratio of the two spectrums:
+
+\begin{verbatim}
+    amps = spectrum.amps
+    amps2 = spectrum2.amps
+    ratio = amps2 / amps    
+    ratio[amps<560] = 0
+    thinkplot.plot(ratio)
+\end{verbatim}
+
+{\tt ratio} is the ratio of the amplitude before and after 
+smoothing.  When {\tt amps} is small, this ratio can be big
+and noisy, so for simplicity I set the ratio to 0 except for
+where the harmonics are.
+
+\begin{figure}
+% convolution5.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution5.pdf}}
+\caption{Ratio of spectrums for the square wave, before and after smoothing.}
+\label{fig.convolution5}
+\end{figure}
+
+Figure~\ref{fig.convolution5} shows the result.  As expected, the
+ratio is high for low frequencies and drops off at a cutoff frequency
+near 4000 Hz.  But there is another feature we did not expect: above
+the cutoff, the ratio seems to oscillate between 0 and 0.2.
+What's up with that?
+
+
+\section{The convolution theorem}
+
+\begin{figure}
+% convolution6.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution6.pdf}}
+\caption{Ratio of spectrums for the square wave, before and after
+  smoothing, along with the DFT of the smoothing window.}
+\label{fig.convolution6}
+\end{figure}
+
+The answer is the convolution theorem.  Stated mathematically:
+%
+\[ DFT(f \conv g) = DFT(f) \cdot DFT(g) \]
+%
+where $f$ is a wave array and $g$ is a window.  In words,
+the convolution theorem says that if we convolve $f$ and $g$,
+and then compute the DFT, we get the same answer as computing
+the DFT of $f$ and $g$, and then multiplying the results
+element-wise.  Or, more concisely, convolution in the time
+domain corresponds to multiplication in the frequency domain.
+
+And that explains Figure~\ref{fig.convolution5}, because when we
+convolve a wave and a window, we multiply the spectrum of
+the wave with the spectrum of the window.  To see how that works,
+we can compute the DFT of the window:
+
+\begin{verbatim}
+    padded = numpy.zeros_like(wave.ys)
+    padded[:len(window)] = window
+    dft_window = numpy.fft.rfft(padded)
+    thinkplot.plot(abs(dft_window))
+\end{verbatim}
+
+{\tt padded} contains the window, padded with zeros to be the
+same length as {\tt wave}.  \verb"dft_window" contains the
+DFT of the smoothing window.
+
+Figure~\ref{fig.convolution6} shows the result, along with the
+ratios we computed in the previous section.  The ratios are
+exactly the amplitudes \verb"dft_window".  Mathematically:
+%
+\[ |DFT(f \conv g)| / |DFT(f)| = |DFT(g)| \]
+%
+where $|z|$ represents the amplitude of a complex number $z$.
+
+In this context, the DFT of a window is called a {\bf filter}.
+For any convolution window in the time domain, there is a
+corresponding filter in the frequency domain.  And for any
+filter than can be expressed by element-wise multiplication in
+the frequency domain, there is a corresponding window.
+
+
+\section{Gaussian filter}
+
+\begin{figure}
+% convolution7.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution7.pdf}}
+\caption{Boxcar and Gaussian windows.}
+\label{fig.convolution7}
+\end{figure}
+
+The moving average window we used in the previous section is
+a low-pass filter, but it is not a very good one.  It cuts off
+at around 4000 Hz, but then it bounces around for a while.  
+For reasons we will see soon, we can do better with
+a Gaussian window.
+
+SciPy provides functions that compute many common convolution
+windows, including {\tt gaussian}:
+
+\begin{verbatim}
+    gaussian = scipy.signal.gaussian(M=11, std=2)
+    gaussian /= sum(gaussian)
+\end{verbatim}
+
+{\tt M} is the number of elements in the window; {\tt std}
+is the standard deviation of the Gaussian expression used to
+compute it.  Figure~\ref{fig.convolution7} shows the shape
+of the window.  It is a discrete approximation of the Gaussian
+``bell curve''.  The figure also shows the moving average window
+from the previous example, which is sometimes called a
+``boxcar'' window because it looks like a rectangular railway car.
+
+\begin{figure}
+% convolution.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution8.pdf}}
+\caption{Ratio of spectrums before and after Gaussian smoothing, and
+  the DFT of the Gaussian window.}
+\label{fig.convolution8}
+\end{figure}
+
+I ran the computations from the previous sections again
+with this curve, and generated Figure~\ref{fig.convolution8},
+which shows the ratio of the spectrums before and after
+smoothing, along with the DFT of the Gaussian window. 
+
+As a low-pass filter, Gaussian smoothing is much better than
+a simple moving average.  The cutoff frequency is a little
+higher; near 7000 Hz, the ratio is 0.1.  But above that, the
+ratio drops quickly and stays low, with almost none of the oscillation we
+saw with the boxcar window.
+
+In Figure~\ref{fig.convolution8}, the shape of the filter
+might look familiar.  As it turns out, the DFT of a Gaussian
+curve is also a Gaussian curve.  In this example, the
+window is a discrete approximation, so the resulting filter
+is only approximately Gaussian.
+
+
+\section{Efficient convolution}
+
+The roundabout way.
+
+Using convolution to compute cross and autocorrelation.
+
+
+\section{Exercises}
+
+\begin{exercise}
+Experiment with the parameters of the Gaussian window to see
+what effect they have on the cutoff frequency.
+\end{exercise}
+
+
 
 \chapter{Signals and Systems}
 
