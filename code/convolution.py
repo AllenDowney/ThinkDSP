@@ -27,7 +27,7 @@ def plot_bitcoin():
     diff = numpy.diff(ys)
     changes = 100 * diff / ys[:len(diff)]
 
-    window = scipy.signal.boxcar(30)
+    window = numpy.ones(30)
     window /= sum(window)
     smoothed = numpy.convolve(changes, window, mode='same')
 

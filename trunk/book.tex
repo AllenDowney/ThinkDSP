@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.3}
+\newcommand{\theversion}{0.9.4}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -2304,12 +2304,12 @@ which means that each value is independent of the others, and Brownian
 noise as ``correlated'', because each value depends on the preceding
 value.  In this chapter I define these terms more precisely and
 present the {\bf autocorrelation function}, which is a useful tool
-signal analysis.
+for signal analysis.
 
 But before we get to autocorrelation, let's start with correlation.
 
-The code from this chapter is available from
-\url{http://think-dsp.com/XXX.py}.
+The code for this chapter is in {\tt autocorr.py}, which is in the
+repository for this book (see Section~\ref{code}).
 
 
 \section{Correlation}
@@ -2318,11 +2318,11 @@ In general, correlation between variables means that if you know the
 value of one, you have some information about the other.  There are
 several ways to quantify correlation, but the most common is the
 Pearson product-moment correlation coefficient, usually denoted
-$\rho$.  For two variables that contain $N$ values, $x_i$ and $y_i$:
+$\rho$.  For two variables, $x$ and $y$, that each contain $N$ values:
 %
 \[ \rho = \frac{ \sum_i (x_i - \mu_x) (y_i - \mu_y)}{N \sigma_x \sigma_y} \]
 %
-Where $\mu_x$ and $\mu_y$ are the means of $x_i$ and $y_i$, and
+Where $\mu_x$ and $\mu_y$ are the means of $x$ and $y$, and
 $\sigma_x$ and $\sigma_y$ are their standard deviations.
 
 Pearson's correlation is always between -1 and +1 (including both).
@@ -2339,11 +2339,11 @@ other.
 If $\rho$ is near zero, the correlation might be weak, or there might
 be a nonlinear relationship that is not captured by this coefficient
 of correlation.  Nonlinear relationships are often important in
-statistics, but less commonly relevant for signal processing, so I
+statistics, but less often relevant for signal processing, so I
 won't say more about them here.
 
 In the context of signal processing, we are often working with
-unbiased waves, where the mean is 0, and normalized waves, where the
+unbiased signals, where the mean is 0, and normalized signals, where the
 standard deviation is 1.  In that case, the definition of $\rho$
 simplifies to:
 %
@@ -2359,7 +2359,7 @@ have dot product 0.
 Python provides several ways to compute correlations.  {\tt
   numpy.corrcoef} takes any number of variables and computes a {\bf
   correlation matrix} that includes correlations between each pair of
-variables.  
+variables.
 
 \begin{figure}
 % autocorr.py
@@ -2391,12 +2391,16 @@ waves look like.  When one wave is high, the other is usually high, so we
 expect them to be correlated.
 
 \begin{verbatim}
->>> corr_matrix = numpy.corrcoef(wave1.ys, wave2.ys)
+>>> corr_matrix = numpy.corrcoef(wave1.ys, wave2.ys, ddof=0)
 [[ 1.    0.54]
  [ 0.54  1.  ]]
 \end{verbatim}
 
-The first element of this array is the correlation of {\tt wave1}
+The option {\tt ddof=0} indicates that {\tt corrcoef} should normalize
+divide by $N$ rather than the default, $N-1$.
+
+The result is a correlation matrix:
+the first element is the correlation of {\tt wave1}
 with itself, which is always 1.  Similarly, the last element
 is the correlation of {\tt wave2} with itself.
 
@@ -2408,7 +2412,7 @@ phase offset between them.  The result is a cosine.}
 \label{fig.autocorr2}
 \end{figure}
 
-The off-diagonal elements contain the values we're interested in,
+The off-diagonal elements contain the value we're interested in,
 the correlation of {\tt wave1} and {\tt wave2}.  The value 0.54
 indicates that the strength of the correlation is moderate.
 
@@ -2434,7 +2438,7 @@ correlation between waves:
 
 \section{Serial correlation}
 
-Many signals represent measurements of quantities that vary in
+Signals often represent measurements of quantities that vary in
 time.  For example, the sound signals we've worked with represent
 measurements of voltage (or current), which represent the changes
 in air pressure we perceive as sound.
@@ -2445,6 +2449,9 @@ To compute serial correlation, we can shift a signal and then compute
 the correlation of the shifted version with the original.
 
 \begin{verbatim}
+def corrcoef(xs, ys):
+    return numpy.corrcoef(xs, ys, ddof=0)[0, 1]
+
 def serial_corr(wave, lag=1):
     n = len(wave)
     y1 = wave.ys[lag:]
@@ -2453,8 +2460,11 @@ def serial_corr(wave, lag=1):
     return corr
 \end{verbatim}
 
-{\tt lag} is the integer number of places to shift the waves,
-with the default value 1.
+{\tt corrcoef} is a convenience function that simplifies
+the interface to {\tt numpy.corrcoef}.
+
+\verb"serial_corr" takes a Wave object and
+{\tt lag}, which is the integer number of places to shift the waves.
 
 We can test this function with the noise signals from the previous
 chapter.  We expect UU noise to be uncorrelated, based on the
@@ -2534,7 +2544,7 @@ def autocorr(wave):
 
 {\tt autocorr} takes a Wave object and returns the autocorrelation
 function as a pair of sequences: {\tt lags} is a sequence of
-integers from 0 to half of the length of the wave; {\tt corrs}
+integers from 0 to half the length of the wave; {\tt corrs}
 is the sequence of serial correlations for each lag.
 
 Figure~\ref{fig.autocorr4} shows autocorrelation functions for pink
@@ -2592,7 +2602,8 @@ a short segment from the wave and plot its spectrum:
     spectrum.plot(high=15)
 \end{verbatim}
 
-Figure~\ref{fig.autocorr6} shows the result.  There is a clear peak near
+This segment starts at 0.2 seconds and lasts 0.01 seconds.
+Figure~\ref{fig.autocorr6} shows its spectrum.  There is a clear peak near
 400 Hz, but it is hard to identify the pitch precisely.  The length of
 the segment is 441 samples at a framerate of 44100 Hz, so the
 frequency resolution is 100 Hz (see Section~\ref{gabor}).
@@ -2629,9 +2640,9 @@ def plot_shifted(wave, shift=0.0023, start=0.2):
     thinkplot.config(xlabel='time (s)', ylim=[-1, 1])
 \end{verbatim} 
 
-On segment starts at 0.2 seconds; the other starts 0.0023 seconds
+One segment starts at 0.2 seconds; the other starts 0.0023 seconds
 later.  Figure~\ref{fig.autocorr7} shows the result.  The segments
-are very similar, and their correlation is 0.94.  This result suggests
+are similar, and their correlation is 0.94.  This result suggests
 that the period is near 0.0023 seconds, which corresponds to a frequency
 of 435 Hz.
 
@@ -2667,6 +2678,63 @@ So the frequency precision using autocorrelation is less than 10 Hz,
 compared with 100 Hz using the spectrum.
 
 
+\section{Using NumPy}
+
+NumPy provides a function, {\tt correlate}, that computes
+the correlation of two functions or the autocorrelation of one
+function.  We can use it to compute the autocorrelation of
+the segment from the previous section:
+
+\begin{verbatim}
+corrs2 = numpy.correlate(segment.ys, segment.ys, mode='same')
+\end{verbatim}
+
+The option {\tt mode} tells {\tt correlate} what range
+of {\tt lag} it should use.  With the value {\tt 'same'}, the
+range is from $-N/2$ to $N/2$, where $N$ is the length of the
+wave array.
+
+Figure~\ref{fig.autocorr9} shows the result.  It is symmetric because
+the two signals are identical, so a negative lag on one has the same
+effect as a positive lag on the other.  To compare with the results
+from {\tt autocorr}, we can select the second half:
+
+\begin{verbatim}
+N = len(corrs2)
+half = corrs2[N//2:]
+\end{verbatim}
+
+If you compare Figure~\ref{fig.autocorr9} to Figure~\ref{fig.autocorr8},
+you'll notice that the correlations computed by {\tt numpy.correlate}
+get smaller as the lags increase.  As the lag get bigger, the amount of
+overlap between the two signals gets smaller, so the magnitude of
+the correlations decreases.
+
+We can correct that by dividing through by the lengths:
+
+\begin{verbatim}
+lengths = range(N, N//2, -1)
+half /= lengths
+\end{verbatim}
+
+Finally, we can normalize the results so the correlation with
+{\tt lag=0} is 1.
+
+\begin{verbatim}
+half /= half[0]
+\end{verbatim}
+
+With these adjustments, the results computed by {\tt autocorr} and
+{\tt numpy.correlate} are nearly the same, but they still differ by
+1-2\%.  The reason not important, but if you are curious: {\tt autocorr}
+normalizes the correlations independently for each lag; for
+{\tt numpy.correlate}, we normalized them all at the end.
+
+More importantly, now you know what autocorrelation is, how to
+use it to estimate the fundamental period of a signal, and two
+ways to compute it.
+
+
 \section{Exercises}
 
 \begin{exercise}
@@ -2676,6 +2744,12 @@ of the price changes.  Using the same data, compute the autocorrelation
 of BitCoin prices.  Does the autocorrelation function decay
 exponentially?  Is there evidence of periodic behavior?
 \end{exercise}
+
+\begin{exercise}
+% TODO: finish this exercise
+Estimate the pitch of a segment from the saxophone recording.
+\end{exercise}
+
 
 
 \chapter{Discrete cosine transform}
@@ -4187,6 +4261,37 @@ is only approximately Gaussian.
 
 
 \section{Efficient convolution}
+
+One of the reasons the FFT is such an important algorithm is that,
+combined with the Convolution Theorem, it provides an efficient
+way to compute convolution, cross-correlation, and autocorrelation.
+
+Again, the Convolution Theorem states
+%
+\[ DFT(f \conv g) = DFT(f) \cdot DFT(g) \]
+%
+So one way to compute a convolution is:
+%
+\[ f \conv g = IDFT(DFT(f) \cdot DFT(g)) \]
+%
+where $IDFT$ is the inverse DFT.  A simple implementation of
+convolution takes time proportional to $N^2$; this algorithm,
+using FFT, takes time proportional to $N \log N$.
+
+We can confirm that it works by computing the same convolution
+both ways:
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
 
 The roundabout way.
 
