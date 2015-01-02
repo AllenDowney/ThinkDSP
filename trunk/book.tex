@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.4}
+\newcommand{\theversion}{0.9.5}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -1830,21 +1830,14 @@ spectrogram.  Can you identify different vowels?
 
 \chapter{Noise}
 
-\begin{figure}
-% noise.py
-\centerline{\includegraphics[height=2.5in]{figs/whitenoise0.pdf}}
-\caption{Waveform of uncorrelated uniform noise.}
-\label{fig.whitenoise0}
-\end{figure}
-
 In English, ``noise'' means an unwanted or unpleasant sound.  In the
 context of digital signal processing, it has two different senses:
 
 \begin{enumerate}
 
 \item As in English, it can mean an unwanted signal of any kind.  If
-two signals interfere with each other, then for each signal the other
-would be considered noise.
+two signals interfere with each other, each signal would consider
+the other to be noise.
 
 \item ``Noise'' also refers to a signal that contains components at
 many frequencies, so it lacks the harmonic structure of the periodic
@@ -1852,21 +1845,28 @@ signals we saw in previous chapters.
 
 \end{enumerate}
 
-This chapter is about noise in the second sense.
-
-The code from this chapter is available from
-\url{http://think-dsp.com/XXX.py}.
-
+The code for this chapter is in {\tt noise.py}, which is in the
+repository for this book (see Section~\ref{code}).  You can listen
+to the examples in {\tt chap04.ipynb}, which you can view at
+\url{http://tinyurl.com/thinkdsp04}.
 
 \section{Uncorrelated noise}
 
-  The simplest way
-to understand noise is to generate it, and the simplest way to generate
-it is uncorrelated uniform noise (UU noise).  ``Uniform'' means that the values
-that make up the signal are drawn at random from a uniform distribution,
-and ``uncorrelated'' means that each value is independent of the others.
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/whitenoise0.pdf}}
+\caption{Waveform of uncorrelated uniform noise.}
+\label{fig.whitenoise0}
+\end{figure}
 
-Here's the code to generate some:
+The simplest way to understand noise is to generate it, and the
+simplest kind to generate is uncorrelated uniform noise (UU noise).
+``Uniform'' means the signal contains random values from a uniform
+distribution; that is, every value in the range is equally likely.
+``Uncorrelated'' means that the values are independent; that is,
+knowing one value provides no information about the others.
+
+This code generates UU noise:
 
 \begin{verbatim}
     duration = 0.5
@@ -1879,8 +1879,7 @@ Here's the code to generate some:
 
 The result is a wave with duration 0.5 seconds at 11,025
 samples per second.  Each sample is drawn from a uniform distribution
-between -1 and 1, which means that every value in that range is
-equally likely.
+between -1 and 1.
 
 If you play this wave, it sounds like the static you hear if you tune
 a radio between channels.  Figure~\ref{fig.whitenoise0} shows what the
@@ -1893,7 +1892,7 @@ waveform looks like.  As expected, it looks pretty random.
 \label{fig.whitenoise1}
 \end{figure}
 
-Now let's take a look at the spectrum.  Here's the code:
+Now let's take a look at the spectrum:
 
 \begin{verbatim}
     spectrum = wave.make_spectrum()
@@ -1903,8 +1902,8 @@ Now let's take a look at the spectrum.  Here's the code:
 \verb"Spectrum.plot_power" is similar to \verb"Spectrum.plot",
 except that it plots power density instead of amplitude.  Power 
 density is the square of amplitude, expressed in units of power per Hz.
-
-% TODO: why power here rather than amplitude?
+(I am switching from amplitude to power in this section because
+it is more conventional in the context of noise.)
 
 Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
 spectrum looks pretty random.  And it is, but we have to be more
@@ -1919,18 +1918,17 @@ might like to know about a noise signal or its spectrum:
   and all values have the same probability.  An alternative is
   {\bf Gaussian noise}, where the set of values is the range from negative
   to positive infinity, but values near 0 are the most likely, with
-  probability that drops off according to the Gaussian distribution or
-  ``bell curve.''
+  probability that drops off according to the Gaussian or
+  ``bell'' curve.
 
 \item Correlation: Is each value in the signal independent of the
-  others, or are there dependencies between them?  In UU noise, each
-  value is independent of the others, so knowing the value of the
-  signal at one point in time provides no new information about the
-  value at any other time.  An alternative is {\bf Brownian noise},
-  where each value is the sum of the previous value and a random
-  value.  So if the value of the signal is high at a particular point
-  in time, we expect it to stay high for a least the next few values.
-  And if it is low, we expect it to stay low.
+  others, or are there dependencies between them?  In UU noise, the
+  values are independent.
+  An alternative is {\bf Brownian noise}, where each value is the sum
+  of the previous value and a random ``step''.  So if the value of the
+  signal is high at a particular point in time, we expect it to stay
+  high, and if it is low, we expect
+  it to stay low.
 
 \item Relationship between power and frequency: In the spectrum of UU
   noise, the power at all frequencies is drawn from the same
@@ -1957,7 +1955,6 @@ the spectrum up to $f$.
 \label{fig.whitenoise2}
 \end{figure}
 
-
 {\tt Spectrum} provides a method that computes the IntegratedSpectrum:
 
 \begin{verbatim}
@@ -1967,7 +1964,7 @@ the spectrum up to $f$.
         return IntegratedSpectrum(cs, self.fs)
 \end{verbatim}
 
-{\tt self.power} is an array of power for each frequency.
+{\tt self.power} is a NumPy array containing power for each frequency.
 {\tt numpy.cumsum} computes the cumulative sum of the powers.
 Dividing through by the last element normalizes the integrated
 spectrum so it runs from 0 to 1.
@@ -1975,8 +1972,7 @@ spectrum so it runs from 0 to 1.
 The result is an IntegratedSpectrum.  Here is the class definition:
 
 \begin{verbatim}
-class IntegratedSpectrum(object):
-    
+class IntegratedSpectrum(object):    
     def __init__(self, cs, fs):
         self.cs = cs
         self.fs = fs
@@ -1992,12 +1988,11 @@ we can compute and plot the integrated spectrum like this:
                    ylabel='cumulative power')
 \end{verbatim}
 
-The result, shown in Figure~\ref{fig.whitenoise2}, is a remarkably
-straight line, which indicates that power at all
-frequencies is constant, on average.  Noise with equal power
-at all frequencies is called {\bf white noise} by analogy with light,
-because an equal mixture
-of light at all visible frequencies is white.
+The result, shown in Figure~\ref{fig.whitenoise2}, is a straight line,
+which indicates that power at all frequencies is constant, on average.
+Noise with equal power at all frequencies is called {\bf white noise}
+by analogy with light, because an equal mixture of light at all
+visible frequencies is white.
 
 
 
@@ -2012,7 +2007,7 @@ of light at all visible frequencies is white.
 
 UU noise is uncorrelated, which means that each value does not depend
 on the others.  An alternative is Brownian noise, in which each value
-is the sum of the previous value and a random ``step.''
+is the sum of the previous value and a random ``step''.
 
 It is called ``Brownian'' by analogy with Brownian motion, in which a
 particle suspended in a fluid moves apparently at random, due to
@@ -2021,12 +2016,12 @@ described using a {\bf random walk}, which is a mathematical model
 of a path where the distance between steps is characterized by a
 random distribution.
 
-In a one-dimensional random walk, the particle moves left or right
+In a one-dimensional random walk, the particle moves up or down
 by a random amount at each time step.  The location of the particle
 at any point in time is the sum of all previous steps.
 
 This observation suggests a way to generate Brownian noise:
-generate an uncorrelated signal and then compute its discrete integral.
+generate uncorrelated random steps and then add them up.
 Here is a class definition that implements this algorithm:
 
 \begin{verbatim}
@@ -2034,16 +2029,15 @@ class BrownianNoise(_Noise):
 
     def evaluate(self, ts):
         dys = numpy.random.uniform(-1, 1, len(ts))
-        ys = scipy.integrate.cumtrapz(dys, ts)
+        ys = numpy.cumsum(dys)
         ys = normalize(unbias(ys), self.amp)
         return ys
 \end{verbatim}
 
 We use {\tt numpy.random.uniform} to generate an uncorrelated signal
-and {\tt scipy.integrate.cumtrapz} to approximate the integral using 
-the trapezoid rule.
+and {\tt numpy.cumsum} to compute their cumulative sum.
 
-Since the integrated signal is likely to escape the range from -1 to
+Since the sum is likely to escape the range from -1 to
 1, we have to use {\tt unbias} to shift the mean to 0, and {\tt
   normalize} to get the desired maximum amplitude.
 
@@ -2084,70 +2078,27 @@ and frequency on a log-log scale.  Here's the code:
                    yscale='log')
 \end{verbatim}
 
-Integrating a noise signal attenuates high frequency components.
-Specifically, it attenuates the power at each frequency, $f$, in
-proportion to $1/f^2$.
-
-This behavior follows from a mathematical property of
-the Fourier transform: given a periodic signal, $h(t)$, and its
-Fourier transform, $H(f)$, we can compute the Fourier transform
-of the integral of $h(t)$:
+The slope of this line is approximately -2 (we'll see why in
+Chapter~\ref{systems}), so we can write this relationship:
 %
-\[ g = \int h \]
+\[ \log P = k -2 \log f \]
 %
-\[ G(f) = H(f) / 2 \pi i f \]
+where $P$ is power, $f$ is frequency, and $k$ is the intercept
+of the line (which is not relevant for our purposes).
+Exponentiating both sides yields:
 %
-Integration attentuates each component by a factor proportional
-to $f$.  Since power is the square of magnitude, the power of each
-component is attentuated by a factor proportional to $f^2$.
-
-Since we started with white noise, which has equal power at all
-frequencies, we expect Brownian noise to have power at frequency $f$
-proportional to $1/f^2$, on average.  In other words:
+\[ P = K / f^{2} \]
 %
-\[ P = k f^{-2} \]
-%
-with some unknown constant, $k$.  Taking the log of both sides yields:
-%
-\[ \log P = \log k -2 \log f \]
-%
-Which means that Figure~\ref{fig.rednoise3}, which shows the power
-spectrum on a log-log scale, should be
-a straight line with slope -2.
+where $K$ is $e^k$, but still not relevant.  More important is
+that power is proportional to $1/f^2$, which is characteristic
+of Brownian noise.
 
-It is quite noisy, so we can't be sure it is a straight line, but at
-least we can estimate its slope.  Spectrum provides
-\verb"estimate_slope", which uses {\tt scipy} to do linear regression
-(also known as a least squares fit):
-
-\begin{verbatim}
-    def estimate_slope(self):
-        x = numpy.log(self.fs[1:])
-        y = numpy.log(self.power[1:])
-        t = scipy.stats.linregress(x,y)
-        return t
-\end{verbatim}
-
-I discard the first component of the spectrum for two reasons: (1)
-this component corresponds to $f=0$, and $\log 0$ is undefined,
-and (2) the amplitude at $f=0$ indicates the mean value of the signal
-(sometimes called the ``DC offset'' or ``bias'').  Since we unbiased
-the signal, this component should be 0 anyway.
-
-\verb"estimate_slope" returns the
-result from {\tt scipy.stats.linregress} which is a tuple that
-contains the estimated slope and intercept, coefficient of
-determination ($R^2$), p-value, and standard error.  For now,
-we only need the slope, which for this example is -1.8.
-
-Brownian noise is also called ``red noise,'' for the same
-reason that white noise is called ``white.''  If you combine
-visible light with the same relationship between frequency and
-power, most of the power would be at the low-frequency end of
-the spectrum, which is red.
-
-Brownian noise is also sometimes called ``brown
-noise'', but I think that's confusing, so I avoid it.
+Brownian noise is also called ``red noise,'' for the same reason that
+white noise is called ``white.''  If you combine visible light with
+the same relationship between frequency and power, most of the power
+would be at the low-frequency end of the spectrum, which is red.
+Brownian noise is also sometimes called ``brown noise'', but I think
+that's confusing, so I won't use it.
 
 
 \section{Pink Noise}
@@ -2160,14 +2111,15 @@ noise'', but I think that's confusing, so I avoid it.
 \label{fig.pinknoise0}
 \end{figure}
 
-To review, for red noise, the relationship between frequency and power is
+For red noise, the relationship between frequency
+and power is
 %
-\[ P = k f^{-2} \]
+\[ P = K / f^{2} \]
 %
 There is nothing special about the exponent -2.  More generally,
 we can synthesize noise with any exponent, $\beta$.
 %
-\[ P = k f^{-\beta} \]
+\[ P = K / f^{\beta} \]
 %
 When $\beta = 0$, power is constant at all frequencies,
 so the result is white noise.  When $\beta=2$ the result is red noise.
@@ -2194,7 +2146,7 @@ class PinkNoise(_Noise):
 
 \begin{verbatim}
     def make_wave(self, duration=1, start=0, framerate=11025):
-        signal = WhiteNoise()
+        signal = UncorrelatedUniformNoise()
         wave = signal.make_wave(duration, start, framerate)
         spectrum = wave.make_spectrum()
 
@@ -2206,11 +2158,11 @@ class PinkNoise(_Noise):
         return wave2
 \end{verbatim}
 
-{\tt duration} is the length of the wave in seconds.  {\tt start}
-is the start time of the wave, which is included so that
-\verb"make_wave" has the same interface for all type of noise,
-but for random noises, start time is irrelevant.  And {\tt framerate}
-is the number of samples per second.
+{\tt duration} is the length of the wave in seconds.  {\tt start} is
+the start time of the wave, which is included so that \verb"make_wave"
+has the same interface for all types of noise, but for random noises,
+start time is irrelevant.  And {\tt framerate} is the number of
+samples per second.
 
 \begin{figure}
 % noise.py
@@ -2234,8 +2186,9 @@ the wave.
 \end{verbatim}
 
 \verb"pink_filter" divides each element of the spectrum by
-$f^{\beta/2}$, which has the effect of dividing the power at
-each frequency, $f$, by $f^\beta$.  It treats the component
+$f^{\beta/2}$.  Since power is the square of amplitude, this
+operation divides the power at
+each component by $f^\beta$.  It treats the component
 at $f=0$ as a special case, partly to avoid dividing by 0, but
 also because this element represents the bias of the signal,
 which we are going to set to 0 anyway. 
@@ -2252,6 +2205,79 @@ white, pink, and red noise on the same log-log scale.
 The relationship between the exponent, $\beta$, and the slope
 of the spectrum is apparent in this figure.
 
+
+\section{Gaussian noise}
+
+\begin{figure}
+% noise.py
+\centerline{\includegraphics[height=2.5in]{figs/noise1.pdf}}
+\caption{Normal probability plot for the real and imaginary parts
+of the spectrum of Gaussian noise.}
+\label{fig.noise1}
+\end{figure}
+
+We started with uncorrelated uniform (UU) noise and showed that,
+because its spectrum has equal power at all frequencies, on
+average, UU noise is white.
+
+But when people talk about ``white noise'', they don't always
+mean UU noise.  In fact, more often they mean uncorrelated
+Gaussian (UG) noise.
+
+{\tt thinkdsp} provides an implementation of UG noise:
+
+\begin{verbatim}
+class UncorrelatedGaussianNoise(_Noise):
+
+    def evaluate(self, ts):
+        ys = numpy.random.normal(0, self.amp, len(ts))
+        return ys
+\end{verbatim}
+
+{\tt numpy.random.normal} returns a NumPy array of values from a
+Gaussian distribution, in this case with mean 0 and standard deviation
+{\tt self.amp}.  In theory the range of values is from negative to
+positive infinity, but we expect about 99\% of the values to be
+between -3 and 3.
+
+UG noise is similar in many ways to UU noise.  The spectrum has
+equal power at all frequencies, on average, so UG is also white.
+And it has one other interesting property: the spectrum of UG
+noise is also UG noise.  More precisely, the real and imaginary
+parts of the spectrum are uncorrelated Gaussian values.
+
+To test that claim, we can generate the spectrum of UG noise and
+then generate a ``normal probability plot,'' which is a graphical
+way to test whether a distribution is Gaussian.
+
+\begin{verbatim}
+    signal = thinkdsp.UncorrelatedGaussianNoise()
+    wave = signal.make_wave(duration=0.5, framerate=11025)
+    spectrum = wave.make_spectrum()
+
+    thinkstats2.NormalProbabilityPlot(spectrum.real)
+    thinkstats2.NormalProbabilityPlot(spectrum.imag)
+\end{verbatim}
+
+{\tt NormalProbabilityPlot} is provided by {\tt thinkstats2}, which is
+included in the repository for this book.  If you are not familiar
+with normal probability plots, you can read about them in
+{\it Think Stats} at \url{http://thinkstats2.com}.
+
+Figure~\ref{fig.noise1} shows the results.  The gray lines
+show a linear model fit to the data; the dark lines show the
+data.
+
+A straight line on a normal probability plot indicates
+that the data come from a Gaussian distribution.  Except for
+some random variation at the extremes, these lines are straight,
+which indicates that the spectrum of UG noise is UG noise.
+
+The spectrum of UU noise is also UG noise, at least approximately.  In
+fact, by the Central Limit Theorem, the spectrum of almost any
+uncorrelated noise is approximately Gaussian, as long as the
+distribution has finite mean and standard deviation and the number of
+samples is large.
 
 
 \section{Exercises}
@@ -2279,6 +2305,8 @@ or Brownian noise?  How does the spectrum vary over time?
 
 
 \begin{exercise}
+%TODO: make this part of the text?
+
 In a white noise signal, the mixture of frequencies changes over time.
 In the long run, we expect the power at all frequencies to be equal,
 but in any sample, the power at each frequency is random.
@@ -2289,7 +2317,7 @@ density for each segment, and then compute the average across
 the segments.  You can read more about this algorithm at
 \url{http://en.wikipedia.org/wiki/Bartlett's_method}.
 
-At \url{http://www.coindesk.com/price/} you can download the daily
+At \url{http://www.coindesk.com} you can download the daily
 price of a BitCoin as a CSV file.  Read this file and compute
 the power spectrum of BitCoin prices as a function of time.
 Does it resemble white, pink, or Brownian noise?
@@ -2396,7 +2424,7 @@ expect them to be correlated.
  [ 0.54  1.  ]]
 \end{verbatim}
 
-The option {\tt ddof=0} indicates that {\tt corrcoef} should normalize
+The option {\tt ddof=0} indicates that {\tt corrcoef} should
 divide by $N$ rather than the default, $N-1$.
 
 The result is a correlation matrix:
@@ -2667,8 +2695,8 @@ the segment starting at $t=0.2$ seconds.  The first peak occurs at
 to that period:
 
 \begin{verbatim}
-period = lag / segment.framerate
-frequency = 1 / period
+    period = lag / segment.framerate
+    frequency = 1 / period
 \end{verbatim}
 
 The estimated fundamental frequency is 437 Hz.  To evaluate the
@@ -2679,6 +2707,14 @@ compared with 100 Hz using the spectrum.
 
 
 \section{Using NumPy}
+\label{correlate}
+
+\begin{figure}
+% autocorr.py
+\centerline{\includegraphics[height=2.5in]{figs/autocorr9.pdf}}
+\caption{Autocorrelation function computed with {\tt numpy.correlate}.}
+\label{fig.autocorr9}
+\end{figure}
 
 NumPy provides a function, {\tt correlate}, that computes
 the correlation of two functions or the autocorrelation of one
@@ -2700,8 +2736,8 @@ effect as a positive lag on the other.  To compare with the results
 from {\tt autocorr}, we can select the second half:
 
 \begin{verbatim}
-N = len(corrs2)
-half = corrs2[N//2:]
+    N = len(corrs2)
+    half = corrs2[N//2:]
 \end{verbatim}
 
 If you compare Figure~\ref{fig.autocorr9} to Figure~\ref{fig.autocorr8},
@@ -2713,15 +2749,15 @@ the correlations decreases.
 We can correct that by dividing through by the lengths:
 
 \begin{verbatim}
-lengths = range(N, N//2, -1)
-half /= lengths
+    lengths = range(N, N//2, -1)
+    half /= lengths
 \end{verbatim}
 
 Finally, we can normalize the results so the correlation with
 {\tt lag=0} is 1.
 
 \begin{verbatim}
-half /= half[0]
+    half /= half[0]
 \end{verbatim}
 
 With these adjustments, the results computed by {\tt autocorr} and
@@ -2845,6 +2881,7 @@ wave how do we identify the frequency components and their amplitudes?
 
 
 \section{Synthesis with arrays}
+\label{synthesis}
 
 \begin{figure}
 \input{diagram}
@@ -3554,7 +3591,7 @@ phase offsets.
 
 \section{Synthesis with matrices}
 
-As we saw in Section~\ref{???}, we can also express the synthesis
+As we saw in Section~\ref{synthesis}, we can also express the synthesis
 problem in terms of matrix multiplication: 
 
 \begin{verbatim}
@@ -3582,8 +3619,9 @@ running across the columns.
 Each column of matrix {\tt M} contains a complex sinusoid with
 a particular frequency, evaluated at a sequence of {\tt ts}.
 
-When we multiply {\tt M} by the amplitudes, the elements of the
-result correspond to the {\tt ts}; each element is the sum of
+When we multiply {\tt M} by the amplitudes, the result is a
+vectors whose
+elements correspond to the {\tt ts}; each element is the sum of
 several complex sinusoids, evaluated at a particular time.
 
 Here's the example from the previous section again:
@@ -3934,7 +3972,7 @@ repository for this book (see Section~\ref{code}).
 \begin{figure}
 % convolution1.py
 \centerline{\includegraphics[height=2.5in]{figs/convolution1.pdf}}
-\caption{Daily changes in the price of Bitcoin and a 30-day moving
+\caption{Daily changes in the price of BitCoin and a 30-day moving
 average.}
 \label{fig.convolution1}
 \end{figure}
@@ -3950,10 +3988,10 @@ A common smoothing algorithm is a moving average, which computes
 the mean of the previous $n$ values, for some value of $n$.
 
 For example, Figure~\ref{fig.convolution1} shows the daily percent
-change in the price of Bitcoin from July 18, 2010 to December 28,
+change in the price of BitCoin from July 18, 2010 to December 28,
 2014 (downloaded from \url{http://www.coindesk.com}).  The gray line
 is the raw data, the darker line shows the 30-day moving average.
-In the short term, the price of Bitcoin is quite volatile, often
+In the short term, the price of BitCoin is quite volatile, often
 changing by more than 10\% in a day.  Smoothing removes the most
 extreme changes and makes it easier to see long-term trends.
 
@@ -3988,13 +4026,13 @@ Now I can compute the average of the first 11 elements by
 multiplying the window by the wave array:
 
 \begin{verbatim}
-    padded = numpy.zeros_like(segment.ys)
-    padded[:len(window)] = window
+    padded = zero_pad(window, len(segment))
     prod = padded * segment.ys
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
-the end so it has the same length as {\tt segment.ys}.
+the end so it has the same length as {\tt segment.ys}
+(\verb"zero_pad" is defined in {\tt convolution.py}).
 {\tt prod} is the product of the window and the wave array.
 
 The first 11 elements of this wave array are -1, so their
@@ -4040,6 +4078,7 @@ to the smoothed signal, it sounds less buzzy and slightly muffled.
 
 
 \section{Convolution}
+\label{convolution}
 
 The operation we just computed is called {\bf convolution},
 and it is such a common operation that NumPy provides an
@@ -4178,8 +4217,7 @@ the wave with the spectrum of the window.  To see how that works,
 we can compute the DFT of the window:
 
 \begin{verbatim}
-    padded = numpy.zeros_like(wave.ys)
-    padded[:len(window)] = window
+    padded = zero_pad(window, len(wave))
     dft_window = numpy.fft.rfft(padded)
     thinkplot.plot(abs(dft_window))
 \end{verbatim}
@@ -4238,7 +4276,7 @@ from the previous example, which is sometimes called a
 % convolution.py
 \centerline{\includegraphics[height=2.5in]{figs/convolution8.pdf}}
 \caption{Ratio of spectrums before and after Gaussian smoothing, and
-  the DFT of the Gaussian window.}
+  the DFT of the window.}
 \label{fig.convolution8}
 \end{figure}
 
@@ -4279,23 +4317,149 @@ convolution takes time proportional to $N^2$; this algorithm,
 using FFT, takes time proportional to $N \log N$.
 
 We can confirm that it works by computing the same convolution
-both ways:
+both ways.  As an example, I'll apply it to the BitCoin data
+shown in Figure~\ref{fig.convolution1}.
 
 \begin{verbatim}
+    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
+                         nrows=1625, 
+                         parse_dates=[0])
+    ys = df.Close.values
 \end{verbatim}
+
+This example uses Pandas to read the data from the CSV file (included
+in the repository for this book).  If you are not familiar with
+Pandas, don't worry: I'm not going to do much with it in this book.
+But if you are interested, you can learn more about it in
+{\it Think Stats} at \url{http://thinkstats2.com}.
+
+The result, {\tt df}, is a DataFrame, one of the data structures
+provided by Pandas.  {\tt ys} is a NumPy array that contains daily
+closing prices.
+
+Next I'll create a Gaussian window and convolve it with {\tt ys}:
 
 \begin{verbatim}
+    window = scipy.signal.gaussian(M=30, std=6)
+    window /= window.sum()
+    smoothed = numpy.convolve(ys, window, mode='valid')
 \end{verbatim}
+
+With {\tt mode='valid'}, {\tt numpy.convolve} returns values
+only where the window and the signal overlap completely, avoiding
+bogus values at the beginning and end.
+
+\verb"fft_convolve" computes the same thing using FFT:
 
 \begin{verbatim}
+def fft_convolve(signal, window):
+    fft_signal = numpy.fft.fft(signal)
+    fft_window = numpy.fft.fft(window)
+    return numpy.fft.ifft(fft_signal * fft_window)
 \end{verbatim}
+
+We can test it by padding the window to the same length
+as {\tt ys}:
 
 \begin{verbatim}
+    padded = zero_pad(window, len(ys))
+    smoothed2 = fft_convolve(ys, padded)
 \end{verbatim}
 
-The roundabout way.
+The result has $M-1$ bogus values at the beginning, where
+$M$ is the length of the window.  If we slice off the bogus
+values, we the same result as before, with about 12 digits
+of precision.
 
-Using convolution to compute cross and autocorrelation.
+\begin{verbatim}
+    M = len(window)
+    smoothed2 = smoothed2[M-1:]
+\end{verbatim}
+
+You can run this example in
+{\tt chap08.ipynb}, which is in the repository for this
+book and also available at \url{http://tinyurl.com/thinkdsp08}.
+
+
+\section{Efficient autocorrelation}
+
+\begin{figure}
+% convolution.py
+\centerline{\includegraphics[height=2.5in]{figs/convolution9.pdf}}
+\caption{Autocorrelation functions computed by NumPy and
+  {\tt fft\_correlate}.}
+\label{fig.convolution9}
+\end{figure}
+
+In Section~\ref{convolution} I presented the definition of
+cross-correlation and convolution, and we saw that they are
+almost the same, except that in convolution the window is
+reversed (for reasons we are still waiting for).
+
+Now that we have an efficient algorithm for convolution, we
+can also use it to compute cross-correlations and autocorrelations.
+Using the data from the previous section, we can compute the
+autocorrelation of BitCoin prices:
+
+\begin{verbatim}
+N = len(ys)
+corrs = numpy.correlate(ys, ys, mode='same')
+corrs = corrs[N//2:]
+\end{verbatim}
+
+With {\tt mode='same'}, the result has the same length as $ys$,
+corresponding to lags from $-N/2$ to $N/2-1$.  By selecting the
+second half, we get only the non-negative lags.
+The gray line in Figure~\ref{fig.convolution9} shows the result.
+Except at {\tt lag=0}, there are no peaks, so there is no apparent
+periodic behavior in this signal.
+
+To compute autocorrelation using convolution, we make two copies of
+the signal and reverse one of them.  Then we pad both of them to
+double their length.  This trick is necessary because the FFT is based
+on the assumption that the signal is periodic; that is, that it wraps
+around from the end to the beginning.  With time-series data like
+this, that assumption is invalid.  Adding zeros prevents the
+FFT from wrapping around and generating bogus values.
+
+\begin{verbatim}
+def fft_autocorr(signal):
+    N = len(signal)
+    window = signal[::-1]
+    signal = zero_pad(signal, 2*N)
+    window = zero_pad(window, 2*N)
+
+    corrs = fft_convolve(signal, window)
+    corrs = corrs[N//2: 3*N//2]
+    return corrs
+\end{verbatim}
+
+When \verb"fft_autocorr" calls \verb"fft_convolve", the result has
+length $2N$, corresponding to lags from $-N+1$ to $N$.  From these I
+slice out the middle half, corresponding to lags from $-N/2$ to
+$N/2-1$.
+
+Finally, we call \verb"fft_autocorr" and select the second half,
+which contains correlations with non-negative lags.
+
+\begin{verbatim}
+    corrs2 = fft_autocorr(ys)
+    corrs2 = corrs2[N//2:]
+\end{verbatim}
+
+The thin, dark line in Figure~\ref{fig.convolution9} shows the result,
+which is identical to the result from {\tt numpy.correlate}, with
+about 7 digits of precision.
+
+Notice that the correlations in Figure~\ref{fig.convolution9} are
+large numbers; we could normalize them (between -1 and 1) as shown
+in Section~\ref{correlate}.
+
+The strategy we used here for auto-correlation also works for
+cross-correlation.  Again, you have to prepare the signals
+by flipping one and padding both, and then you have to trim
+the invalid parts of the result.  But that's why libraries like
+NumPy provide functions to do that for you.
 
 
 \section{Exercises}
@@ -4308,6 +4472,58 @@ what effect they have on the cutoff frequency.
 
 
 \chapter{Signals and Systems}
+
+
+Integrating a noise signal attenuates high frequency components.
+Specifically, it attenuates the power at each frequency, $f$, in
+proportion to $1/f^2$.
+
+This behavior follows from a mathematical property of
+the Fourier transform: given a periodic signal, $h(t)$, and its
+Fourier transform, $H(f)$, we can compute the Fourier transform
+of the integral of $h(t)$:
+%
+\[ g = \int h \]
+%
+\[ G(f) = H(f) / 2 \pi i f \]
+%
+Integration attentuates each component by a factor proportional
+to $f$.  Since power is the square of magnitude, the power of each
+component is attentuated by a factor proportional to $f^2$.
+
+Since we started with white noise, which has equal power at all
+frequencies, we expect Brownian noise to have power at frequency $f$
+proportional to $1/f^2$, on average.  In other words:
+with some unknown constant, $k$.  Taking the log of both sides yields:
+Which means that Figure~\ref{fig.rednoise3}, which shows the power
+spectrum on a log-log scale, should be
+a straight line with slope -2.
+
+It is quite noisy, so we can't be sure it is a straight line, but at
+least we can estimate its slope.  Spectrum provides
+\verb"estimate_slope", which uses {\tt scipy} to do linear regression
+(also known as a least squares fit):
+
+\begin{verbatim}
+    def estimate_slope(self):
+        x = numpy.log(self.fs[1:])
+        y = numpy.log(self.power[1:])
+        t = scipy.stats.linregress(x,y)
+        return t
+\end{verbatim}
+
+I discard the first component of the spectrum for two reasons: (1)
+this component corresponds to $f=0$, and $\log 0$ is undefined,
+and (2) the amplitude at $f=0$ indicates the mean value of the signal
+(sometimes called the ``DC offset'' or ``bias'').  Since we unbiased
+the signal, this component should be 0 anyway.
+
+\verb"estimate_slope" returns the
+result from {\tt scipy.stats.linregress} which is a tuple that
+contains the estimated slope and intercept, coefficient of
+determination ($R^2$), p-value, and standard error.  For now,
+we only need the slope, which for this example is -1.8.
+
 
 \chapter{Fourier analysis of images}
 
