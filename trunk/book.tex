@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.5}
+\newcommand{\theversion}{0.9.6}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -466,7 +466,7 @@ more interesting than sinusoids.
 \end{figure}
 
 The most important topic in this book is {\bf spectral decomposition},
-which is the idea that a complex signal can be expressed as the sum of
+which is the idea that a complicated signal can be expressed as the sum of
 simpler signals with different frequencies.
 
 And the most important algorithm in this book is the {\bf discrete
@@ -633,8 +633,8 @@ and returns a new wave:
 {\tt start} and {\tt duration} are in seconds.  This example copies
 the first three periods from {\tt mix}.  If we plot {\tt segment}, it
 looks like Figure~\ref{fig.example1}.  This signal contains two
-frequency components, so it is more complex than the signal from the
-tuning fork, but less complex than the violin.
+frequency components, so it is more complicated than the signal from the
+tuning fork, but less complicated than the violin.
 
 
 \section{Reading and writing Waves}
@@ -731,8 +731,9 @@ Before you begin this exercises, you should download the code
 for this book, following the instructions in Section~\ref{code}.
 
 \begin{exercise}
-If you have IPython, load {\tt chap01.ipynb}, read through it,
-and run the examples.
+If you have IPython, load {\tt chap01.ipynb}, read through it, and run
+the examples.  You can also view this notebook at
+\url{http://tinyurl.com/thinkdsp01}.
 
 Go to \url{http://freesound.org} and download a sound sample that
 include music, speech, or other sounds that have a well-defined pitch.
@@ -1078,6 +1079,7 @@ Here's the code that generates Figure~\ref{fig.triangle.200.1}:
 
 
 \section{Harmonics}
+\label{harmonics}
 
 \begin{figure}
 % example2.py
@@ -1304,9 +1306,10 @@ repository for this book (see Section~\ref{code}).
 \section{Chirp}
 
 The signals we have worked with so far are periodic, which means
-that they repeat forever.  It also means that their spectrums do
-not vary in time.  In this chapter, we consider non-periodic signals,
-which include signals whose frequency components change over time.
+that they repeat forever.  It also means that the frequency
+components they contain do not change over time.
+In this chapter, we consider non-periodic signals,
+whose frequency components {\em do} change over time.
 In other words, pretty much all sound signals.
 
 We'll start with a {\bf chirp}, which is a signal with variable
@@ -1997,6 +2000,7 @@ visible frequencies is white.
 
 
 \section{Brownian noise}
+\label{brownian}
 
 \begin{figure}
 % noise.py
@@ -2616,7 +2620,7 @@ from C5 to E4.
 \begin{figure}
 % autocorr.py
 \centerline{\includegraphics[height=2.5in]{figs/autocorr6.pdf}}
-\caption{}
+\caption{Spectrum of a segment from a vocal chirp.}
 \label{fig.autocorr6}
 \end{figure}
 
@@ -3279,7 +3283,7 @@ For the analysis problem, we started with a solution that
 takes time proportional to $n^3$ and improved it to take time
 proportional to $n^2$.  It turns out that there is another optimization
 that gets the run time down to $n \log n$.  We'll see how that works
-in Chapter~\ref{???}.
+in Chapter~\ref{dft}.
 
 
 
@@ -3463,8 +3467,7 @@ This function describes a quantity that varies in time, so it is
 a signal.  Specifically, it is a {\bf complex exponential signal}.
 
 In the special case where the frequency of the signal is constant,
-so $\phi(t) = 2 \pi f t$, the result is a {\bf complex
-  sinusoid}:
+so $\phi(t) = 2 \pi f t$, the result is a {\bf complex sinusoid}:
 %
 \[ e^{i 2 \pi f t} = \cos 2 \pi f t + i \sin 2 \pi f t \]
 %
@@ -3590,6 +3593,7 @@ phase offsets.
 
 
 \section{Synthesis with matrices}
+\section{synthmat}
 
 As we saw in Section~\ref{synthesis}, we can also express the synthesis
 problem in terms of matrix multiplication: 
@@ -3968,6 +3972,7 @@ repository for this book (see Section~\ref{code}).
 
 
 \section{Smoothing}
+\label{smoothing}
 
 \begin{figure}
 % convolution1.py
@@ -3976,7 +3981,6 @@ repository for this book (see Section~\ref{code}).
 average.}
 \label{fig.convolution1}
 \end{figure}
-
 
 Smoothing is an operation that tries to remove short-term variations
 from a signal in order to reveal long-term trends.  For example, if
@@ -3995,10 +3999,10 @@ In the short term, the price of BitCoin is quite volatile, often
 changing by more than 10\% in a day.  Smoothing removes the most
 extreme changes and makes it easier to see long-term trends.
 
-Smoothing operations also apply to sound signals.  As an example,
-I'll start with a square wave at 440 Hz.  As we saw in Section~\ref{},
-the harmonics of a square wave drop off slowly, so it contains many
-high-frequency components.
+Smoothing operations also apply to sound signals.  As an example, I'll
+start with a square wave at 440 Hz.  As we saw in
+Section~\ref{harmonics}, the harmonics of a square wave drop off
+slowly, so it contains many high-frequency components.
 
 \begin{verbatim}
     signal = thinkdsp.SquareSignal(freq=440)
@@ -4191,6 +4195,7 @@ What's up with that?
 
 
 \section{The convolution theorem}
+\section{convtheorem}
 
 \begin{figure}
 % convolution6.py
@@ -4299,6 +4304,7 @@ is only approximately Gaussian.
 
 
 \section{Efficient convolution}
+\section{effconv}
 
 One of the reasons the FFT is such an important algorithm is that,
 combined with the Convolution Theorem, it provides an efficient
@@ -4472,6 +4478,351 @@ what effect they have on the cutoff frequency.
 
 
 \chapter{Signals and Systems}
+\label{systems}
+
+The code for this chapter is in {\tt systems.py}, which is in the
+repository for this book (see Section~\ref{code}).
+
+\section{Finite differences}
+
+In Section~\ref{smoothing}, I applied a smoothing window to
+the historical price of BitCoin, and we found that a smoothing
+window in the time domain corresponds to a low-pass filter in
+the frequency domain.
+
+In this section, we'll look at daily price changes, and we'll
+see that computing the difference between successive elements,
+in the time domain, corresponds to a high-pass filter.
+
+Here's the code to read the data, store it as a wave, and compute its
+spectrum.
+
+\begin{verbatim}
+    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
+                         nrows=1625, 
+                         parse_dates=[0])
+    ys = df.Close.values
+    wave = thinkdsp.Wave(ys, framerate=1)
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+The framerate is 1 sample per day.  Figure~\ref{fig.systems1} shows
+the time series and its spectrum plotted on a log-log scale.
+Visually, the time series resembles Brownian noise (see
+Section~\ref{brownian}).  The estimated slope of the spectrum is -1.8,
+which is consistent with Brownian noise.
+
+\begin{figure}
+% systems1.py
+\centerline{\includegraphics[height=2.5in]{figs/systems1.pdf}}
+\caption{Daily closing price of BitCoin and the spectrum of this time
+  series.}
+\label{fig.systems1}
+\end{figure}
+
+Now let's compute the daily price change using {\tt numpy.diff}:
+
+\begin{verbatim}
+    diff = numpy.diff(ys)
+    wave2 = thinkdsp.Wave(diff, framerate=1)
+\end{verbatim}
+
+Figure~\ref{fig.systems2} shows the resulting wave and its
+spectrum.  The differences and their spectrum resemble white noise,
+and the estimated parameter, -0.023, is near zero, which is what
+we expect for white noise.
+
+
+\section{The frequency domain}
+
+\begin{figure}
+% systems2.py
+\centerline{\includegraphics[height=2.5in]{figs/systems2.pdf}}
+\caption{Daily price changes of BitCoin and their spectrum.}
+\label{fig.systems2}
+\end{figure}
+
+To see the effect of this operation in the frequency domain,
+we can compute the ratio of amplitudes before and after:
+
+\begin{verbatim}
+    amps = spectrum.amps
+    amps2 = spectrum2.amps
+    n = min(len(amps), len(amps2))
+    ratio = amps2[:n] / amps[:n]
+    thinkplot.plot(ratio)
+\end{verbatim}
+
+We can also characterize the effect in the frequency domain
+by computing the DFT of the window.  Computing the difference
+between successive elements is the same as convolution with
+the window {\tt [1, -1]}.
+
+\begin{verbatim}
+    window = numpy.array([1.0, -1.0])
+    padded = zero_pad(window, len(wave))
+    fft_window = numpy.fft.rfft(padded)
+    thinkplot.plot(abs(fft_window), color='0.7')
+\end{verbatim}
+
+If the order of the elements in the window seems backward,
+remember that convolution reverses the window before applying it
+to the signal.
+
+Figure~\ref{fig.systems3} shows the computed ratio and the DFT of the
+window, which is the filter.  The computed ratio is noisy, but
+generally follows the shape of the filter.
+
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems3.pdf}}
+\caption{Ratio of amplitudes before and after filtering, and
+the filter corresponding to the {\tt diff} operation.}
+\label{fig.systems3}
+\end{figure}
+
+The filter increases with frequency, linearly for low frequencies,
+and then sublinearly after that.  In the next section, we'll see why.
+
+
+\section{Differentiation}
+\label{effdiff}
+
+The window we used in the previous section is a simple
+numerical approximation of the first derivative, so the filter
+approximates the effect of differentiation, which we can
+figure out mathematically.
+
+Suppose we have a complex sinusoid with frequency $f$:
+%
+\[ E_f(t) = e^{2 \pi i f t} \]
+%
+The first derivative of $E_f$ is
+%
+\[ \frac{d}{dt} E_f(t) = 2 \pi i f e^{2 \pi i f t} \]
+%
+which we can rewrite as
+%
+\[ \frac{d}{dt} E_f(t) = 2 \pi i f E_f(t) \]
+%
+In other words, taking the derivative of $E_f$ is the same
+as multiplying by $2 \pi i f$, which is a complex scalar
+(more specifically, an imaginary scalar).
+
+As we saw in Section~\ref{synthmat}, multiplying a complex sinusoid
+function by a complex scalar has two effects: it multiplies
+the amplitude, in this case by $2 \pi f$, and shifts the phase
+offset, in this case by $\pi/2$ (because that's the angle of
+a positive imaginary number).
+
+If you are familiar with the language of operators and eigenfunctions,
+$E_F$ is an eigenfunction of the differentiation operator, with the
+corresponding eigenvalue $2 \pi i f$.  See
+\url{http://en.wikipedia.org/wiki/Eigenfunction}.
+
+For a complex signal with only one frequency component,
+differentiation is easy.  For signal with more than one component,
+the process is only slightly harder:
+
+\begin{enumerate}
+
+\item Express the signal as the sum of complex sinusoids.
+
+\item Compute the derivative of each component by multiplication.
+
+\item Add up the differentiated components.
+
+\end{enumerate}
+
+If that process sounds familiar, that's because it is identical
+to the algorithm for convolution in Section~\ref{effconv}: compute
+the DFT, multiply by a filter, and compute the inverse DFT.
+
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems4.pdf}}
+\caption{Comparison of daily price changes computed by
+{\tt numpy.diff} and by filtering in the frequency domain.}
+\label{fig.systems4}
+\end{figure}
+
+{\tt Spectrum} provides a method that applies the differentiation
+filter:
+
+\begin{verbatim}
+# class Spectrum:
+
+    def differentiate(self):
+        i = complex(0, 1)
+        filtr = PI2 * i * self.fs
+        self.hs *= filtr
+\end{verbatim}
+
+We can use it to compute the derivative of the BitCoin time series:
+
+\begin{verbatim}
+    spectrum3 = wave.make_spectrum()
+    spectrum3.differentiate()
+    wave3 = spectrum3.make_wave()
+\end{verbatim}
+
+And then plot {\tt wave3}, compared to the previous result
+using {\tt numpy.diff}, {\tt wave3}:
+
+\begin{verbatim}
+    wave2.plot(color='0.7', label='diff')
+    wave3.plot(label='derivative')
+\end{verbatim}
+
+Figure~\ref{fig.systems4} shows the results.  They are similar except
+where the changes are most abrupt.  They also differ at the
+boundaries, because the DFT-based derivative is based on the
+assumption that the signal is periodic.  It wraps around from the end
+to the beginning, creating artifacts at the boundaries.
+
+To summarize, we have shown:
+
+\begin{itemize} 
+
+\item Computing the difference between successive values in a signal
+  can be expressed as convolution with a simple window.  The result is
+  an approximation of the first derivative.
+
+\item Differentiation in the time domain corresponds to a simple
+  filter in the frequency domain.
+
+\end{itemize}
+
+The second conclusion is the basis of {\bf spectral methods} for
+solving differential equations (see
+\url{http://en.wikipedia.org/wiki/Spectral_method}).
+
+In particular, it is useful for the analysis of linear, time-invariant
+systems, which is the next topic.
+
+
+\section{LTI systems}
+
+In the context of signal processing, a {\bf system} is an abstract
+representation of something that takes a signal as input and produces
+a signal as output.
+
+For example, an electronic amplifier is a circuit that takes an
+electrical signal as input and produces a (louder) signal as output.
+
+As another example, for one of the exercises in Chapter~\ref{signal},
+we computed the sound of a violin as heard through a kilometer of sea
+water.  In that case, we model the sea water as a system that takes
+the original recording as input and produces a filtered version as
+output.
+
+A {\bf linear, time-invariant system}\footnote{My presentation here
+  follows \url{http://en.wikipedia.org/wiki/LTI_system_theory}.} is a
+system with these additional properties:
+
+\begin{enumerate}
+
+\item Linearity: If the input $x_1$ produces output $y_1$ and input
+  $x_2$ produces $y_2$, then $a x_1 + b x_2$ produces $a y_1 + b y_2$,
+  where $a$ and $b$ are scalars.  In other words, if you put two
+  inputs into the system at the same time, the result is the sum of
+  their outputs.  
+
+\item Time invariance: If $x_1$ and $x_2$ differ by a shift in time,
+  $y_1$ and $y_2$ differ by the same shift.  In other words, the
+  effect of the system doesn't vary over time, or depend on the state
+  of the system.
+
+\end{enumerate}
+
+Many physical systems have these properties, at least approximately.
+
+\begin{itemize}
+
+\item Circuits that contain only resistors, capacitors and inductors are
+LTI, to the degree that the components behave like their idealized
+models.
+
+\item Mechanical systems that contain springs, masses and
+dashpots are also LTI, assuming linear springs (force proportional
+to displacement) and dashpots (force proportional to velocity).
+
+\item Also, and most relevant to applications in this book,
+the media that transmit sounds (including air, water
+and solids) are well-modeled by LTI systems.
+
+\end{itemize}
+
+LTI systems are described by linear differential equations, and
+the solutions of those equations are complex sinusoids (see
+\url{http://en.wikipedia.org/wiki/Linear_differential_equation}).
+
+This result provides an algorithm for computing the effect of
+an LTI system on an input signal:
+
+\begin{enumerate}
+
+\item Express the signal as the sum of complex sinusoids.
+
+\item For each input component, compute the corresponding output component.
+
+\item Add up the output components.
+
+\end{enumerate}
+
+At this point, I hope this algorithm sounds familiar.  It's the
+same algorithm we used for convolution in Section~\ref{effconv}, and
+for differentiation in Section~\ref{effdiff}.  This process
+is called {\bf spectral decomposition} because we ``decompose''
+the input signal into its spectral components.
+
+In order to apply this process to an LTI system, we have to {\bf
+  characterize} the system by finding its effect on each component
+of the input signal.  For mechanical systems, it turns out that there
+is a simple and efficient way to do that: you kick it and measure
+the output.
+
+Technically, the ``kick'' is called an {\bf impulse} and the
+output is called the {\bf impulse response}.
+
+
+
+\section{Exercises}
+
+\begin{exercise}
+Are kazoos nonlinear?
+
+Also see \url{http://www.google.com/patents/US20140256218}
+
+And \url{http://designingsound.org/2014/07/spectral-analysis-interview-with-rob-blake/}
+\end{exercise}
+
+
+
+\chapter{Fourier analysis of images}
+
+
+\end{document}
+
+
+
+Case study ideas:
+
+\begin{itemize}
+
+\item Pitch tracking in Rock Band
+
+\item Auto-Tune
+
+\item JPEG compression
+
+\item Image recognition in Fourier space (money)
+
+\item Application of cepstrum?
+
+\item Application of z transform -- digital control systems
+
+\item tilt shift effect on a photo
 
 
 Integrating a noise signal attenuates high frequency components.
@@ -4524,30 +4875,5 @@ contains the estimated slope and intercept, coefficient of
 determination ($R^2$), p-value, and standard error.  For now,
 we only need the slope, which for this example is -1.8.
 
-
-\chapter{Fourier analysis of images}
-
-
-\end{document}
-
-
-
-Case study ideas:
-
-\begin{itemize}
-
-\item Pitch tracking in Rock Band
-
-\item Auto-Tune
-
-\item JPEG compression
-
-\item Image recognition in Fourier space (money)
-
-\item Application of cepstrum?
-
-\item Application of z transform -- digital control systems
-
-\item tilt shift effect on a photo
 
 \end{itemize}
