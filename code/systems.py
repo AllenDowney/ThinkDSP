@@ -133,7 +133,48 @@ def plot_filters(wave):
     thinkplot.show()
 
 
+def plot_response():
+    thinkplot.preplot(cols=2)
+
+    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = response.segment(start=0.26, duration=5.0)
+    response.normalize()
+    response.plot()
+    thinkplot.config(xlabel='time',
+                     xlim=[0, 5.0],
+                     ylabel='amplitude',
+                     ylim=[-1.05, 1.05])
+
+    thinkplot.subplot(2)
+    transfer = response.make_spectrum()
+    transfer.plot()
+    thinkplot.config(xlabel='frequency',
+                     xlim=[0, 22500],
+                     ylabel='amplitude')
+
+    thinkplot.save(root='systems6')
+
+    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
+    wave.ys = wave.ys[:len(response)]
+    wave.normalize()
+    spectrum = wave.make_spectrum()
+
+    output = (spectrum * transfer).make_wave()
+    output.normalize()
+
+    wave.plot(color='0.7')
+    output.plot(alpha=0.4)
+    thinkplot.config(xlabel='time',
+                     xlim=[0, 5.0],
+                     ylabel='amplitude',
+                     ylim=[-1.05, 1.05])
+    thinkplot.save(root='systems7')
+
+
 def main():
+    plot_response()
+    return
+
     df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
                          nrows=1625,
                          parse_dates=[0])

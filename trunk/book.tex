@@ -377,8 +377,8 @@ transduce, or convert, signals from one form to another.
 
 This book is about signal processing, which includes processes for
 synthesizing, transforming, and analyzing signals.  I will focus on
-sound signals, but the same methods apply to
-electronic signals and mechanical vibration.
+sound signals, but the same methods apply to electronic signals,
+mechanical vibration, and signals in many other domains.
 
 They also apply to signals that vary in space rather than time, like
 elevation along a hiking trail.  And they apply to signals in more
@@ -466,7 +466,7 @@ more interesting than sinusoids.
 \end{figure}
 
 The most important topic in this book is {\bf spectral decomposition},
-which is the idea that a complicated signal can be expressed as the sum of
+which is the idea that any signal can be expressed as the sum of
 simpler signals with different frequencies.
 
 And the most important algorithm in this book is the {\bf discrete
@@ -628,13 +628,15 @@ and returns a new wave:
     segment = wave.segment(start=0, duration=period*3)
 \end{verbatim}
 
-{\tt period} is a property of a Signal; it returns the period in second.
+{\tt period} is a property of a Signal; it returns the period in seconds.
 
 {\tt start} and {\tt duration} are in seconds.  This example copies
-the first three periods from {\tt mix}.  If we plot {\tt segment}, it
-looks like Figure~\ref{fig.example1}.  This signal contains two
-frequency components, so it is more complicated than the signal from the
-tuning fork, but less complicated than the violin.
+the first three periods from {\tt mix}.  The result is a Wave object.
+
+If we plot {\tt segment}, it looks like Figure~\ref{fig.example1}.
+This signal contains two frequency components, so it is more
+complicated than the signal from the tuning fork, but less complicated
+than the violin.
 
 
 \section{Reading and writing Waves}
@@ -1012,7 +1014,7 @@ should be plotted.
 \section{Other waveforms}
 
 A sinusoid contains only one frequency component, so its DFT
-has only one peak.  More complex waveforms, like the
+has only one peak.  More complicated waveforms, like the
 violin recording, yield DFTs with many peaks.  In this section we
 investigate the relationship between waveforms and their DFTs.
 
@@ -1222,7 +1224,7 @@ and sample them at 10,000 frames per second:
 % example2.py
 \centerline{\includegraphics[height=2.5in]{figs/aliasing-3.pdf}}
 \caption{Cosine signals at 4500 and 5500 Hz, sampled at 10,000 frames
-per second.}
+per second.  They are identical.}
 \label{fig.aliasing-3}
 \end{figure}
 
@@ -1292,7 +1294,7 @@ wave has both even and odd harmonics.  The harmonics of the
 square and sawtooth waves drop off in proportion to $1/f$; the
 harmonics of the triangle wave drop off like $1/f^2$.  Can you
 find a waveform that has even and odd harmonics that drop off
-like $1/f$?
+like $1/f^2$?
 \end{exercise}
 
 
@@ -1491,14 +1493,13 @@ beginning, and FFT behaves well.
 Figure~\ref{fig.windowing1}a shows the result.  As expected, there is
 a single peak at 440 Hz.
 
-But if the duration is not a multiple of the
-period, bad things happen.  With {\tt duration = signal.period *
-  30.25}, the signal starts at 0 and ends at 1.
-Figure~\ref{fig.windowing1}b shows the spectrum of this segment.
-Again, the peak is at 440 Hz, but now there are additional components
-spread out from 240 to 640 Hz.  This spread is called ``spectral
-leakage'', because some of the energy at the fundamental frequency
-leaks into other frequencies.
+But if the duration is not a multiple of the period, bad things
+happen.  With {\tt duration = signal.period * 30.25}, the signal
+starts at 0 and ends at 1.  Figure~\ref{fig.windowing1}b shows the
+spectrum of this segment.  Again, the peak is at 440 Hz, but now there
+are additional components spread out from 240 to 640 Hz.  This spread
+is called ``spectral leakage'', because some of the energy that is
+actually at the fundamental frequency leaks into other frequencies.
 
 In this example, leakage happens because we are using FFT on a segment
 that is not periodic.
@@ -1582,7 +1583,7 @@ range.  Based on that observation, you should be able to guess what
 the spectrum of an exponential chirp looks like.
 
 The spectrum gives hints about the structure of the signal,
-but it loses the relationship between frequency and time.
+but it obscures the relationship between frequency and time.
 For example, we cannot tell by looking at this spectrum whether
 the frequency went up or down, or both.
 
@@ -1667,7 +1668,7 @@ resolution in half (which is good), but you double time resolution
 more samples, but the range of frequencies increases at
 the same time.
 
-This tradeoff is called the ``Gabor limit'' and it is a fundamental
+This tradeoff is called the {\bf Gabor limit} and it is a fundamental
 limitation of this kind of time-frequency analysis.
 
 
@@ -3046,9 +3047,9 @@ system of equations takes time proportional to $n^3$, where $n$ is
 the number of columns in $M$.  We can do better.
 
 
-\section{Orthogonal matrixes}
+\section{Orthogonal matrices}
 
-One way to solve linear systems is by inverting matrixes.  The
+One way to solve linear systems is by inverting matrices.  The
 inverse of a matrix $M$ is written $M^{-1}$, and it has the property
 that $M^{-1}M = I$.  $I$ is the identity matrix, which has
 the value 1 on all diagonal elements and 0 everywhere else.
@@ -3513,7 +3514,7 @@ This example evaluates the signal at 4 places equally spaced between
 
 \section{The synthesis problem}
 
-We can create more complicated signals by adding up complex
+We can create compound signals by adding up complex
 sinusoids with different frequencies.  And that brings us
 to the synthesis problem: given the frequency and amplitude of
 each component, how do we evaluate the signal?
@@ -4783,8 +4784,161 @@ is a simple and efficient way to do that: you kick it and measure
 the output.
 
 Technically, the ``kick'' is called an {\bf impulse} and the
-output is called the {\bf impulse response}.
+output is called the {\bf impulse response}.  You might wonder
+how a single impulse can completely characterize a system.  You
+can see the answer by computing the DFT of an impulse.  Here's
+a wave array with an impulse at $t=0$:
 
+\begin{verbatim}
+>>> impulse = numpy.zeros(8)
+>>> impulse[0] = 1
+>>> print(impulse)
+[ 1.  0.  0.  0.  0.  0.  0.  0.]
+\end{verbatim}
+
+And here's its spectrum:
+
+\begin{verbatim}
+>>> spectrum = numpy.fft.fft(impulse)
+>>> print(spectrum)
+[ 1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j]
+\end{verbatim}
+
+That's right: an impulse is the sum of components with
+equal magnitudes at all frequencies (and a phase offset of 0).
+
+What that means is that when you test a system by inputting
+an impulse, you are testing the response of the 
+system at all frequencies.  And you can test them all at the same
+time because the system is linear, so simultaneous tests don't
+interfere with each other.
+
+
+\section{Transfer functions}
+
+For characterizing the acoustic response of a room or open space, a
+simple and effective way to generate an impulse is to fire a gun (or a
+starter pistol).  The gunshot puts an impulse into the system; the
+sound you hear is the impulse response.
+
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems6.pdf}}
+\caption{Waveform of a gunshot.}
+\label{fig.systems6}
+\end{figure}
+
+As an example, I'll use a recording of a gunshot to characterize
+the room where the gun was fired, then use the impulse response
+to simulate the effect of that room on a violin recording.
+
+This
+example is in {\tt chap09.ipynb}, which is in the repository
+for this book; you can also view it, and listen to the examples,
+at \url{http://tinyurl.com/thinkdsp09}.
+
+Here's the gunshot:
+
+\begin{verbatim}
+    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = response.segment(start=0.26, duration=5.0)
+    response.normalize()
+    response.plot()
+\end{verbatim}
+
+I select a segment starting at 0.26 seconds to remove the silence
+before the gunshot.  Figure~\ref{fig.system6} (left) shows the
+waveform of the gunshot.  Next we compute the DFT of {\tt response}:
+
+\begin{verbatim}
+    transfer = response.make_spectrum()
+    transfer.plot()
+\end{verbatim}
+
+Figure~\ref{fig.system6} (right) shows the result.  This spectrum
+encodes the response of the room; for each frequency, the spectrum
+contains a complex number that represents the amplitude of the
+response and the phase shift.  This spectrum is called a {\bf transfer
+function} contains information about how the system transfers
+the input to the output.
+
+Now we can simulate the effect this room would have on the sound
+of a violin.  Here is the violin recording we used in Chapter~\ref{signals}
+
+\begin{verbatim}
+    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
+    wave.ys = wave.ys[:len(response)]
+    wave.normalize()
+\end{verbatim}
+
+The violin and gunshot waves were sampled at the same framerate,
+44,100 Hz.  And coincidentally, the duration of both is about 5
+seconds.  I trimmed the violin wave to the same length as the
+gunshot.
+
+Next I'll compute the DFT of the violin wave:
+
+\begin{verbatim}
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Now I know the magnitude and phase of each component in the
+input, and I know the transfer function of the system.  Their
+product is the DFT of the output:
+
+\begin{verbatim}
+    output = (spectrum * transfer).make_wave()
+    output.normalize()
+    output.plot()
+\end{verbatim}
+
+Figure~\ref{fig.system7} shows the output of the system superimposed
+on the input.  The overall shape is similar, but there are substantial
+differences.  And those differences are clearly audible.  Load
+{\tt chap09.ipynb} and listen to them.  One thing I find striking
+about this example is that you can get a sense of what the room
+was like; to me, it sounds like a long, narrow room with hard floors
+and ceilings.  That is, a firing range.
+
+There's one things I glossed over in this example that I'll mention
+in case it bothers anyone.  The violin recording I started with
+has already been transformed by one system: the room where it was
+recorded.  So what I really computed in my example is the sound
+of the violin after two transformations.  To really simulate
+the sound of a violin in a different room, I should have characterized
+the room where the violin was recorded and applied the inverse
+of that transfer function first.
+
+
+\section{Systems and convolution}
+
+If you think the previous example is black magic,
+you are not alone.  I've been thinking about it for a while and it
+still makes my head hurt.
+
+In the previous section, I suggested one way to think about it:
+
+\begin{itemize}
+
+\item An impulse is made up of components with amplitude 1 at all
+  frequencies.
+
+\item So the impulse response contains sum of the response of the
+  system to all of these components.
+
+\item The transfer function, which is the DFT of the impulse response,
+  encodes the response of the system to each component.
+
+\item Therefore, if we know what the system does to an impulse, we
+  can figure out what it would do to any other signal.
+
+\end{itemize}
+
+
+
+
+\begin{verbatim}
+\end{verbatim}
 
 
 \section{Exercises}
