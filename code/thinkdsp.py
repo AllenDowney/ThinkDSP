@@ -108,10 +108,16 @@ def read_wave(filename='sound.wav'):
     
     fp.close()
 
-    dtype_map = {1:numpy.int8, 2:numpy.int16}
-    assert sampwidth in dtype_map
+    dtype_map = {1:numpy.int8, 2:numpy.int16, 3:'special', 4:numpy.int32}
+    if sampwidth not in dtype_map:
+        raise ValueError('sampwidth %d unknown' % sampwidth)
     
-    ys = numpy.fromstring(z_str, dtype=dtype_map[sampwidth])
+    if sampwidth == 3:
+        xs = numpy.fromstring(z_str, dtype=numpy.int8).astype(numpy.int32)
+        ys = (xs[2::3] * 256 + xs[1::3]) * 256 + xs[0::3]
+    else:
+        ys = numpy.fromstring(z_str, dtype=dtype_map[sampwidth])
+
     wave = Wave(ys, framerate)
     return wave
 
@@ -206,6 +212,10 @@ class Spectrum(_SpectrumParent):
             
         self.fs = numpy.linspace(0, max_freq, n)
 
+    def __len__(self):
+        """Length of the spectrum."""
+        return len(self.hs)
+
     def __add__(self, other):
         """Adds two spectrums elementwise.
 
@@ -221,6 +231,20 @@ class Spectrum(_SpectrumParent):
         return Spectrum(hs, self.framerate)
 
     __radd__ = __add__
+        
+    def __mul__(self, other):
+        """Multiplies two spectrums.
+
+        other: Spectrum
+
+        returns: new Spectrum
+        """
+        # the spectrums have to have the same framerate and duration
+        assert self.framerate == other.framerate
+        assert len(self) == len(other)
+
+        hs = self.hs * other.hs
+        return Spectrum(hs, self.framerate)
         
     @property
     def real(self):
@@ -281,6 +305,13 @@ class Spectrum(_SpectrumParent):
         denom = self.fs ** (beta/2.0)
         denom[0] = 1
         self.hs /= denom
+
+    def differentiate(self):
+        """Apply the differentiation filter.
+        """
+        i = complex(0, 1)
+        filtr = PI2 * i * self.fs
+        self.hs *= filtr
 
     def angles(self, i):
         """Computes phase angles in radians.
@@ -544,6 +575,19 @@ class Wave(object):
         ys = numpy.concatenate((self.ys, other.ys))
         return Wave(ys, self.framerate)
 
+    def __mul__(self, other):
+        """Convolves two waves.
+
+        other: Wave
+        
+        returns: Wave
+        """
+        if self.framerate != other.framerate:
+            raise ValueError('Wave convolution: framerates do not agree')
+
+        ys = numpy.convolve(self.ys, other.ys, mode='same')
+        return Wave(ys, self.framerate)
+
     def quantize(self, bound, dtype):
         """Maps the waveform to quanta.
 
@@ -577,6 +621,23 @@ class Wave(object):
         """
         self.ys *= window
 
+    def scale(self, factor):
+        """Multplies the wave by a factor.
+
+        factor: scale factor
+        """
+        self.ys *= factor
+
+    def shift(self, shift):
+        """Shifts the wave left or right by index shift.
+
+        shift: integer number of places to shift
+        """
+        if shift < 0:
+            self.ys = shift_left(self.ys, shift)
+        if shift > 0:
+            self.ys = shift_right(self.ys, shift)
+        
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
 
@@ -753,6 +814,30 @@ def normalize(ys, amp=1.0):
     """
     high, low = abs(max(ys)), abs(min(ys))
     return amp * ys / max(high, low)
+
+
+def shift_right(ys, shift):
+    """Shift a wave array to the right and zero pads.
+
+    ys: wave array
+    shift: integer shift
+
+    returns: wave array
+    """
+    res = numpy.zeros(len(ys) + shift)
+    res[shift:] = ys
+    return res
+
+
+def shift_left(ys, shift):
+    """Shift a wave array to the left.
+
+    ys: wave array
+    shift: integer shift
+
+    returns: wave array
+    """
+    return ys[shift:]
 
 
 def quantize(ys, bound, dtype):
@@ -1177,8 +1262,7 @@ class UncorrelatedGaussianNoise(_Noise):
         
         returns: float wave array
         """
-        ys = numpy.random.normal(0, 1, len(ts))
-        ys = normalize(ys, self.amp)
+        ys = numpy.random.normal(0, self.amp, len(ts))
         return ys
 
 
@@ -1196,7 +1280,8 @@ class BrownianNoise(_Noise):
         returns: float wave array
         """
         dys = numpy.random.uniform(-1, 1, len(ts))
-        ys = scipy.integrate.cumtrapz(dys, ts)
+        #ys = scipy.integrate.cumtrapz(dys, ts)
+        ys = numpy.cumsum(dys)
         ys = normalize(unbias(ys), self.amp)
         return ys
 
