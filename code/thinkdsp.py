@@ -585,7 +585,8 @@ class Wave(object):
         if self.framerate != other.framerate:
             raise ValueError('Wave convolution: framerates do not agree')
 
-        ys = numpy.convolve(self.ys, other.ys, mode='same')
+        ys = numpy.convolve(self.ys, other.ys, mode='full')
+        ys = ys[:len(self.ys)]
         return Wave(ys, self.framerate)
 
     def quantize(self, bound, dtype):
@@ -638,6 +639,11 @@ class Wave(object):
         if shift > 0:
             self.ys = shift_right(self.ys, shift)
         
+    def truncate(self, n):
+        """Trims this wave to the given length.
+        """
+        self.ys = truncate(self.ys, n)
+
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
 
@@ -658,12 +664,12 @@ class Wave(object):
 
         returns: Wave
         """
-        i = start * self.framerate
+        i = round(start * self.framerate)
 
         if duration is None:
             j = None
         else:
-            j = i + duration * self.framerate
+            j = i + round(duration * self.framerate)
 
         ys = self.ys[i:j]
         return Wave(ys, self.framerate)
@@ -817,7 +823,7 @@ def normalize(ys, amp=1.0):
 
 
 def shift_right(ys, shift):
-    """Shift a wave array to the right and zero pads.
+    """Shifts a wave array to the right and zero pads.
 
     ys: wave array
     shift: integer shift
@@ -830,7 +836,7 @@ def shift_right(ys, shift):
 
 
 def shift_left(ys, shift):
-    """Shift a wave array to the left.
+    """Shifts a wave array to the left.
 
     ys: wave array
     shift: integer shift
@@ -838,6 +844,17 @@ def shift_left(ys, shift):
     returns: wave array
     """
     return ys[shift:]
+
+
+def truncate(ys, n):
+    """Trims a wave array to the given length.
+
+    ys: wave array
+    n: integer length
+
+    returns: wave array
+    """
+    return ys[:n]
 
 
 def quantize(ys, bound, dtype):

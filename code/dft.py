@@ -123,12 +123,12 @@ def make_figures():
 
     ys = synthesize2(amps, freqs, ts)
 
-    amps2 = amps * numpy.exp(1j)
+    amps2 = amps * numpy.exp(1.5j)
     ys2 = synthesize2(amps2, freqs, ts)
 
     thinkplot.preplot(2)
     thinkplot.plot(ts[:n], ys.real[:n], label=r'$\phi_0 = 0$')
-    thinkplot.plot(ts[:n], ys2.real[:n], label=r'$\phi_0 = 1$')
+    thinkplot.plot(ts[:n], ys2.real[:n], label=r'$\phi_0 = 1.5$')
     thinkplot.save(root='dft2',
                    xlabel='time (s)', 
                    ylabel='wave',

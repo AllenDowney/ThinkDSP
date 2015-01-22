@@ -24,25 +24,39 @@ def plot_bitcoin():
     df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
                          nrows=nrows, parse_dates=[0])
     ys = df.Close.values
-    diff = numpy.diff(ys)
-    changes = 100 * diff / ys[:len(diff)]
 
     window = numpy.ones(30)
     window /= sum(window)
-    smoothed = numpy.convolve(changes, window, mode='same')
+    smoothed = numpy.convolve(ys, window, mode='valid')
 
-    thinkplot.plot(changes, color='0.7', label='daily')
+    N = len(window)
+    smoothed = thinkdsp.shift_right(smoothed, N//2)
+
+    thinkplot.plot(ys, color='0.7', label='daily')
     thinkplot.plot(smoothed, label='30 day average')
     thinkplot.config(xlabel='time (days)', 
-                     ylabel='% change',
+                     ylabel='price',
                      xlim=[0, nrows],
-                     ylim=[-60, 60],
+#                     ylim=[-60, 60],
                      loc='lower right')
     thinkplot.save(root='convolution1')
 
 
-def plot_boxcar():
+def zero_pad(array, n):
+    """Makes a new array with the same elements and the given length.
+
+    array: numpy array
+    n: length of result
+
+    returns: new NumPy array
     """
+    res = numpy.zeros(n)
+    res[:len(array)] = array
+    return res
+
+
+def plot_boxcar():
+    """Makes a plot showing the effect of convolution with a boxcar window.
     """
     # start with a square signal
     signal = thinkdsp.SquareSignal(freq=440)
@@ -56,8 +70,7 @@ def plot_boxcar():
     segment = wave.segment(duration=0.01)
 
     # and pad with window out to the length of the array
-    padded = numpy.zeros_like(segment.ys)
-    padded[:len(window)] = window
+    padded = zero_pad(window, len(segment))
 
     # compute the first element of the smoothed signal
     prod = padded * segment.ys
@@ -114,8 +127,7 @@ def plot_boxcar():
 
 
     # plot the same ratio along with the FFT of the window
-    padded = numpy.zeros_like(wave.ys)
-    padded[:len(window)] = window
+    padded = zero_pad(window, len(wave))
     dft_window = numpy.fft.rfft(padded)
 
     thinkplot.plot(abs(dft_window), color='0.7', label='boxcar filter')
@@ -129,7 +141,7 @@ def plot_boxcar():
 
     
 def plot_gaussian():
-    """
+    """Makes a plot showing the effect of convolution with a boxcar window.
     """
     # start with a square signal
     signal = thinkdsp.SquareSignal(freq=440)
@@ -162,8 +174,7 @@ def plot_gaussian():
     ratio[amps<560] = 0
 
     # plot the same ratio along with the FFT of the window
-    padded = numpy.zeros_like(wave.ys)
-    padded[:len(gaussian)] = gaussian
+    padded = zero_pad(gaussian, len(wave))
     dft_gaussian = numpy.fft.rfft(padded)
 
     thinkplot.plot(abs(dft_gaussian), color='0.7', label='Gaussian filter')
@@ -175,11 +186,74 @@ def plot_gaussian():
                      legend=False)
     thinkplot.save(root='convolution8')
 
-    
+
+def fft_convolve(signal, window):
+    fft_signal = numpy.fft.fft(signal)
+    fft_window = numpy.fft.fft(window)
+    return numpy.fft.ifft(fft_signal * fft_window)
+
+
+def fft_autocorr(signal):
+    N = len(signal)
+    window = signal[::-1]
+    signal = zero_pad(signal, 2*N)
+    window = zero_pad(window, 2*N)
+
+    corrs = fft_convolve(signal, window)
+    corrs = corrs[N//2: 3*N//2]
+    return corrs
+
+
+def plot_fft_convolve():
+    """Makes a plot showing that FFT-based convolution works.
+    """
+    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
+                         nrows=1625, 
+                         parse_dates=[0])
+    ys = df.Close.values
+
+    # compute a 30-day average using numpy.convolve
+    window = scipy.signal.gaussian(M=30, std=6)
+    window /= window.sum()
+    smoothed = numpy.convolve(ys, window, mode='valid')
+
+    # compute the same thing using fft_convolve
+    padded = zero_pad(window, len(ys))
+    smoothed2 = fft_convolve(ys, padded)
+    M = len(window)
+    smoothed2 = smoothed2[M-1:]
+
+    # check for the biggest difference
+    diff = smoothed - smoothed2
+    print(max(abs(diff)))
+
+    # compute autocorrelation using numpy.correlate
+    N = len(ys)
+    corrs = numpy.correlate(ys, ys, mode='same')
+    corrs = corrs[N//2:]
+
+    corrs2 = fft_autocorr(ys)
+    corrs2 = corrs2[N//2:]
+
+    # check for the biggest difference
+    diff = corrs - corrs2
+    print(max(abs(diff)))
+
+    # plot the results
+    thinkplot.preplot(1)
+    thinkplot.plot(corrs, color='0.7', linewidth=7, label='numpy.convolve')
+    thinkplot.plot(corrs2.real, linewidth=2, label='fft_convolve')
+    thinkplot.config(xlabel='lags', 
+                     ylabel='correlation', 
+                     xlim=[0, N//2])
+    thinkplot.save(root='convolution9')
+
+
 def main():
     plot_gaussian()
     plot_boxcar()
     plot_bitcoin()
+    plot_fft_convolve()
 
 
 if __name__ == '__main__':

@@ -9,7 +9,6 @@ from __future__ import print_function, division
 
 import math
 import numpy
-import scipy.fftpack
 
 import thinkdsp
 import thinkplot
@@ -98,24 +97,8 @@ def dct_iv(ys):
     return amps
 
 
-def plot(res, index):
-    """
-
-    res:
-    index:
-    """
-    slices = [[0, None], [400, 1000], [860, 900]]
-    start, end = slices[index]
-    xs, ys = zip(*res[start:end])
-    thinkplot.plot(xs, ys)
-    thinkplot.save(root='dft%d' % index,
-                   xlabel='freq (Hz)',
-                   ylabel='cov',
-                   formats=['png'])
-
-
 def synthesize_example():
-    """
+    """Synthesizes a sum of sinusoids and plays it.
     """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
@@ -134,26 +117,19 @@ def synthesize_example():
     print(amps2)
 
 
-def test_analyze1():
-    """
-    """
+def test1():
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
     time_unit = 0.001
     ts = numpy.arange(N) / N * time_unit
     max_freq = N / time_unit / 2
     freqs = numpy.arange(N) / N * max_freq
-    print('amps', amps)
-    print('ts', ts / time_unit)
-    print('freqs', freqs)
-
-    ys = synthesize2(amps, freqs, ts)
-    amps2 = analyze1(ys, freqs, ts)
-    print('amps', amps)
-    print('amps2', amps2)
+    args = numpy.outer(ts, freqs)
+    M = numpy.cos(PI2 * args)
+    return M
 
 
-def test_analyze2():
+def test2():
     """
     """
     amps = numpy.array([0.6, 0.25, 0.1, 0.05])
@@ -186,39 +162,8 @@ def test_dct():
 def main():
     numpy.set_printoptions(precision=3, suppress=True)
 
-    test_dct()
-    return
-
-    synthesize_example()
-    return
-
-    test_synthesize(fshift=0, tshift=0)
-    test_synthesize(fshift=0.5, tshift=0.5)
-    return
-
-    cos_sig = thinkdsp.CosSignal(freq=1)
-    wave = cos_sig.make_wave(duration=1, start=0, framerate=4)
-    print(wave.ys)
-
-    dct = scipy.fftpack.dct(wave.ys, type=2)
-    print(dct)
-
-    cos_trans = wave.cos_transform()
-    xs, ys = zip(*cos_trans)
-    print(ys)
-    return
-
-
-    framerate = 4000
-    cos_sig = (thinkdsp.CosSignal(freq=440) +
-               thinkdsp.SinSignal(freq=660) +
-               thinkdsp.CosSignal(freq=880))
-
-    wave = cos_sig.make_wave(duration=0.5, start=0, framerate=framerate)
-
-    res = wave.cos_transform()
-    for index in range(3):
-        plot(res, index)
+    test1()
+    test2()
 
 
 if __name__ == '__main__':

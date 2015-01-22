@@ -171,7 +171,49 @@ def plot_response():
     thinkplot.save(root='systems7')
 
 
+def shifted_scaled(wave, shift, factor):
+    res = wave.copy()
+    res.shift(shift)
+    res.scale(factor)
+    return res
+
+def plot_convolution():
+    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = response.segment(start=0.26, duration=5.0)
+    response.normalize()
+
+    dt = 1
+    shift = dt * response.framerate
+    factor = 0.5
+    
+    gun2 = response + shifted_scaled(response, shift, factor)
+    gun2.plot()
+    thinkplot.config(xlabel='time (s)',
+                     ylabel='amplitude',
+                     ylim=[-1.05, 1.05],
+                     legend=False)
+    thinkplot.save(root='systems8')
+
+    signal = thinkdsp.SawtoothSignal(freq=410)
+    wave = signal.make_wave(duration=0.1, framerate=response.framerate)
+
+    total = 0
+    for j, y in enumerate(wave.ys):
+        total += shifted_scaled(response, j, y)
+
+    total.normalize()
+
+    wave.make_spectrum().plot(high=500, color='0.7', label='original')
+    segment = total.segment(duration=0.2)
+    segment.make_spectrum().plot(high=1000, label='convolved')
+    thinkplot.config(xlabel='frequency (Hz)', ylabel='amplitude')
+    thinkplot.save(root='systems9')
+
+
 def main():
+    plot_convolution()
+    return
+
     plot_response()
     return
 

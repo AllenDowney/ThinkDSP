@@ -212,8 +212,6 @@ def plot_singing_chirp():
 
 def plot_correlate():
     """Plots the autocorrelation function computed by numpy.
-
-    wave: Wave
     """
     wave = thinkdsp.read_wave('28042__bcjordan__voicedownbew.wav')
     wave.normalize()
@@ -229,21 +227,20 @@ def plot_correlate():
     thinkplot.save(root='autocorr9')
 
     N = len(corrs2)
-    lengths = range(N, N//2, -1)
-
     half = corrs2[N//2:]
+
+    lengths = range(N, N//2, -1)
     half /= lengths
     half /= half[0]
 
 
 def main():
-    plot_correlate()
-    return
-
     plot_sines()
     plot_serial_corr()
     plot_autocorr()
     plot_singing_chirp()
+    plot_correlate()
+
 
 if __name__ == '__main__':
     main()

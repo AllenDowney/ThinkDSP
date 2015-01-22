@@ -7,12 +7,13 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 from __future__ import print_function
 
-import logging
 import math
 import matplotlib
 import matplotlib.pyplot as pyplot
 import numpy as np
 import pandas
+
+import warnings
 
 # customize some matplotlib attributes
 #matplotlib.rc('figure', figsize=(4, 3))
@@ -165,6 +166,8 @@ def _Underride(d, **options):
 
 def Clf():
     """Clears the figure and any hints that have been set."""
+    global LOC
+    LOC = None
     _Brewer.ClearIter()
     pyplot.clf()
     fig = pyplot.gcf()
@@ -187,7 +190,8 @@ def _UnderrideColor(options):
         try:
             options['color'] = next(color_iter)
         except StopIteration:
-            print('Warning: Brewer ran out of colors.')
+            # TODO: reconsider whether this should warn
+            # warnings.warn('Warning: Brewer ran out of colors.')
             _Brewer.ClearIter()
     return options
 
@@ -322,7 +326,7 @@ def Hist(hist, **options):
         try:
             options['width'] = 0.9 * np.diff(xs).min()
         except TypeError:
-            logging.warning("Hist: Can't compute bar width automatically."
+            warnings.warn("Hist: Can't compute bar width automatically."
                             "Check for non-numeric types in Hist."
                             "Or try providing width option."
                             )
@@ -367,9 +371,9 @@ def Pmf(pmf, **options):
         try:
             width = np.diff(xs).min()
         except TypeError:
-            logging.warning("Pmf: Can't compute bar width automatically."
-                            "Check for non-numeric types in Pmf."
-                            "Or try providing width option.")
+            warnings.warn("Pmf: Can't compute bar width automatically."
+                          "Check for non-numeric types in Pmf."
+                          "Or try providing width option.")
     points = []
 
     lastx = np.nan
@@ -571,6 +575,9 @@ def Text(x, y, s, **options):
     pyplot.text(x, y, s, **options)
 
 
+LEGEND = True
+LOC = None
+
 def Config(**options):
     """Configures the plot.
 
@@ -597,12 +604,13 @@ def Config(**options):
                 'center': 10,
                 }
 
-    loc = options.get('loc', 0)
-    #loc = loc_dict.get(loc, loc)
+    global LEGEND
+    LEGEND = options.get('legend', LEGEND)
 
-    legend = options.get('legend', True)
-    if legend:
-        pyplot.legend(loc=loc)
+    if LEGEND:
+        global LOC
+        LOC = options.get('loc', LOC)
+        pyplot.legend(loc=LOC)
 
 
 def Show(**options):
