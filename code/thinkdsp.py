@@ -313,7 +313,7 @@ class Spectrum(_SpectrumParent):
         filtr = PI2 * i * self.fs
         self.hs *= filtr
 
-    def angles(self, i):
+    def angles(self):
         """Computes phase angles in radians.
 
         returns: list of phase angles
