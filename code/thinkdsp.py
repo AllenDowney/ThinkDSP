@@ -536,6 +536,15 @@ class Wave(object):
         return len(self.ys)
 
     @property
+    def ts(self):
+        """Times (property).
+
+        returns: NumPy array of times
+        """
+        n = len(self.ys)
+        return numpy.linspace(0, self.duration, n)
+
+    @property
     def duration(self):
         """Duration (property).
 
@@ -720,9 +729,7 @@ class Wave(object):
         """Plots the wave.
 
         """
-        n = len(self.ys)
-        ts = numpy.linspace(0, self.duration, n)
-        thinkplot.plot(ts, self.ys, **options)
+        thinkplot.plot(self.ts, self.ys, **options)
 
     def corr(self, other):
         """Correlation coefficient two waves.
@@ -1125,7 +1132,7 @@ class ParabolicSignal(Sinusoid):
         """
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
-        ys = frac**2
+        ys = (frac - 0.5)**2
         ys = normalize(unbias(ys), self.amp)
         return ys
 

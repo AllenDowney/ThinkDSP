@@ -1496,6 +1496,14 @@ class Pdf(object):
     def Render(self, **options):
         """Generates a sequence of points suitable for plotting.
 
+        If options includes low and high, it must also include n;
+        in that case the density is evaluated an n locations between
+        low and high, including both.
+
+        If options includes xs, the density is evaluate at those location.
+
+        Otherwise, self.GetLinspace is invoked to provide the locations.
+
         Returns:
             tuple of (xs, densities)
         """
@@ -2689,12 +2697,16 @@ def PercentileRow(array, p):
 
 
 def PercentileRows(ys_seq, percents):
-    """Selects rows from a sequence that map to percentiles.
+    """Given a collection of lines, selects percentiles along vertical axis.
 
-    ys_seq: sequence of unsorted rows
+    For example, if ys_seq contains simulation results like ys as a
+    function of time, and percents contains (5, 95), the result would
+    be a 90% CI for each vertical slice of the simulation results.
+
+    ys_seq: sequence of lines (y values)
     percents: list of percentiles (0-100) to select
 
-    returns: list of NumPy arrays
+    returns: list of NumPy arrays, one for each percentile
     """
     nrows = len(ys_seq)
     ncols = len(ys_seq[0])
