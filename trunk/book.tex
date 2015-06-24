@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.6}
+\newcommand{\theversion}{0.9.8}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -338,6 +338,11 @@ the first draft of this book.
 
 \item On Reddit's DSP forum, the anonymous user RamjetSoundwave
 helped me fix a problem with my implementation of Brownian Noise.
+And andodli found a typo.
+
+\item In Spring 2015 I had the pleasure of teaching this material
+along with Prof. Oscar Mur-Miranda and Prof. Siddhartan Govindasamy.
+Both made many suggestions and corrections.
 
 
 % ENDCONTRIB
@@ -656,9 +661,7 @@ And {\tt Wave} provides {\tt write}, which writes a WAV file:
 
 You can listen to the Wave with any media player that plays WAV
 files.  On UNIX systems, I use {\tt aplay}, which is simple, robust,
-and included in many Linux distributions.  For Windows you might like
-MicroWav, available from
-\url{http://bellsouthpwp2.net/b/o/bobad/microwav.htm}.
+and included in many Linux distributions.
 
 {\tt thinkdsp} also provides \verb"play_wave", which runs
 the media player as a subprocess:
@@ -703,7 +706,7 @@ Git repository for this book (see Section~\ref{code}).
 \item \verb"high_pass" applies a high-pass filter, which means that
   it attenuates components below the cutoff.
 
-\item \verb"band_stop" attenuates components in a the band of
+\item \verb"band_stop" attenuates components in the band of
 frequencies between two cutoffs.
 
 \end{itemize}
@@ -756,44 +759,6 @@ Synthesize a wave by creating a spectrum with arbitrary harmonics,
 inverting it, and listening.  What happens as you add frequency
 components that are not multiples of the fundamental?
 \end{exercise}
-
-
-\begin{exercise}
-This exercise asks you to write a function that simulates the
-effect of sound transmission underwater.
-This is a more open-ended exercise for ambitious readers.
-It uses decibels, which you can read about at
-\url{http://en.wikipedia.org/wiki/Decibel}.
-
-First some background information: when sound travels through water,
-high frequency components are absorbed more than low frequency
-components.  In pure water, the absorption rate, expressed in decibels
-per kilometer (dB/km), is proportional to frequency squared.
-
-For example, if the absorption rate for frequency $f$ is 1 dB/km,
-we expect the absorption rate for $2f$ to be 4 dB/km.  In other words,
-doubling the frequency quadruples the absorption rate.
-
-Over a distance of 10 kilometers, the $f$ component would be attenuated
-by 10 dB, which corresponds to a factor of 10 in power, or a factor
-of 3.162 in amplitude.  
-
-Over the same distance, the $2f$ component would be attenuated by
-40 dB, or a factor or 100 in amplitude.
-
-Write a function that takes a Wave and returns a new Wave that contains
-the same frequency components as the original, but where each
-component is attenuated according to the absorption rate of water.
-Apply this function to the violin recording to see what a violin
-would sound like under water.
-
-For more about the physics of sound transmission in water, see
-``Underlying physics and mechanisms for the absorption of sound in
-seawater'' at
-\url{http://resource.npl.co.uk/acoustics/techguides/seaabsorption/physics.html}
-
-\end{exercise}
-
 
 
 
@@ -886,7 +851,7 @@ corresponding quantities:
         return ys
 \end{verbatim}
 
-{\tt PI2} is a constant set to $2 \ pi$.
+{\tt PI2} is a constant set to $2 \pi$.
 
 {\tt ts} and {\tt ys} are NumPy arrays.  I use NumPy and SciPy
 throughout the book.  If you are familiar with these libraries,
@@ -958,7 +923,7 @@ You can think of $x$ and $y$ as Cartesian coordinates.
 \item A complex number is also the product of a magnitude
 and a complex exponential, $A e^{i \phi}$, where $A$ is the
 {\bf magnitude} and $\phi$ is the
-{\bf angle} in radians, also called the ``argument.''   You
+{\bf angle} in radians, also called the ``argument''.   You
 can think of $A$ and $\phi$ as polar coordinates.
 
 \end{itemize}
@@ -969,7 +934,7 @@ corresponding component.  The angle of each element is the phase
 offset.
 
 NumPy provides {\tt absolute}, which computes the magnitude of a
-complex number, also called the ``absolute value,'' and {\tt angle},
+complex number, also called the ``absolute value'', and {\tt angle},
 which computes the angle.
 
 Here is the definition of {\tt Spectrum}:
@@ -1058,7 +1023,7 @@ are not important, but here's how {\tt evaluate} works:
 {\tt numpy.modf} splits the number of cycles into the fraction
 part, stored in {\tt frac}, and the integer part, which is ignored.
 \footnote{Using an underscore as a variable name is a convention that
-means, ``I don't intend to use this value.''}
+means, ``I don't intend to use this value''.}
 
 \item {\tt frac} is a sequence that ramps from 0 to 1 with the given
   frequency.  Subtracting 0.5 yields values between -0.5 and 0.5.
@@ -1244,7 +1209,7 @@ signal is sampled, it disguises itself as a low frequency signal.
 In this example, the highest frequency we can measure is 5000 Hz,
 which is half the sampling rate.  Frequencies above 5000 Hz are folded
 back below 5000 Hz, which is why this threshold is sometimes called
-the ``folding frequency,'' but more often it is called the {\bf
+the ``folding frequency'', but more often it is called the {\bf
   Nyquist frequency}.  See
 \url{http://en.wikipedia.org/wiki/Nyquist_frequency}.
 
@@ -1344,7 +1309,7 @@ it as a sequence of $n-1$ intervals of time.  To compute the frequency
 during each interval, we use {\tt numpy.linspace}.
 
 \verb"_evaluate" is a private method\footnote{Beginning a method name
-  with an underscore makes it ``private,'' indicating that it is not
+  with an underscore makes it ``private'', indicating that it is not
   part of the API that should be used outside the class definition.}
 that does the rest of the math:
 
@@ -1849,6 +1814,8 @@ signals we saw in previous chapters.
 
 \end{enumerate}
 
+This chapter is about the second kind.
+
 The code for this chapter is in {\tt noise.py}, which is in the
 repository for this book (see Section~\ref{code}).  You can listen
 to the examples in {\tt chap04.ipynb}, which you can view at
@@ -1911,7 +1878,7 @@ it is more conventional in the context of noise.)
 
 Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
 spectrum looks pretty random.  And it is, but we have to be more
-precise about the word ``random.''  There are at least three things we
+precise about the word ``random''.  There are at least three things we
 might like to know about a noise signal or its spectrum:
 
 \begin{itemize}
@@ -2098,8 +2065,8 @@ where $K$ is $e^k$, but still not relevant.  More important is
 that power is proportional to $1/f^2$, which is characteristic
 of Brownian noise.
 
-Brownian noise is also called ``red noise,'' for the same reason that
-white noise is called ``white.''  If you combine visible light with
+Brownian noise is also called {\bf red noise}, for the same reason that
+white noise is called ``white''.  If you combine visible light with
 the same relationship between frequency and power, most of the power
 would be at the low-frequency end of the spectrum, which is red.
 Brownian noise is also sometimes called ``brown noise'', but I think
@@ -2121,7 +2088,7 @@ and power is
 %
 \[ P = K / f^{2} \]
 %
-There is nothing special about the exponent -2.  More generally,
+There is nothing special about the exponent 2.  More generally,
 we can synthesize noise with any exponent, $\beta$.
 %
 \[ P = K / f^{\beta} \]
@@ -2130,7 +2097,7 @@ When $\beta = 0$, power is constant at all frequencies,
 so the result is white noise.  When $\beta=2$ the result is red noise.
 
 When $\beta$ is between 0 and 2, the result is between white and
-red noise, so it is called ``pink noise''
+red noise, so it is called ``pink noise''.
 
 There are several ways to generate pink noise.  The simplest is to
 generate white noise and then apply a low-pass filter with the
@@ -2203,7 +2170,7 @@ Brownian noise, it wanders up and down in a way that suggests
 correlation between successive values, but at least visually, it looks
 more random.  In the next chapter we will come back to this
 observation and I will be more precise about what I mean by
-``correlation'' and ``more random.''
+``correlation'' and ``more random''.
 
 Finally, Figure~\ref{fig.noise-triple} shows a spectrum for
 white, pink, and red noise on the same log-log scale.
@@ -2252,7 +2219,7 @@ noise is also UG noise.  More precisely, the real and imaginary
 parts of the spectrum are uncorrelated Gaussian values.
 
 To test that claim, we can generate the spectrum of UG noise and
-then generate a ``normal probability plot,'' which is a graphical
+then generate a ``normal probability plot'', which is a graphical
 way to test whether a distribution is Gaussian.
 
 \begin{verbatim}
@@ -2375,20 +2342,6 @@ of correlation.  Nonlinear relationships are often important in
 statistics, but less often relevant for signal processing, so I
 won't say more about them here.
 
-In the context of signal processing, we are often working with
-unbiased signals, where the mean is 0, and normalized signals, where the
-standard deviation is 1.  In that case, the definition of $\rho$
-simplifies to:
-%
-\[ \rho = \frac{1}{N} \sum_i x_i y_i \]
-%
-If you think of $x$ and $y$ as vectors, you might recognize this
-formula as the dot product, normalized by the length of the vectors.
-The magnitude of the dot product indicates the degree to which
-the vectors are similar.  Unit vectors pointing in the same direction
-have dot product 1; if they are orthogonal (perpedicular), they
-have dot product 0.
-
 Python provides several ways to compute correlations.  {\tt
   numpy.corrcoef} takes any number of variables and computes a {\bf
   correlation matrix} that includes correlations between each pair of
@@ -2456,9 +2409,7 @@ At that point we have come full circle and the correlation is 1.
 
 Figure~\ref{fig.autocorr2} shows the relationship between correlation and
 phase offset for a sine wave.  The shape of that curve should look
-familiar; it is a cosine.  This result makes sense if you remember
-that the dot product of unit vectors is $\cos \theta$, where $\theta$
-is the angle between the vectors.
+familiar; it is a cosine.  
 
 {\tt thinkdsp} also provides a simple interface for computing the
 correlation between waves:
@@ -2489,7 +2440,7 @@ def serial_corr(wave, lag=1):
     n = len(wave)
     y1 = wave.ys[lag:]
     y2 = wave.ys[:n-lag]
-    corr = numpy.corrcoef(y1, y2)[0, 1]
+    corr = corrcoef(y1, y2)
     return corr
 \end{verbatim}
 
@@ -2514,7 +2465,7 @@ small serial correlation.  You might get a different value when you run
 it, but it should be comparably small.
 
 In a Brownian noise signal, each value is the sum of the previous
-value and a random ``step,'' so we expect a strong serial
+value and a random ``step'', so we expect a strong serial
 correlation:
 
 \begin{verbatim}
@@ -2564,9 +2515,9 @@ of parameters.}
 \label{fig.autocorr4}
 \end{figure}
 
-In fact, we can think of \verb"serial_corr" as a function that
+You can think of \verb"serial_corr" as a function that
 maps from each value of lag to the corresponding correlation, and we
-can plot that function by looping through values of {\tt lag}:
+can evaluate that function by looping through values of {\tt lag}:
 
 \begin{verbatim}
 def autocorr(wave):
@@ -2582,12 +2533,12 @@ is the sequence of serial correlations for each lag.
 
 Figure~\ref{fig.autocorr4} shows autocorrelation functions for pink
 noise with three values of $\beta$.  For low values of $\beta$, the
-signal is less correlated, and the autocorrelation function drops off
+signal is less correlated, and the autocorrelation function drops
 toward zero relatively quickly.  For larger values, serial correlation
-is stronger and drops off more slowly.  Even for long lags, serial
-correlation is quite strong; this phenomenon is called {\bf long-range
-  dependence}, because it indicates that each value in the signal
-depends on many preceding values.
+is stronger and drops off more slowly.  With $\beta=1.2$ serial
+correlation is strong even for long lags; this phenomenon is called
+{\bf long-range dependence}, because it indicates that each value in
+the signal depends on many preceding values.
 
 If you plot these autocorrelation functions on a log-x scale, they
 are approximately straight lines, which indicates that they are
@@ -2711,6 +2662,46 @@ So the frequency precision using autocorrelation is less than 10 Hz,
 compared with 100 Hz using the spectrum.
 
 
+\section{Correlation as dot product}
+
+I started this chapter with this definition of Pearson's
+correlation coefficient:
+%
+\[ \rho = \frac{ \sum_i (x_i - \mu_x) (y_i - \mu_y)}{N \sigma_x \sigma_y} \]
+%
+Then I used $\rho$ to define serial correlation and autocorrelation.
+That's consistent with how these terms are used in statistics,
+but in the context of signal processing, the definitions are
+a little different.
+
+In signal processing, we are often working with unbiased signals,
+where the mean is 0, and normalized signals, where the standard
+deviation is 1.  In that case, the definition of $\rho$ simplifies to:
+%
+\[ \rho = \frac{1}{N} \sum_i x_i y_i \]
+%
+And it is common to simplify even further:
+%
+\[ r = \sum_i x_i y_i \]
+%
+This definition of correlation is not ``standardized'', so it doesn't
+generally fall between -1 and 1.  But it has other useful properties.
+
+If you think of $x$ and $y$ as vectors, you might recognize this
+formula as the {\bf dot product}, $x \cdot y$.  See
+\url{http://en.wikipedia.org/wiki/Dot_product}.
+
+\newcommand{\norm}{\mathrm{norm}}
+
+The dot product indicates the degree to which the signals are similar.
+If they are normalized so their standard deviations are 1,
+%
+\[ x \cdot y = \cos \theta \]
+%
+where $\theta$ is the angle between the vectors.  And that explains
+why Figure~\ref{fig.autocorr2} is a cosine curve.
+
+
 \section{Using NumPy}
 \label{correlate}
 
@@ -2747,7 +2738,9 @@ from {\tt autocorr}, we can select the second half:
 
 If you compare Figure~\ref{fig.autocorr9} to Figure~\ref{fig.autocorr8},
 you'll notice that the correlations computed by {\tt numpy.correlate}
-get smaller as the lags increase.  As the lag get bigger, the amount of
+get smaller as the lags increase.  That's because {\tt numpy.correlate}
+uses the unstandardized definition of correlation;
+as the lag gets bigger, the
 overlap between the two signals gets smaller, so the magnitude of
 the correlations decreases.
 
@@ -2758,7 +2751,7 @@ We can correct that by dividing through by the lengths:
     half /= lengths
 \end{verbatim}
 
-Finally, we can normalize the results so the correlation with
+Finally, we can standardize the results so the correlation with
 {\tt lag=0} is 1.
 
 \begin{verbatim}
@@ -2766,14 +2759,15 @@ Finally, we can normalize the results so the correlation with
 \end{verbatim}
 
 With these adjustments, the results computed by {\tt autocorr} and
-{\tt numpy.correlate} are nearly the same, but they still differ by
+{\tt numpy.correlate} are nearly the same.  They still differ by
 1-2\%.  The reason not important, but if you are curious: {\tt autocorr}
-normalizes the correlations independently for each lag; for
-{\tt numpy.correlate}, we normalized them all at the end.
+standardizes the correlations independently for each lag; for
+{\tt numpy.correlate}, we standardized them all at the end.
 
 More importantly, now you know what autocorrelation is, how to
 use it to estimate the fundamental period of a signal, and two
 ways to compute it.
+
 
 
 \section{Exercises}
@@ -2796,8 +2790,8 @@ Estimate the pitch of a segment from the saxophone recording.
 \chapter{Discrete cosine transform}
 \label{dct}
 
-The code for this chapter is available from
-\url{http://think-dsp.com/dct.py}.
+The code for this chapter is in {\tt dct.py}, which is in the
+repository for this book (see Section~\ref{code}).
 
 The topic of this chapter is the {\bf Discrete Cosine
   Transform} (DCT), which is used in MP3 and related formats for
@@ -2882,7 +2876,7 @@ resulting wave.
 
 Conceptually, synthesis is pretty simple.  But in this form it doesn't
 help much with {\bf analysis}, which is the inverse problem: given the
-wave how do we identify the frequency components and their amplitudes?
+wave, how do we identify the frequency components and their amplitudes?
 
 
 \section{Synthesis with arrays}
@@ -2920,22 +2914,21 @@ Let's see how it works:
   down the columns, each column contains a cosine signal at a
   particular frequency, evaluated at a sequence of times.
 
-\item {\tt numpy.dot} computes a dot product.  In terms of linear
+\item {\tt numpy.dot} multiplies each row of {\tt M} by {\tt amps},
+  element-wise, and then adds up the products.  In terms of linear
   algebra, we are multiplying a matrix, {\tt M}, by a vector, {\tt
-    amps}.  Figure~\ref{fig.synthesis} is a diagram of this
-  multiplication.  {\tt numpy.dot} multiplies each row of {\tt M} by
-  {\tt amps}, element-wise, and then adds up the products.
+    amps}.
 
 \end{enumerate}
 
 Figure~\ref{fig.synthesis} shows the structure of this computation.
 Each row of the matrix, {\tt M}, corresponds to a time 
-from 0.0 to 1.0 s; $t_k$ is the time of the $k$th row.
+from 0.0 to 1.0 seconds; $t_k$ is the time of the $k$th row.
 Each column corresponds to a frequency from
 100 to 400 Hz; $f_j$ is the frequency of the $j$th column.
 
 I labeled the $k$th row with the letters $a$ through $d$; as an
-example, the value of $a$ is $\cos [2 \pi (220) t_k]$.
+example, the value of $a$ is $\cos [2 \pi (100) t_k]$.
 
 The result of the dot product, {\tt ys}, is a vector with one element
 for each row of {\tt M}.  The $k$th element, labeled $e$, is the sum
@@ -2951,10 +2944,6 @@ the previous section to
 check that the two versions of {\tt synthesize} produce the same results.
 
 \begin{verbatim}
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
-    freqs = [100, 200, 300, 400]
-    framerate = 11025
-    ts = numpy.linspace(0, 1, framerate)
     ys1 = synthesize1(amps, freqs, ts)
     ys2 = synthesize2(amps, freqs, ts)
     print max(abs(ys1 - ys2))
@@ -2963,15 +2952,10 @@ check that the two versions of {\tt synthesize} produce the same results.
 The biggest difference between {\tt ys1} and {\tt y2} is about {\tt
   1e-13}, which is what we expect due to floating-point errors.
 
-One note on linear algebra vocabulary: I am using ``matrix'' to refer
-to a two-dimensional array, and ``vector'' for a one-dimensional array
-or sequence.  To be pedantic, it would be more correct to think
-of matrices and vectors as abstract mathematical concepts, and NumPy
-arrays as one way (and not the only way) to represent them.
-
-One advantage of linear algebra is that it provides concise notation
-for operations on matrices and vectors.  For example, we could write
-{\tt synthesize} like this:
+Writing this computation in terms of linear algebra makes the code
+smaller and faster.  Another benefit of linear algebra is that it
+provides concise notation for operations on matrices and vectors.  For
+example, we could write {\tt synthesize} like this:
 %
 \begin{eqnarray*}
 M &=& \cos (2 \pi t \otimes f) \\
@@ -3018,7 +3002,7 @@ equations if the matrix is square; that is, the number of equations
 In this example, we have only 4 frequencies, but we evaluated the
 signal at 11,025 times.  So we have many more equations than unknowns.
 
-But in general if {\tt ys}
+In general if {\tt ys}
 contains more than 4 elements, it is unlikely that we can analyze it
 using only 4 frequencies.
 
@@ -3034,15 +3018,16 @@ the previous section, we can run {\tt analyze1} like this:
 \begin{verbatim}
     n = len(freqs)
     amps2 = analyze1(ys[:n], freqs, ts[:n])
+    print(amps2)
 \end{verbatim}
 
 And sure enough, we get
 
 \begin{verbatim}
-amps2 = [ 0.6   0.25  0.1   0.05 ]
+[ 0.6   0.25  0.1   0.05 ]
 \end{verbatim}
 
-So this algorithm works, but it is slow.  Solving a linear
+This algorithm works, but it is slow.  Solving a linear
 system of equations takes time proportional to $n^3$, where $n$ is
 the number of columns in $M$.  We can do better.
 
@@ -3126,7 +3111,7 @@ You might recognize 0.707 as an approximation of $\sqrt{2}/2$,
 which is $\cos \pi/4$.  You also might notice that this matrix
 is {\bf symmetric}, which means that the element at $(j, k)$ always
 equals the element at $(k, j)$.  This implies that $M$ is its own
-transpose; that is $M^T = M$.
+transpose; that is, $M^T = M$.
 
 But sadly, $M$ is not orthogonal.  If we compute $M^TM$, we get:
 
@@ -3205,8 +3190,8 @@ def analyze2(ys, freqs, ts):
 Instead of using {\tt numpy.linalg.solve}, we just multiply
 by $M/2$.
 
-Putting it all together, we can write an implementation of
-DCT-IV:
+Combining {\tt test2} and {\tt analyze2}, we can write an
+implementation of DCT-IV:
 
 \begin{verbatim}
 def dct_iv(ys):
@@ -3239,7 +3224,7 @@ We can test \verb"dct_iv" like this
 Starting with {\tt amps}, we synthesize a wave array, then use
 \verb"dct_iv" to see if we can recover the amplitudes.  The biggest
 difference between {\tt amps} and {\tt amps2} is about {\tt 1e-16},
-which is what we expect with 64-bit floating point arithmetic.
+which is what we expect due to floating-point errors.
 
 
 \section{Inverse DCT}
@@ -3268,26 +3253,6 @@ and testing that we get back what we started with.
 Again, the biggest difference is about {\tt 1e-16}.
 
 
-\section{Summary}
-
-This chapter explores the relationship between the synthesis problem
-and the analysis problem.  By writing the synthesis problem in the
-form of matrix operations, we derive an efficient algorithm for computing
-the DCT.
-
-This algorithm is based on a matrix, $M$, that is orthogonal and
-symmetric, so it has the unusual property that the inverse of $M$ is
-$M$ (within a factor of two, anyway).  As a result, the function we
-wrote to compute DCT-IV also computes the inverse DCT.
-
-For the analysis problem, we started with a solution that
-takes time proportional to $n^3$ and improved it to take time
-proportional to $n^2$.  It turns out that there is another optimization
-that gets the run time down to $n \log n$.  We'll see how that works
-in Chapter~\ref{dft}.
-
-
-
 \section{Exercises}
 
 \begin{exercise}
@@ -3297,8 +3262,7 @@ and {\tt scipy.fftpack.dct}.
 
 \begin{exercise}
 One of the major applications of the DCT is compression for both
-sound and images.  For example, MP3 uses a compression algorithm
-based on the DCT.  In it's simplest form, DCT-based compression
+sound and images.  In its simplest form, DCT-based compression
 works like this:
 
 \begin{enumerate}
@@ -3335,11 +3299,11 @@ If you understand the discrete cosine transform (DCT), you will
 understand the DFT.  The only difference is that instead of using the
 cosine function, we'll use the complex exponential function.  I'll
 start by explaining complex exponentials, then I'll follow the
-same progression you saw in Chapter~\ref{dct}:
+same progression as in Chapter~\ref{dct}:
 
 \begin{enumerate}
 
-\item I'll start with the synthesis
+\item We'll start with the synthesis
   problem: given a set of frequency components and their amplitudes,
   how can we construct a signal?  The synthesis problem is 
   equivalent to the inverse DFT.
@@ -3363,8 +3327,8 @@ repository for this book (see Section~\ref{code}).
 \section{Complex exponentials}
 
 One of the more interesting moves in mathematics is the generalization
-of an operation from one type to another.  For example, factorial
-is a function that operates on integers; the natural definition for
+of an operation from one type to another.  For example, factorial is a
+function that operates on integers; the natural definition for
 factorial of $n$ is the product of all integers from 1 to $n$.
 
 If you are of a certain inclination, you might wonder how to compute
@@ -3383,7 +3347,7 @@ The natural definition of exponentiation is repeated multiplication.
 For example, $\phi^3 = \phi \cdot \phi \cdot \phi$.  But this
 definition doesn't apply to non-integers, including complex numbers.
 
-But exponentiation can also be expressed as a power series:
+However, exponentiation can also be expressed as a power series:
 %
 \[ e^\phi = 1 + \phi + \phi^2/2! + \phi^3/3! + ... \]
 %
@@ -3404,10 +3368,9 @@ In the case where the argument is a complex number, we have:
 \[ e^{a + i\phi} = e^a e^{i\phi} = A e^{i\phi} \]
 %
 where $A$ is a real number that indicates amplitude and
-$e^{i\phi}$ is a complex number with magnitude 1.
+$e^{i\phi}$ is a unit complex number that indicates angle.
 
-NumPy provides a version of {\tt exp} that works with
-complex numbers:
+NumPy provides a version of {\tt exp} that works with complex numbers:
 
 \begin{verbatim}
 >>> i = complex(0, 1)
@@ -3475,10 +3438,10 @@ so $\phi(t) = 2 \pi f t$, the result is a {\bf complex sinusoid}:
 Or more generally, the signal might start at a phase offset
 $\phi_0$, yielding
 %
-\[ e^{i (2 \pi f t + \phi_0)}\]
+\[ e^{i (2 \pi f t + \phi_0)} \]
 %
 {\tt thinkdsp} provides an implementation of this signal,
-{\tt ComplexSignal}:
+{\tt ComplexSinusoid}:
 
 \begin{verbatim}
 class ComplexSinusoid(Sinusoid):
@@ -3494,7 +3457,7 @@ class ComplexSinusoid(Sinusoid):
 {\tt Sinusoid}.  It provides a version of {\tt evaluate}
 that is almost identical to {\tt Sinusoid.evaluate}; the
 difference is that it uses {\tt numpy.exp} instead of
-{\tt numpy.sin} or {\tt numpy.cos}.
+{\tt numpy.sin}.
 
 The result is a NumPy array of complex numbers:
 
@@ -3509,7 +3472,8 @@ The frequency of this signal is 1 cycle per second; the amplitude
 is 0.6 (in unspecified units); and the phase offset is 1 radian.
 
 This example evaluates the signal at 4 places equally spaced between
-0 and 1 second.
+0 and 1 second.  The resulting samples are complex numbers.  You
+might wonder how to interpret these values.  We'll get to it soon.
 
 
 \section{The synthesis problem}
@@ -3552,7 +3516,7 @@ At the lowest level, a complex signal is a sequence of complex
 numbers.  But how should we interpret it?  We have some intuition for
 real signals: they represent quantities that vary in time; for
 example, a sound signal represents changes in air pressure.
-But nothing we measure in the real world yields complex numbers.
+But nothing we measure in the world yields complex numbers.
 
 \begin{figure}
 % dft.py
@@ -3562,7 +3526,7 @@ But nothing we measure in the real world yields complex numbers.
 \end{figure}
 
 So what is a complex signal?  I don't have a good answer to this
-question.  The best I can offer is two bad, or maybe unsatisfying,
+question.  The best I can offer is two unsatisfying
 answers:
 
 \begin{enumerate}
@@ -3594,7 +3558,7 @@ phase offsets.
 
 
 \section{Synthesis with matrices}
-\section{synthmat}
+\label{synthmat}
 
 As we saw in Section~\ref{synthesis}, we can also express the synthesis
 problem in terms of matrix multiplication: 
@@ -3610,16 +3574,17 @@ def synthesize2(amps, freqs, ts):
     return ys
 \end{verbatim}
 
-Again, {\tt amps} is a NumPy array that contains a sequence
-of amplitudes.
+Again, {\tt amps} is a NumPy array that contains a sequence of
+amplitudes.
 
 {\tt freqs} is a sequence containing the frequencies of the
 components.  {\tt ts} contains the times where we will evaluate
 the signal.
 
 {\tt args} contains the outer product of {\tt ts} and {\tt freqs},
-with the {\tt ts} running down the rows and the {\tt freqs}
-running across the columns.
+with the {\tt ts} running down the rows and the {\tt freqs} running
+across the columns (you might want to refer back to
+Figure~\ref{fig.synthesis}).
 
 Each column of matrix {\tt M} contains a complex sinusoid with
 a particular frequency, evaluated at a sequence of {\tt ts}.
@@ -3651,8 +3616,8 @@ we have:
 %
 \[ A e^{i \phi_0} \cdot e^{i 2 \pi f t} = A e^{i 2 \pi f t + \phi_0} \]
 %
-In other words, the angle of the complex amplitude becomes
-the phase offset of the complex sinusoid.
+Multiplying by $A e^{i \phi_0}$ multiplies the amplitude by $A$
+and adds the phase offset $\phi_0$.
 
 \begin{figure}
 % dft.py
@@ -3663,34 +3628,38 @@ offset.}
 \end{figure}
 
 We can test that claim by running the previous example with
-$\phi_0 = 1$ for all frequency components:
+$\phi_0 = 1.5$ for all frequency components:
 
 \begin{verbatim}
-    amps2 = amps * numpy.exp(1j)
+    amps2 = amps * numpy.exp(1.5j)
     ys2 = synthesize2(amps2, freqs, ts)
 
-    thinkplot.plot(ts[:n], ys.real[:n], label=r'$\phi_0 = 0$')
-    thinkplot.plot(ts[:n], ys2.real[:n], label=r'$\phi_0 = 1$')
+    thinkplot.plot(ts[:n], ys.real[:n])
+    thinkplot.plot(ts[:n], ys2.real[:n])
 \end{verbatim}
 
+Python recognizes {\tt 1.5j} as a complex number.  Since {\tt amps}
+is an array of reals, multiplying by {\tt numpy.exp(1.5j)} yields
+an array of complex numbers with phase offset 1.5 radians, and
+the same magnitudes as {\tt amps}.
+
 Figure~\ref{fig.dft2} shows the result.  The phase offset
-$\phi_0 = 1$ shifts the wave to the left by about one sixth of
+$\phi_0 = 1.5$ shifts the wave to the left by about one quarter of
 a cycle; it also changes the waveform, because the same phase
 offset applied to different frequencies changes how the frequency
 components line up with each other.
 
-Now that we have the more general solution to the synthesis problem,
-one that handles complex amplitudes, we are ready for the analysis
+Now that we have the more general solution to the synthesis problem --
+one that handles complex amplitudes -- we are ready for the analysis
 problem.
-
 
 
 \section{The analysis problem}
 
 The analysis problem is the inverse of the synthesis problem: given a
-sequence of samples from a signal, $y$, and knowing the
-frequencies that make up the signal, can we compute the
-complex amplitudes of the components, $a$?
+sequence of samples, $y$, and knowing the frequencies
+that make up the signal, can we compute the complex amplitudes of the
+components, $a$?
 
 As we saw in Section~\ref{analysis}, we can solve this problem by forming
 the synthesis matrix, $M$, and solving the system of linear
@@ -3710,7 +3679,7 @@ times, {\tt ts}.  It returns a sequence of complex amplitudes, {\tt
   amps}.
 
 Continuing the previous example, we can confirm that {\tt analyze1}
-can recover the amplitudes we started with.  For the linear system
+recovers the amplitudes we started with.  For the linear system
 solver to work, {\tt M} has to be square, so we need {\tt ys}, {\tt
   freqs} and {\tt ts} to have the same length.  I'll insure that by
 slicing {\tt ys} and {\tt ts} down to the length of {\tt freqs}:
@@ -3745,29 +3714,26 @@ The NumPy methods {\tt conj} and {\tt transpose} do what we
 want.  Here's the code that computes {\tt M} for $N=4$ components:
 
 \begin{verbatim}
-N = 4
-ts = numpy.arange(N) / N
-freqs = numpy.arange(N)
-args = numpy.outer(ts, freqs)
-M = numpy.exp(i * PI2 * args)
-print(M)
+>>> N = 4
+>>> ts = numpy.arange(N) / N
+>>> freqs = numpy.arange(N)
+>>> args = numpy.outer(ts, freqs)
+>>> M = numpy.exp(i * PI2 * args)
 \end{verbatim}
 
-If $M$ is unitary, $M*M = I$, where $M*$ is the conjugate transpose
+If $M$ is unitary, $M^*M = I$, where $M^*$ is the conjugate transpose
 of $M$, and $I$ is the identity matrix.  We can test whether $M$
 is unitary like this:
 
 \begin{verbatim}
-MstarM = M.conj().transpose().dot(M)
-print(MstarM)
+>>> MstarM = M.conj().transpose().dot(M)
 \end{verbatim}
 
 The result, within the tolerance of floating-point error, is
 $4 I$, so $M$ is unitary except for an extra factor of $N$,
 similar to the extra factor of 2 we found with the DCT.
 
-So we can use this result to write a faster version of
-{\tt analyze1}:
+We can use this result to write a faster version of {\tt analyze1}:
 
 \begin{verbatim}
 def analyze2(ys, freqs, ts):
@@ -3794,20 +3760,32 @@ And test it with appropriate values of {\tt freqs} and {\tt ts}:
 Again, the result is correct within the tolerance of floating-point
 arithmetic.
 
+
 \section{DFT}
 
 As a function, {\tt analyze2} would be hard to use because it
-only works if {\tt freqs} and {\tt ts} are chosen correctly.  So
-the usual definition of {\tt dft} takes {\tt ys} and computes
-{\tt freqs} and {\tt ts} accordingly:
+only works if {\tt freqs} and {\tt ts} are chosen correctly.
+We can clean it up by writing functions to compute DFT and IDFT.
+
+First, I'll make a function to compute the synthesis matrix,
+$M$:
 
 \begin{verbatim}
-def dft(ys):
-    N = len(ys)
+def synthesis_matrix(N):
     ts = numpy.arange(N) / N
     freqs = numpy.arange(N)
     args = numpy.outer(ts, freqs)
     M = numpy.exp(i * PI2 * args)
+    return M
+\end{verbatim}
+
+Now we can write a version of {\tt dft} that takes
+{\tt ys} and returns {\tt amps}:
+
+\begin{verbatim}
+def dft(ys):
+    N = len(ys)
+    M = synthesis_matrix(N)
     amps = M.conj().transpose().dot(ys)
     return amps
 \end{verbatim}
@@ -3829,15 +3807,19 @@ And here's the version in {\tt numpy.fft}:
 [ 2.4 +8.0e-17j  1.0 -2.5e-17j  0.4 -3.1e-17j  0.2 -2.5e-17j]
 \end{verbatim}
 
-They are approximately the same.
+They are the same, within floating point error.
 
-The inverse DFT is almost the same, except {\em now} we have to
+The inverse DFT is almost the same, except we don't have to transpose and
+conjugate $M$, and
+{\em now} we have to
 divide through by N:
 
 \begin{verbatim}
-def idft(amps):
-    ys = dft(amps) / N
-    return ys
+def idft(ys):
+    N = len(ys)
+    M = synthesis_matrix(N)
+    amps = M.dot(ys) / N
+    return amps
 \end{verbatim}
 
 Finally, we can confirm that {\tt dft(idft(amps))} yields {\tt amps}.
@@ -3845,17 +3827,17 @@ Finally, we can confirm that {\tt dft(idft(amps))} yields {\tt amps}.
 \begin{verbatim}
 >>> ys = idft(amps)
 >>> print(dft(ys))
-[ 0.60 -2.1e-17j  0.05 +0.0e+00j  0.10 -2.5e-17j  0.25 -1.4e-17j]
+[ 0.60 +2.1e-17j  0.25 +1.4e-17j  0.10 -3.9e-17j  0.05 -8.3e-17j]
 \end{verbatim}
 
 If I could go back in time, I might change the definition of
 DFT so it divides by $N$ and the inverse DFT doesn't.  That would
-be more consistent my presentation of the synthesis and analysis
+be more consistent with my presentation of the synthesis and analysis
 problems.
 
 Or I might change the definition so that both operations divide
 through by $\sqrt{N}$.  Then the DFT and inverse DFT would be
-identical.
+more symmetric.
 
 I can't go back in time (yet!), so we're stuck with a slightly
 weird convention.  But for practical purposes it doesn't really
@@ -3872,29 +3854,29 @@ matter.
 \end{figure}
 
 The Spectrum class in {\tt thinkdsp} is based on {\tt numpy.ftt.rfft},
-which computes the ``real FFT''; that is, it works with real signals.
-The DFT is more general than the real FFT; it works with complex
+which computes the ``real DFT''; that is, it works with real signals.
+The DFT is more general than the real DFT; it works with complex
 signals.
 
 So what happens when we apply DFT to a real signal?  Let's look at
 an example:
 
 \begin{verbatim}
-    framerate = 10000
-    signal = thinkdsp.SawtoothSignal(freq=500)
-    wave = signal.make_wave(duration=0.1, framerate=framerate)
-    hs = dft(wave.ys)
-    amps = numpy.absolute(hs)
+>>> framerate = 10000
+>>> signal = thinkdsp.SawtoothSignal(freq=500)
+>>> wave = signal.make_wave(duration=0.1, framerate=framerate)
+>>> hs = dft(wave.ys)
+>>> amps = numpy.absolute(hs)
 \end{verbatim}
 
 This code makes a sawtooth wave with frequency 500 Hz, sampled at
 framerate 10 kHz.  {\tt hs} contains the complex DFT of the wave;
 {\tt amps} contains the amplitude at each frequency.  But what
-frequency do these amplitudes correspond to.  If we look at the
+frequency do these amplitudes correspond to?  If we look at the
 body of {\tt dft}, we see:
 
 \begin{verbatim}
-    fs = numpy.arange(N)
+>>> fs = numpy.arange(N)
 \end{verbatim}
 
 So it's tempting to think that these values are the right frequencies.
@@ -3905,20 +3887,20 @@ we have to convert from these arbitrary time units back to seconds,
 like this:
 
 \begin{verbatim}
-    fs = numpy.arange(N) * framerate / N
+>>> fs = numpy.arange(N) * framerate / N
 \end{verbatim}
 
 With this change, the range of frequencies is from 0 to the actual
 framerate, 10 kHz.  Now we can plot the spectrum:
 
 \begin{verbatim}
-    thinkplot.plot(fs, amps)
-    thinkplot.config(xlabel='frequency (Hz)', 
+>>> thinkplot.plot(fs, amps)
+>>> thinkplot.config(xlabel='frequency (Hz)', 
                      ylabel='amplitude')
 \end{verbatim}
 
 Figure~\ref{fig.dft3} shows the amplitude of the signal for each
-frequency component from 0 to 1 kHz.  The left half of the figure
+frequency component from 0 to 10 kHz.  The left half of the figure
 is what we should expect: the dominant frequency is at 500 Hz, with
 harmonics dropping off like $1/f$.
 
@@ -3927,7 +3909,7 @@ amplitude of the harmonics start growing again, peaking at 9500 Hz.
 What's going on?
 
 The answer: aliasing.  Remember that with framerate 10000 Hz, the
-folding frequency is 5000 Hz.  As we saw in Section~\ref{aliasing}
+folding frequency is 5000 Hz.  As we saw in Section~\ref{aliasing},
 a component at 5500 Hz is indistinguishable from a component
 at 4500 Hz.  So when we evaluate the DFT at 5500 Hz, we get the same
 value as at 4500 Hz.  Similarly, the value at 6000 Hz is the same
@@ -3935,7 +3917,7 @@ as the one at 4000 Hz, and so on.
 
 So the DFT of a real signal is symmetric around the folding frequency.
 Since there is no additional information past this point, we can
-save time be evaluating only the first half of the DFT,
+save time by evaluating only the first half of the DFT,
 and that's exactly what {\tt rfft} does.
 
 
@@ -3945,7 +3927,7 @@ and that's exactly what {\tt rfft} does.
 In this chapter, I showed how we can express the DFT and inverse
 DFT as matrix multiplications.  These operations are relatively
 fast, taking time proportional to $N^2$, where $N$ is the length
-of the wave array.  And that would be fast enough for many applications,
+of the wave array.  That would be fast enough for many applications,
 but it turns out that there is a faster algorithm, the
 Fast Fourier Transform (FFT), which takes time proportional to 
 $N \log N$.
@@ -3954,7 +3936,7 @@ Read about the FFT at
 \url{http://en.wikipedia.org/wiki/Cooley-Tukey_FFT_algorithm}, and
 write an implementation.  Hint: I suggest you write a simple version
 as a recursive function; don't worry about ``data reordering, bit
-reversal, and in-place algorithms.''
+reversal, and in-place algorithms''.
 \end{exercise}
 
 
@@ -3962,11 +3944,8 @@ reversal, and in-place algorithms.''
 
 In this chapter I present one of the most important and useful
 ideas related to signal processing: the Convolution Theorem.
-Before we can understand the Convolution Theorem, we have to understand
+But before we can understand the Convolution Theorem, we have to understand
 convolution.  I'll start with one of the simplest examples: smoothing.
-
-Then we'll see how the Convolution Theorem works and, for
-those who are interested, I'll try to explain {\em why} it works.
 
 The code for this chapter is in {\tt convolution.py}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -3978,7 +3957,7 @@ repository for this book (see Section~\ref{code}).
 \begin{figure}
 % convolution1.py
 \centerline{\includegraphics[height=2.5in]{figs/convolution1.pdf}}
-\caption{Daily changes in the price of BitCoin and a 30-day moving
+\caption{Daily closing price of BitCoin and a 30-day moving
 average.}
 \label{fig.convolution1}
 \end{figure}
@@ -3992,8 +3971,8 @@ was generally going up or down over time.
 A common smoothing algorithm is a moving average, which computes
 the mean of the previous $n$ values, for some value of $n$.
 
-For example, Figure~\ref{fig.convolution1} shows the daily percent
-change in the price of BitCoin from July 18, 2010 to December 28,
+For example, Figure~\ref{fig.convolution1} shows the daily
+closing price of BitCoin from July 18, 2010 to December 28,
 2014 (downloaded from \url{http://www.coindesk.com}).  The gray line
 is the raw data, the darker line shows the 30-day moving average.
 In the short term, the price of BitCoin is quite volatile, often
@@ -4006,9 +3985,9 @@ Section~\ref{harmonics}, the harmonics of a square wave drop off
 slowly, so it contains many high-frequency components.
 
 \begin{verbatim}
-    signal = thinkdsp.SquareSignal(freq=440)
-    wave = signal.make_wave(duration=1, framerate=44100)
-    segment = wave.segment(duration=0.01)
+>>> signal = thinkdsp.SquareSignal(freq=440)
+>>> wave = signal.make_wave(duration=1, framerate=44100)
+>>> segment = wave.segment(duration=0.01)
 \end{verbatim}
 
 {\tt wave} is a 1-second segment of the signal; {\tt segment}
@@ -4023,16 +4002,16 @@ a window with 11 elements and normalize it so the elements
 add up to 1.
 
 \begin{verbatim}
-    window = numpy.ones(11)
-    window /= sum(window)
+>>> window = numpy.ones(11)
+>>> window /= sum(window)
 \end{verbatim}
 
 Now I can compute the average of the first 11 elements by
 multiplying the window by the wave array:
 
 \begin{verbatim}
-    padded = zero_pad(window, len(segment))
-    prod = padded * segment.ys
+>>> padded = zero_pad(window, len(segment))
+>>> prod = padded * segment.ys
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
@@ -4043,8 +4022,9 @@ the end so it has the same length as {\tt segment.ys}
 The first 11 elements of this wave array are -1, so their
 average is -1, and (sure enough) that's the value of {\tt prod}.
 
-To compute the next element of the smoothed signal, we shift
-the right and compute the average of 11 elements of the wave
+To compute the next element of the smoothed signal, we shift the
+window to the right and compute the average of the next
+11 elements of the wave
 array, starting with the second.
 
 \begin{figure}
@@ -4060,9 +4040,9 @@ The following code computes the rolling average for the whole
 wave:
 
 \begin{verbatim}
-    smoothed = numpy.zeros_like(segment.ys)
-    rolled = padded
-    for i in range(len(segment.ys)):
+>>> smoothed = numpy.zeros_like(segment.ys)
+>>> rolled = padded
+>>> for i in range(len(segment.ys)):
         smoothed[i] = sum(rolled * segment.ys)
         rolled = numpy.roll(rolled, 1)
 \end{verbatim}
@@ -4090,8 +4070,8 @@ and it is such a common operation that NumPy provides an
 implementation that is simpler and faster than my version:
 
 \begin{verbatim}
-    ys = numpy.convolve(segment.ys, window, mode='valid')
-    smooth2 = thinkdsp.Wave(ys, framerate=wave.framerate)
+>>> ys = numpy.convolve(segment.ys, window, mode='valid')
+>>> smooth2 = thinkdsp.Wave(ys, framerate=wave.framerate)
 \end{verbatim}
 
 {\tt numpy.convolve} computes the convolution of the wave
@@ -4106,29 +4086,39 @@ than that, the result is the same as in Figure~\ref{fig.convolution2}.
 Actually, there is one other difference.  The loop in the
 previous section actually computes {\bf cross-correlation}:
 %
-\[ (f \star g)[i] = \sum_{j=0}^{N-1} f[j] g[j-i]  \]
+\[ (f \star g)[j] = \sum_{k=0}^{N-1} f[k] g[k-j]  \]
 %
 where $f$ is a wave array with length $N$, $g$ is the window,
 and $\star$ is the symbol for cross-correlation.  To
-compute the $i$th element of the result, we shift $g$ to
-the right, which is why the index is $j-i$.
+compute the $j$th element of the result, we shift $g$ to
+the right, which is why the index is $k-j$.
 
 The mathematical definition of convolution is slightly different:
 %
-\[ (f \conv g)[i] = \sum_{j=0}^{N-1} f[j] g[i-j]  \]
+\[ (f \conv g)[j] = \sum_{k=0}^{N-1} f[k] g[j-k]  \]
 %
 The symbol $\conv$ represents convolution.  The difference is
 that the index of $g$ has been negated, which has the same
 effect as reversing the elements of $g$ (assuming that negative
 indices wrap around to the end of the array).
 
-Because the window we are using is symmetric,
-cross-correlation and convolution yield the same result.
-When we use other windows, we will have to be more careful.
+Because the moving average window is symmetric, cross-correlation and
+convolution yield the same result.  When we use other windows, we will
+have to be more careful.
 
-You might wonder why convolution is defined the way it is.
-I can't answer that question yet, but I will, in
-Section~\ref{whyflip}.
+You might wonder why convolution is defined the way it is.  There
+are two reasons:
+
+\begin{itemize}
+
+\item Convolution comes up naturally for several applications,
+especially analysis of signal-processing systems, which is
+the topic of Chapter~\ref{systems}.
+
+\item Also, convolution is the basis of the Convolution Theorem,
+coming up very soon.
+
+\end{itemize}
 
 
 \section{The frequency domain}
@@ -4146,17 +4136,17 @@ operation has on the spectrum.  First I'll plot the spectrum
 of the original wave:
 
 \begin{verbatim}
-    spectrum = wave.make_spectrum()
-    spectrum.plot(color='0.7')
+>>> spectrum = wave.make_spectrum()
+>>> spectrum.plot(color='0.7')
 \end{verbatim}
 
 Then the smoothed wave:
 
 \begin{verbatim}
-    ys = numpy.convolve(wave.ys, window, mode='same')
-    smooth = thinkdsp.Wave(ys, framerate=wave.framerate)
-    spectrum2 = smooth.make_spectrum()
-    spectrum2.plot()
+>>> ys = numpy.convolve(wave.ys, window, mode='same')
+>>> smooth = thinkdsp.Wave(ys, framerate=wave.framerate)
+>>> spectrum2 = smooth.make_spectrum()
+>>> spectrum2.plot()
 \end{verbatim}
 
 Figure~\ref{fig.convolution4} shows the result.  The fundamental
@@ -4169,11 +4159,11 @@ To see how much each component has been attenuated, we can
 compute the ratio of the two spectrums:
 
 \begin{verbatim}
-    amps = spectrum.amps
-    amps2 = spectrum2.amps
-    ratio = amps2 / amps    
-    ratio[amps<560] = 0
-    thinkplot.plot(ratio)
+>>> amps = spectrum.amps
+>>> amps2 = spectrum2.amps
+>>> ratio = amps2 / amps    
+>>> ratio[amps<560] = 0
+>>> thinkplot.plot(ratio)
 \end{verbatim}
 
 {\tt ratio} is the ratio of the amplitude before and after 
@@ -4191,12 +4181,12 @@ where the harmonics are.
 Figure~\ref{fig.convolution5} shows the result.  As expected, the
 ratio is high for low frequencies and drops off at a cutoff frequency
 near 4000 Hz.  But there is another feature we did not expect: above
-the cutoff, the ratio seems to oscillate between 0 and 0.2.
+the cutoff, the ratio bounces around between 0 and 0.2.
 What's up with that?
 
 
 \section{The convolution theorem}
-\section{convtheorem}
+\label{convtheorem}
 
 \begin{figure}
 % convolution6.py
@@ -4214,7 +4204,7 @@ where $f$ is a wave array and $g$ is a window.  In words,
 the convolution theorem says that if we convolve $f$ and $g$,
 and then compute the DFT, we get the same answer as computing
 the DFT of $f$ and $g$, and then multiplying the results
-element-wise.  Or, more concisely, convolution in the time
+element-wise.  More concisely, convolution in the time
 domain corresponds to multiplication in the frequency domain.
 
 And that explains Figure~\ref{fig.convolution5}, because when we
@@ -4232,19 +4222,20 @@ we can compute the DFT of the window:
 same length as {\tt wave}.  \verb"dft_window" contains the
 DFT of the smoothing window.
 
+\newcommand{\abs}{\mathrm{abs}}
+
 Figure~\ref{fig.convolution6} shows the result, along with the
 ratios we computed in the previous section.  The ratios are
-exactly the amplitudes \verb"dft_window".  Mathematically:
+exactly the amplitudes in \verb"dft_window".  Mathematically:
 %
-\[ |DFT(f \conv g)| / |DFT(f)| = |DFT(g)| \]
+\[ \abs(DFT(f \conv g)) / \abs(DFT(f)) = \abs(DFT(g)) \]
 %
-where $|z|$ represents the amplitude of a complex number $z$.
-
 In this context, the DFT of a window is called a {\bf filter}.
 For any convolution window in the time domain, there is a
 corresponding filter in the frequency domain.  And for any
 filter than can be expressed by element-wise multiplication in
 the frequency domain, there is a corresponding window.
+
 
 
 \section{Gaussian filter}
@@ -4257,13 +4248,17 @@ the frequency domain, there is a corresponding window.
 \end{figure}
 
 The moving average window we used in the previous section is
-a low-pass filter, but it is not a very good one.  It cuts off
-at around 4000 Hz, but then it bounces around for a while.  
-For reasons we will see soon, we can do better with
-a Gaussian window.
+a low-pass filter, but it is not a very good one.
+The DFT drops off steeply at
+first, but then it bounces around.  Those bounces are
+called {\bf sidelobes}, and they are there because the moving
+average window is like a square wave, so its spectrum contains
+high-frequency harmonics that drop off proportionally to
+$1/f$, which is relatively slow.  
 
-SciPy provides functions that compute many common convolution
-windows, including {\tt gaussian}:
+We can do better with a Gaussian window.
+SciPy provides functions that compute many common convolution windows,
+including {\tt gaussian}:
 
 \begin{verbatim}
     gaussian = scipy.signal.gaussian(M=11, std=2)
@@ -4291,21 +4286,18 @@ with this curve, and generated Figure~\ref{fig.convolution8},
 which shows the ratio of the spectrums before and after
 smoothing, along with the DFT of the Gaussian window. 
 
-As a low-pass filter, Gaussian smoothing is much better than
-a simple moving average.  The cutoff frequency is a little
-higher; near 7000 Hz, the ratio is 0.1.  But above that, the
-ratio drops quickly and stays low, with almost none of the oscillation we
-saw with the boxcar window.
+As a low-pass filter, Gaussian smoothing is better than a simple
+moving average.  After the ratio drops off, it
+stays low, with almost none of the sidelobes we saw with the boxcar
+window.  So it does a better job of cutting off the higher frequencies.
 
-In Figure~\ref{fig.convolution8}, the shape of the filter
-might look familiar.  As it turns out, the DFT of a Gaussian
-curve is also a Gaussian curve.  In this example, the
-window is a discrete approximation, so the resulting filter
-is only approximately Gaussian.
+The reason it does so well is that the DFT of a Gaussian curve is also a
+Gaussian curve.  So the ratio drops off in proportion to $\exp(-x^2)$,
+which is much faster than $1/f$.
 
 
 \section{Efficient convolution}
-\section{effconv}
+\label{effconv}
 
 One of the reasons the FFT is such an important algorithm is that,
 combined with the Convolution Theorem, it provides an efficient
@@ -4337,7 +4329,7 @@ shown in Figure~\ref{fig.convolution1}.
 This example uses Pandas to read the data from the CSV file (included
 in the repository for this book).  If you are not familiar with
 Pandas, don't worry: I'm not going to do much with it in this book.
-But if you are interested, you can learn more about it in
+But if you're interested, you can learn more about it in
 {\it Think Stats} at \url{http://thinkstats2.com}.
 
 The result, {\tt df}, is a DataFrame, one of the data structures
@@ -4366,7 +4358,7 @@ def fft_convolve(signal, window):
 \end{verbatim}
 
 We can test it by padding the window to the same length
-as {\tt ys}:
+as {\tt ys} and then computing the convolution:
 
 \begin{verbatim}
     padded = zero_pad(window, len(ys))
@@ -4375,7 +4367,7 @@ as {\tt ys}:
 
 The result has $M-1$ bogus values at the beginning, where
 $M$ is the length of the window.  If we slice off the bogus
-values, we the same result as before, with about 12 digits
+values, we get the same result as before, with about 12 digits
 of precision.
 
 \begin{verbatim}
@@ -4398,10 +4390,10 @@ book and also available at \url{http://tinyurl.com/thinkdsp08}.
 \label{fig.convolution9}
 \end{figure}
 
-In Section~\ref{convolution} I presented the definition of
+In Section~\ref{convolution} I presented definitions of
 cross-correlation and convolution, and we saw that they are
 almost the same, except that in convolution the window is
-reversed (for reasons we are still waiting for).
+reversed.
 
 Now that we have an efficient algorithm for convolution, we
 can also use it to compute cross-correlations and autocorrelations.
@@ -4421,13 +4413,13 @@ The gray line in Figure~\ref{fig.convolution9} shows the result.
 Except at {\tt lag=0}, there are no peaks, so there is no apparent
 periodic behavior in this signal.
 
-To compute autocorrelation using convolution, we make two copies of
-the signal and reverse one of them.  Then we pad both of them to
+To compute autocorrelation using convolution, we make a copy of
+the signal and reverse it.  Then we pad the copy and the original to
 double their length.  This trick is necessary because the FFT is based
 on the assumption that the signal is periodic; that is, that it wraps
 around from the end to the beginning.  With time-series data like
-this, that assumption is invalid.  Adding zeros prevents the
-FFT from wrapping around and generating bogus values.
+this, that assumption is invalid.  Adding zeros, and then trimming 
+the results, removes the bogus values.
 
 \begin{verbatim}
 def fft_autocorr(signal):
@@ -4465,8 +4457,9 @@ in Section~\ref{correlate}.
 The strategy we used here for auto-correlation also works for
 cross-correlation.  Again, you have to prepare the signals
 by flipping one and padding both, and then you have to trim
-the invalid parts of the result.  But that's why libraries like
-NumPy provide functions to do that for you.
+the invalid parts of the result.  This packing and unpacking is
+a nuisance, but that's why libraries like
+NumPy provide functions to do it for you.
 
 
 \section{Exercises}
@@ -4483,6 +4476,7 @@ what effect they have on the cutoff frequency.
 
 The code for this chapter is in {\tt systems.py}, which is in the
 repository for this book (see Section~\ref{code}).
+
 
 \section{Finite differences}
 
@@ -4529,7 +4523,7 @@ Now let's compute the daily price change using {\tt numpy.diff}:
 \end{verbatim}
 
 Figure~\ref{fig.systems2} shows the resulting wave and its
-spectrum.  The differences and their spectrum resemble white noise,
+spectrum.  The daily changes and their spectrum resemble white noise,
 and the estimated parameter, -0.023, is near zero, which is what
 we expect for white noise.
 
@@ -4589,7 +4583,7 @@ and then sublinearly after that.  In the next section, we'll see why.
 \section{Differentiation}
 \label{effdiff}
 
-The window we used in the previous section is a simple
+The window we used in the previous section is a
 numerical approximation of the first derivative, so the filter
 approximates the effect of differentiation, which we can
 figure out mathematically.
@@ -4611,18 +4605,40 @@ as multiplying by $2 \pi i f$, which is a complex scalar
 (more specifically, an imaginary scalar).
 
 As we saw in Section~\ref{synthmat}, multiplying a complex sinusoid
-function by a complex scalar has two effects: it multiplies
+by a complex scalar has two effects: it multiplies
 the amplitude, in this case by $2 \pi f$, and shifts the phase
 offset, in this case by $\pi/2$ (because that's the angle of
 a positive imaginary number).
 
 If you are familiar with the language of operators and eigenfunctions,
-$E_F$ is an eigenfunction of the differentiation operator, with the
+each $E_f$ is an eigenfunction of the differentiation operator, with the
 corresponding eigenvalue $2 \pi i f$.  See
 \url{http://en.wikipedia.org/wiki/Eigenfunction}.
 
+If you are not familiar with that language, I'll tell you what it
+means:
+
+\newcommand{\op}{\mathcal{A}}
+
+\begin{itemize}
+
+\item An operator is a function that takes a function and returns
+another function.  For example, differentiation is an operator.
+
+\item A function, $g$, is an eigenfunction of an operator, $\op$, if
+applying $\op$ to $g$ has the effect of multiplying the function by
+a scalar.  That is, $\op g = \lambda g$.
+
+\item In that case, the scalar $\lambda$ is the eigenvalue that
+corresponds to the eigenfunction $g$.
+
+\item A given operator might have many eigenfunctions, each with
+a corresponding eigenvalue. 
+
+\end{itemize}
+
 For a complex signal with only one frequency component,
-differentiation is easy.  For signal with more than one component,
+differentiation is easy.  For signals with more than one component,
 the process is only slightly harder:
 
 \begin{enumerate}
@@ -4705,7 +4721,7 @@ systems, which is the next topic.
 \section{LTI systems}
 
 In the context of signal processing, a {\bf system} is an abstract
-representation of something that takes a signal as input and produces
+representation of anything that takes a signal as input and produces
 a signal as output.
 
 For example, an electronic amplifier is a circuit that takes an
@@ -4857,9 +4873,9 @@ waveform of the gunshot.  Next we compute the DFT of {\tt response}:
 
 Figure~\ref{fig.system6} (right) shows the result.  This spectrum
 encodes the response of the room; for each frequency, the spectrum
-contains a complex number that represents the amplitude of the
-response and the phase shift.  This spectrum is called a {\bf transfer
-function} contains information about how the system transfers
+contains a complex number that represents an amplitude multiplier and
+a phase shift.  This spectrum is called a {\bf transfer
+function} because it contains information about how the system transfers
 the input to the output.
 
 Now we can simulate the effect this room would have on the sound
@@ -4912,6 +4928,14 @@ of that transfer function first.
 
 \section{Systems and convolution}
 
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems8.pdf}}
+\caption{Sum of a gunshot waveform with a shifted, scaled version of
+itself.}
+\label{fig.systems8}
+\end{figure}
+
 If you think the previous example is black magic,
 you are not alone.  I've been thinking about it for a while and it
 still makes my head hurt.
@@ -4923,22 +4947,214 @@ In the previous section, I suggested one way to think about it:
 \item An impulse is made up of components with amplitude 1 at all
   frequencies.
 
-\item So the impulse response contains sum of the response of the
+\item The impulse response contains sum of the responses of the
   system to all of these components.
 
 \item The transfer function, which is the DFT of the impulse response,
-  encodes the response of the system to each component.
+  encodes effect of the system on each frequency component in the form
+  of an amplitude multiplier and a phase shift.
 
-\item Therefore, if we know what the system does to an impulse, we
-  can figure out what it would do to any other signal.
+\item For any input, we can compute the response of the system
+  by breaking the input into components, computing the response to
+  each component, and adding them up.
 
 \end{itemize}
 
+But if you don't like that, there's another way to think about
+it altogether: convolution!
 
+Suppose that instead of firing one gun, you fire two guns:
+a big one with amplitude 1 at $t=0$ and a smaller one with
+amplitude 0.5 at $t=1$.
 
+We can compute the response of the system by adding up
+the original impulse response and a scaled, shifted version of itself.
+Here's a function that makes a shifted, scaled version of
+a wave:
 
 \begin{verbatim}
+def shifted_scaled(wave, shift, factor):
+    res = wave.copy()
+    res.shift(shift)
+    res.scale(factor)
+    return res
 \end{verbatim}
+
+Here's how we use it to compute the response to a two-gun salute:
+
+\begin{verbatim}
+dt = 1
+shift = dt * response.framerate
+factor = 0.5
+response2 = response + shifted_scaled(response, shift, factor)
+\end{verbatim}
+
+Figure~\ref{fig.systems8} shows the result.  You can hear what
+it sounds like in {\tt chap09.ipynb}, which you can view
+at \url{http://tinyurl.com/thinkdsp09}.  Not surprisingly, it
+sounds like two gunshots, the first one louder than the second.
+
+Now suppose instead of two guns, you add up 100 guns, with
+a shift of 100 between them.  This loop computes the result:
+
+\begin{verbatim}
+    total = 0
+    for j in range(100):
+        total += shifted_scaled(response, j*100, 1.0)
+\end{verbatim}
+
+At a framerate of 44,100 Hz, there are 441 gunshots per second,
+so you don't hear the individual shots.  Instead, it sounds
+like a periodic signal at 441 Hz.  If you play this example, it
+sounds like a car horn in a garage.
+
+And that brings us to a key insight: you can think of any wave as a
+series of samples, where each sample is an impulse with a different
+magnitude.
+
+As a example, I'll generate a sawtooth signal at 410 Hz:
+
+\begin{verbatim}
+    signal = thinkdsp.SawtoothSignal(freq=410)
+    wave = signal.make_wave(duration=0.1,
+                            framerate=response.framerate)
+\end{verbatim}
+
+Now I'll loop through the series of impulses that make up the
+sawtooth, and add up the impulse responses:
+
+\begin{verbatim}
+    total = 0
+    for j, y in enumerate(wave.ys):
+        total += shifted_scaled(response, j, y)
+\end{verbatim}
+
+The result is what it would sound like to play a sawtooth wave in a
+firing range.  Again, you can listen to it in {\tt chap09.ipynb}.
+
+\begin{figure}
+\input{diagram2}
+\caption{Diagram of the sum of scaled and shifted copies of $g$.}
+\label{fig.convolution}
+\end{figure}
+
+Figure~\ref{fig.convolution} shows a diagram of this computation,
+where $f$ is the sawtooth, $g$ is the impulse response, and $h$
+is the sum of the shifted, scaled copies of $g$.
+
+For the example shown:
+
+\[ h[2] = f[0]g[2] + f[1]g[1] + f[2]g[0]  \]
+
+And more generally,
+
+\[ h[i] = \sum_{j=0}^{N-1} f[j] g[i-j]  \]
+
+You might recognize this equation from Section~\ref{convolution}.  It
+is the convolution of $f$ and $g$.
+
+In summary, there are two ways to think about the effect of a system
+on a signal:
+
+\begin{enumerate}
+
+\item The input is a sequence of impulses, so the output is the sum of
+  scaled, shifted copies of the impulse response, which is the
+  convolution of the input and the impulse response.
+
+\item The DFT of the impulse response is a transfer function that
+  encodes the effect of the system on each frequency component as a
+  magnitude and phase offset.  The DFT of the input encodes the
+  magnitude and phase offset of the frequency components it contains.
+  Multiplying the DFT of the input by the transfer function yields
+  the DFT of the output.
+
+\end{enumerate}
+
+The equivalence of these two descriptions should not be a surprise;
+it is basically a statement of the Convolution Theorem:
+convolution in the time
+domain corresponds to multiplication in the frequency domain.
+
+
+\section{Proof of the Convolution Theorem}
+
+Well, I've put it off long enough.  It's time to prove the Convolution
+Theorem (CT), which states:
+
+\[ DFT(f \conv g) = DFT(f) DFT(g) \]
+
+where $f$ and $g$ are vectors with the same length, $N$.
+
+I'll proceed in two steps:
+
+\begin{enumerate}
+
+\item I'll show that in the special case where $f$ is a complex
+exponential, convolution with $g$ has the effect of multiplying
+$f$ by a scalar.  
+
+\item In the more general case where $f$ is not a complex exponential,
+we can use the DFT to express it as a sum of exponential components,
+compute the convolution of each component (by multiplication) and
+then add up the results.
+
+\end{enumerate}
+
+The second step demonstrates the Convolution Theorem.
+
+First, let's assemble the pieces we'll need.
+The DFT of $g$, which I'll call $G$, is:
+%
+\[ G[n] = \sum_k g[k] \exp(-2 \pi i n k / N) \]
+%
+where $N$ is the length of $g$, and $n$ is an index that runs from 0
+to $N-1$.  So $G$ is a vector of complex numbers, with length $N$.
+
+And here's the definition of convolution:
+%
+\[ (f \conv g)[j] = \sum_k f[k] g[j-k] \]
+%
+This is the definition we saw in Section~\ref{convolution}, except
+that I've changed the names of the index variables.
+
+Convolution is commutative, so I could equivalently write:
+%
+\[ (f \conv g)[j] = \sum_k f[j-k] g[k] \]
+%
+Now let's consider the special case where $f$ is a complex
+exponential; specifically,
+%
+\[ f_n[\kappa] = \exp(2 \pi i n \kappa / N) \]
+%
+where $N$ is the length of $f$ and $g$, and
+$n$ is one of the integers from 0 to $N-1$.  I'm using
+$\kappa$ here as a placekeeper to avoid confusion because
+very soon I will need to substitute $j-k$ for $\kappa$.
+
+Plugging $f_n$ into the second definition of convolution yields
+%
+\[ (f_n \conv g)[j] = \sum_k \exp(2 \pi i n (j-k) / N) g[k]  \]
+%
+We can split the first term into a product:
+%
+\[ (f_n \conv g)[j] = \sum_k \exp(2 \pi i n j / N) \exp(-2 \pi i n k / N) g[k]  \]
+%
+The first half does not depend on $k$, so we can pull it out of the
+summation:
+%
+\[ (f_n \conv g)[j] = \exp(2 \pi i n j / N) \sum_k \exp(-2 \pi i n k / N) g[k]  \]
+%
+Now we recognize the first term is $f_n$ (with $j$ substituted for
+$\kappa$), and the summation is $G[n]$.  So we can write:
+%
+\[ (f_n \conv g)[j] = f_n[j] G[n] \]
+%
+which shows that for each complex exponential, $f_n$, convolution
+with $g$ has the effect of multiplying $f_n$ by $G[n]$.  In other
+words, each $f_n$ is an eigenvector of this operation, and
+$G[n]$ is the corresponding eigenvalue.
+
 
 
 \section{Exercises}
@@ -4954,6 +5170,98 @@ And \url{http://designingsound.org/2014/07/spectral-analysis-interview-with-rob-
 
 
 \chapter{Fourier analysis of images}
+
+
+\appendix
+
+\chapter{Linear Algebra}
+
+Dot product
+
+In the special case where $y$ has length 1, we have 
+%
+\[ x \cdot \hat{y} = \norm(x) \cos \theta \]
+%
+which is the {\bf scalar projection} of $x$ onto $\hat{y}$;
+that is, it is the length of the component of $x$ that points
+in the direction of $\hat{y}$.
+
+I mention this now because it will come in handy when we talk
+about transforms.
+
+In the context of computation, it is common to think of a vector as a
+sequence of numbers, and people often use ``vector'' and ``array''
+interchangeably.  But it is more correct to think of a vector as an
+abstract mathematical concept, with an array as one way to represent
+one.
+
+From a mathematical point of view, a vector is a sequence of
+coordinates relative to a {\bf basis}.  Most vectors are implicitly
+defined relative to the ``standard basis'', which is a sequence
+of unit vectors.
+
+For example, in a 3-D Euclidean space, the standard basis is the
+sequence of vectors:
+%
+\begin{eqnarray}
+e_x &=& (1, 0, 0) \\
+e_y &=& (0, 1, 0) \\
+e_z &=& (0, 0, 1) \\
+\end{eqnarray}
+%
+Relative to this basis, the vector $(1, 2, 3)$ is understood to
+mean $1 e_x + 2 e_y + 3 e_z$.  This is similar to the way we
+understand that the number $123$ means $100 + 20 + 3$, provided
+that it is in base 10.
+
+But just as we can write numbers in other bases, we can define vectors
+relative to other bases.  A basis is a sequence of vectors that
+are linearly-independent, which means that no vector in the set
+can be written as a weighted sum of the others.
+
+
+
+
+
+One note on linear algebra vocabulary: I am using ``matrix'' to refer
+to a two-dimensional array, and ``vector'' for a one-dimensional array
+or sequence.  To be pedantic, it would be more correct to think
+of matrices and vectors as abstract mathematical concepts, and NumPy
+arrays as one way (and not the only way) to represent them.
+
+
+This chapter explores the relationship between the synthesis problem
+and the analysis problem.  By writing the synthesis problem in the
+form of matrix operations, we derive an efficient algorithm for computing
+the DCT.
+
+That's useful for analysis and synthesis, but it also provides
+an alternative way to think about these operations: in the vocabulary
+of linear algebra, they are linear transformations, or {\bf transforms}.
+
+To understand transforms, we have to start with bases.  A {\bf basis}
+is a set of linearly-independent vectors, which means that no
+vector in the set can be written as a weighted sum of the others.
+
+In this context, a vector is a sequence of coordinates defined
+relative to a basis.  
+
+
+
+This algorithm is based on a matrix, $M$, that is orthogonal and
+symmetric, so it has the unusual property that the inverse of $M$ is
+$M$ (within a factor of two, anyway).  As a result, the function we
+wrote to compute DCT-IV also computes the inverse DCT.
+
+From 
+
+
+For the analysis problem, we started with a solution that
+takes time proportional to $n^3$ and improved it to take time
+proportional to $n^2$.  It turns out that there is another optimization
+that gets the run time down to $n \log n$.  We'll see how that works
+in Chapter~\ref{dft}.
+
 
 
 \end{document}
