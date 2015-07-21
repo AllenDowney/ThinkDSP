@@ -72,7 +72,7 @@ def three_spectrums():
                            right=0.95, left=0.1,
                            top=0.95, bottom=0.05)
 
-    xticks = xrange(0, 900, 200)
+    xticks = range(0, 900, 200)
 
     thinkplot.subplot(1)
     thinkplot.config(xticks=xticks)

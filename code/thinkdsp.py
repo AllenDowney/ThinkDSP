@@ -276,7 +276,7 @@ class Spectrum(_SpectrumParent):
         cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in xrange(len(self.hs)):
+        for i in range(len(self.hs)):
             if self.fs[i] > cutoff:
                 self.hs[i] *= factor
 
@@ -286,7 +286,7 @@ class Spectrum(_SpectrumParent):
         cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in xrange(len(self.hs)):
+        for i in range(len(self.hs)):
             if self.fs[i] < cutoff:
                 self.hs[i] *= factor
 
@@ -297,7 +297,7 @@ class Spectrum(_SpectrumParent):
         high_cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in xrange(len(self.hs)):
+        for i in range(len(self.hs)):
             if low_cutoff < self.fs[i] < high_cutoff:
                 self.hs[i] *= factor
 
@@ -1009,6 +1009,7 @@ class SumSignal(Signal):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         return sum(sig.evaluate(ts) for sig in self.signals)
 
 
@@ -1043,6 +1044,7 @@ class Sinusoid(Signal):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         phases = PI2 * self.freq * ts + self.offset
         ys = self.amp * self.func(phases)
         return ys
@@ -1082,6 +1084,7 @@ class ComplexSinusoid(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         i = complex(0, 1)
         phases = PI2 * self.freq * ts + self.offset
         ys = self.amp * numpy.exp(i * phases)
@@ -1098,6 +1101,7 @@ class SquareSignal(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = self.amp * numpy.sign(unbias(frac))
@@ -1114,6 +1118,7 @@ class SawtoothSignal(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = normalize(unbias(frac), self.amp)
@@ -1130,6 +1135,7 @@ class ParabolicSignal(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = (frac - 0.5)**2
@@ -1147,6 +1153,7 @@ class GlottalSignal(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = frac**4 * (1-frac)
@@ -1164,6 +1171,7 @@ class TriangleSignal(Sinusoid):
         
         returns: float wave array
         """
+        ts = numpy.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = numpy.modf(cycles)
         ys = numpy.abs(frac - 0.5)
