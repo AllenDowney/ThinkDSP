@@ -1625,6 +1625,13 @@ class EstimatedPdf(Pdf):
         """
         return self.kde.evaluate(xs)
 
+    def Sample(self, n):
+        """Generates a random sample from the estimated Pdf.
+
+        n: size of sample
+        """
+        return self.kde.resample(n)
+
 
 def CredibleInterval(pmf, percentage=90):
     """Computes a credible interval for a given distribution.

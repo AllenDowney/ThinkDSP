@@ -27,17 +27,39 @@ windowing3.pdf windowing3.eps \
 whitenoise0.pdf whitenoise0.eps \
 whitenoise1.pdf whitenoise1.eps \
 whitenoise2.pdf whitenoise2.eps \
-whitenoise3.pdf whitenoise3.eps \
-whitenoise4.pdf whitenoise4.eps \
-whitenoise5.pdf whitenoise5.eps \
 rednoise0.pdf rednoise0.eps \
-rednoise1.pdf rednoise1.eps \
-rednoise2.pdf rednoise2.eps \
 rednoise3.pdf rednoise3.eps \
-rednoise4.pdf rednoise4.eps \
-rednoise5.pdf rednoise5.eps \
-
-
+pinknoise0.pdf pinknoise0.eps \
+noise-triple.pdf noise-triple.eps \
+noise1.pdf noise1.eps \
+autocorr1.pdf autocorr1.eps \
+autocorr2.pdf autocorr2.eps \
+autocorr3.pdf autocorr3.eps \
+autocorr4.pdf autocorr4.eps \
+autocorr5.pdf autocorr5.eps \
+autocorr6.pdf autocorr6.eps \
+autocorr7.pdf autocorr7.eps \
+autocorr8.pdf autocorr8.eps \
+autocorr9.pdf autocorr9.eps \
+dft1.pdf dft1.eps \
+dft2.pdf dft2.eps \
+dft3.pdf dft3.eps \
+convolution1.pdf convolution1.eps \
+convolution2.pdf convolution2.eps \
+convolution4.pdf convolution4.eps \
+convolution5.pdf convolution5.eps \
+convolution6.pdf convolution6.eps \
+convolution7.pdf convolution7.eps \
+convolution8.pdf convolution8.eps \
+convolution9.pdf convolution9.eps \
+systems1.pdf systems1.eps \
+systems2.pdf systems2.eps \
+systems3.pdf systems3.eps \
+systems4.pdf systems4.eps \
+systems5.pdf systems5.eps \
+systems6.pdf systems6.eps \
+systems7.pdf systems7.eps \
+systems8.pdf systems8.eps \
 
 all_figs:
 	python violin.py
@@ -60,6 +82,8 @@ figs:
 .PHONY: docs $(DOCPY)
 
 docs: $(DOCPY)
+	rsync -a $(DOCS) $(DEST)
+	cd /home/downey/public_html/greent; sh back
 
 $(DOCPY):
 	pydoc -w ./$@
