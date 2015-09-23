@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.9}
+\newcommand{\theversion}{0.9.11}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -817,11 +817,13 @@ provides {\tt CosSignal} and {SinSignal}, which create cosine
 and sine signals: 
 
 \begin{verbatim}
+import numpy as np
+
 def CosSignal(freq=440, amp=1.0, offset=0):
-    return Sinusoid(freq, amp, offset, func=numpy.cos)
+    return Sinusoid(freq, amp, offset, func=np.cos)
 
 def SinSignal(freq=440, amp=1.0, offset=0):
-    return Sinusoid(freq, amp, offset, func=numpy.sin)
+    return Sinusoid(freq, amp, offset, func=np.sin)
 \end{verbatim}
 
 These functions are just wrappers for {\tt Sinusoid}, which
@@ -830,7 +832,7 @@ is a kind of Signal:
 \begin{verbatim}
 class Sinusoid(Signal):
     
-    def __init__(self, freq=440, amp=1.0, offset=0, func=numpy.sin):
+    def __init__(self, freq=440, amp=1.0, offset=0, func=np.sin):
         Signal.__init__(self)
         self.freq = freq
         self.amp = amp
@@ -853,7 +855,7 @@ microphone or maximum output to a speaker.
 
 \item {\tt func}: a Python function used
 to evaluate the signal at a particular point in time.  It is
-usually either {\tt numpy.sin} or {\tt numpy.cos}, yielding a sine or
+usually either {\tt np.sin} or {\tt np.cos}, yielding a sine or
 cosine signal.
 
 \end{itemize}
@@ -868,7 +870,7 @@ points in time and returns a Wave.
 \begin{verbatim}
     def make_wave(self, duration=1, start=0, framerate=11025):
         dt = 1.0 / framerate
-        ts = numpy.arange(start, duration, dt)
+        ts = np.arange(start, duration, dt)
         ys = self.evaluate(ts)
         return Wave(ys, framerate)
 \end{verbatim}
@@ -878,7 +880,7 @@ in seconds.  {\tt framerate} is the number of frames (samples)
 per second.
 
 {\tt dt} is the time between samples, and {\tt ts} is the sequence
-of sample times.  {\tt numpy.arange} returns a NumPy array.
+of sample times.  {\tt np.arange} returns a NumPy array.
 
 \verb"make_wave" invokes {\tt evaluate}, which has to be provided
 by a child class of {\tt Signal}, in this case {\tt Sinusoid}.
@@ -936,7 +938,7 @@ a new {\tt Spectrum} object.
 
 \begin{verbatim}
     def make_spectrum(self):
-        hs = numpy.fft.rfft(self.ys)
+        hs = np.fft.rfft(self.ys)
         return Spectrum(hs, self.framerate)
 \end{verbatim}
 
@@ -983,9 +985,9 @@ class Spectrum(object):
 
         n = len(hs)
         f_max = framerate / 2.0
-        self.fs = numpy.linspace(0, f_max, n)
+        self.fs = np.linspace(0, f_max, n)
 
-        self.amps = numpy.absolute(self.hs)
+        self.amps = np.absolute(self.hs)
 \end{verbatim}
 
 Again, {\tt hs} is the result of the FFT and {\tt framerate}
@@ -1040,8 +1042,8 @@ class TriangleSignal(Sinusoid):
     
     def evaluate(self, ts):
         cycles = self.freq * ts + self.offset / PI2
-        frac, _ = numpy.modf(cycles)
-        ys = numpy.abs(frac - 0.5)
+        frac, _ = np.modf(cycles)
+        ys = np.abs(frac - 0.5)
         ys = normalize(unbias(ys), self.amp)
         return ys
 \end{verbatim}
@@ -1059,7 +1061,7 @@ are not important, but here's how {\tt evaluate} works:
 \begin{enumerate}
 
 \item {\tt cycles} is the number of cycles since the start time.
-{\tt numpy.modf} splits the number of cycles into the fraction
+{\tt np.modf} splits the number of cycles into the fraction
 part, stored in {\tt frac}, and the integer part, which is ignored
 \footnote{Using an underscore as a variable name is a convention that
 means, ``I don't intend to use this value''.}.
@@ -1136,8 +1138,8 @@ class SquareSignal(Sinusoid):
     
     def evaluate(self, ts):
         cycles = self.freq * ts + self.offset / PI2
-        frac, _ = numpy.modf(cycles)
-        ys = self.amp * numpy.sign(unbias(frac))
+        frac, _ = np.modf(cycles)
+        ys = self.amp * np.sign(unbias(frac))
         return ys
 \end{verbatim}
 
@@ -1150,7 +1152,7 @@ the number of cycles since the start time, and {\tt frac} is the
 fractional part, which ramps from 0 to 1 each period.
 
 {\tt unbias} shifts {\tt frac} so it ramps from -0.5 to 0.5,
-then {\tt numpy.sign} maps the negative values to -1 and the
+then {\tt np.sign} maps the negative values to -1 and the
 positive values to 1.  Multiplying by {\tt amp} yields a square
 wave that jumps between {\tt -amp} and {\tt amp}.
 
@@ -1285,6 +1287,10 @@ Compute the spectrum of a sawtooth wave.  How does the harmonic
 structure compare to triangle and square waves?
 \end{exercise}
 
+%\begin{exercise}
+% TODO: add an exercise about plotting phases
+%\end{exercise}
+
 \begin{exercise}
 Sample an 1100 Hz triangle at 10000 frames per second and listen to it.
 Can you hear the aliased harmonic?  It might help if you play a sequence of
@@ -1306,15 +1312,10 @@ find a waveform that has even and odd harmonics that drop off
 like $1/f^2$?
 \end{exercise}
 
+% TODO: chap02soln.ipynb
 
 
 \chapter{Non-periodic signals}
-
-The code for this chapter is in {\tt chirp.py}, which is in the
-repository for this book (see Section~\ref{code}).
-
-
-\section{Chirp}
 
 The signals we have worked with so far are periodic, which means
 that they repeat forever.  It also means that the frequency
@@ -1322,6 +1323,15 @@ components they contain do not change over time.
 In this chapter, we consider non-periodic signals,
 whose frequency components {\em do} change over time.
 In other words, pretty much all sound signals.
+
+This chapter also presents spectrograms, a common way to visualize
+non-periodic signals.
+
+The code for this chapter is in {\tt chirp.py}, which is in the
+repository for this book (see Section~\ref{code}).
+
+
+\section{Chirp}
 
 We'll start with a {\bf chirp}, which is a signal with variable
 frequency.  Here is a class that represents a chirp:
@@ -1343,14 +1353,16 @@ to {\tt end}.  Here is the function that evaluates the signal:
 
 \begin{verbatim}
     def evaluate(self, ts):
-        freqs = numpy.linspace(self.start, self.end, len(ts)-1)
+        freqs = np.linspace(self.start, self.end, len(ts)-1)
         return self._evaluate(ts, freqs)
 \end{verbatim}
 
-{\tt ts} is the sequence of points in time where the signal should
-be evaluated.  If the length of {\tt ts} is $n$, you can think of
-it as a sequence of $n-1$ intervals of time.  To compute the frequency
-during each interval, we use {\tt numpy.linspace}.
+{\tt ts} is the sequence of points in time where the signal should be
+evaluated; to keep this function simple, I assume they are equally-spaced.
+
+If the length of {\tt ts} is $n$, you can think of it as a sequence of
+$n-1$ intervals of time.  To compute the frequency during each
+interval, I use {\tt np.linspace}.
 
 \verb"_evaluate" is a private method\footnote{Beginning a method name
   with an underscore makes it ``private'', indicating that it is not
@@ -1359,16 +1371,16 @@ that does the rest of the math:
 
 \begin{verbatim}
     def _evaluate(self, ts, freqs):
-        dts = numpy.diff(ts)
+        dts = np.diff(ts)
         dphis = PI2 * freqs * dts
-        phases = numpy.cumsum(dphis)
-        ys = self.amp * numpy.cos(phases)
+        phases = np.cumsum(dphis)
+        ys = self.amp * np.cos(phases)
         return ys
 \end{verbatim}
 
-{\tt numpy.diff} computes the difference between adjacent elements
-of {\tt ts}, returning the length of each interval in seconds.  In
-the usual case where the elements of {\tt ts} are equally spaced,
+{\tt np.diff} computes the difference between adjacent elements
+of {\tt ts}, returning the length of each interval in seconds.  
+If the elements of {\tt ts} are equally spaced,
 the {\tt dts} are all the same.
 
 The next step is to figure out how much the phase changes during
@@ -1378,14 +1390,16 @@ interval, the {\em change} in phase during each interval is
 %
 \[ \Delta \phi = 2 \pi f(t) \Delta t \]
 %
-{\tt numpy.cumsum} computes the cumulative sum, which you can think
-of as a simple kind of integration.  The result is
-a NumPy array where the {\tt i}th element contains the sum of
-the first {\tt i} terms from {\tt dphis}; that is, the total
-phase at the end of the {\tt i}th interval.  Finally, {\tt numpy.cos}
+{\tt np.cumsum} computes the cumulative sum, which you can think
+of as a simple kind of integration.  If you know calculus, explanations
+like that might help; otherwise you can ignore them.
+
+The result is a NumPy array where the {\tt i}th element contains the
+sum of the first {\tt i} terms from {\tt dphis}; that is, the total
+phase at the end of the {\tt i}th interval.  Finally, {\tt np.cos}
 maps from phase to amplitude.
 
-Here's the code that creates and plays a chirp from 220 to 880 Hz, which
+Here's an example that creates and plays a chirp from 220 to 880 Hz, which
 is two octaves from A3 to A5:
 
 \begin{verbatim}
@@ -1433,12 +1447,12 @@ class ExpoChirp(Chirp):
     
     def evaluate(self, ts):
         start, end = math.log10(self.start), math.log10(self.end)
-        freqs = numpy.logspace(start, end, len(ts)-1)
+        freqs = np.logspace(start, end, len(ts)-1)
         return self._evaluate(ts, freqs)
 \end{verbatim}
 
-Instead of {\tt numpy.linspace}, this version of evaluate uses
-{\tt numpy.logspace}, which creates a series of frequencies
+Instead of {\tt np.linspace}, this version of evaluate uses
+{\tt np.logspace}, which creates a series of frequencies
 whose logarithms are equally spaced, which means that they increase
 exponentially.
 
@@ -1454,8 +1468,8 @@ that makes one:
     thinkdsp.play_wave(filename)
 \end{verbatim}
 
-Run this code and listen.  If you have a musical ear, this might
-sound more like music than the linear chirp.
+You can run this example in {\tt chap03.ipynb}.  If you have a musical
+ear, it might sound more like music than the linear chirp.
 
 
 \section{Leakage}
@@ -1471,7 +1485,7 @@ a non-periodic segment, (c) a tapered non-periodic segment.}
 In previous chapters, we used the Fast Fourier Transform (FFT) to
 compute the spectrum of a wave.  When we discuss how FFT works in
 Chapter~\ref{dft}, we will learn that it is based on the assumption
-that the signal is periodic.  In theory, we should not use FFT on
+that the signal is periodic.  In theory we should not use FFT on
 non-periodic signals.  In practice it happens all the time, but there
 are a few things you have to be careful about.
 
@@ -1536,7 +1550,7 @@ connect smoothly to the beginning.
 Figure~\ref{fig.windowing2}b shows a ``Hamming window'', one of the
 more common window functions.  No window function is perfect, but some
 can be shown to be optimal for different applications, and Hamming
-is a commonly-used, all-purpose window.
+is a good, all-purpose window.
 
 Figure~\ref{fig.windowing2}c shows the result of multiplying the
 window by the original signal.  Where the window is close to 1, the
@@ -1552,10 +1566,10 @@ which applies a Hamming window:
 
 \begin{verbatim}
     def hamming(self):
-        self.ys *= numpy.hamming(len(self.ys))
+        self.ys *= np.hamming(len(self.ys))
 \end{verbatim}
 
-{\tt numpy.hamming} computes the Hamming window with the given number
+{\tt np.hamming} computes the Hamming window with the given number
 of elements.  NumPy provides functions to compute other window
 functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
 and {\tt kaiser}.  One of the exercises at the end of this chapter
@@ -1572,7 +1586,7 @@ asks you to experiment with these other windows.
 \end{figure}
 
 What do you think happens if you compute the spectrum of a chirp?
-Here's an example that constructs a one-second one-octave chirp and
+Here's an example that constructs a one-second, one-octave chirp and
 its spectrum:
 
 \begin{verbatim}
@@ -1581,9 +1595,9 @@ its spectrum:
     spectrum = wave.make_spectrum()
 \end{verbatim}
 
-Figure~\ref{fig.chirp1} shows the result.  The spectrum shows
-components at every frequency from 220 to 440 Hz with variations,
-caused by leakage, that look a little like the Eye of Sauron
+Figure~\ref{fig.chirp1} shows the result.  The spectrum has
+components at every frequency from 220 to 440 Hz, with variations
+that look a little like the Eye of Sauron
 (see \url{http://en.wikipedia.org/wiki/Sauron}).
 
 The spectrum is approximately flat between 220 and 440 Hz, which
@@ -1695,14 +1709,14 @@ Here is the {\tt Wave} method that computes spectrograms:
 \begin{verbatim}
     def make_spectrogram(self, seg_length):
         n = len(self.ys)
-        window = numpy.hamming(seg_length)
+        window = np.hamming(seg_length)
 
         start, end, step = 0, seg_length, seg_length / 2
         spec_map = {}
 
         while end < n:
             ys = self.ys[start:end] * window
-            hs = numpy.fft.rfft(ys)
+            hs = np.fft.rfft(ys)
 
             t = (start + end) / 2.0 / self.framerate
             spec_map[t] = Spectrum(hs, self.framerate)
@@ -1718,7 +1732,7 @@ Here is the {\tt Wave} method that computes spectrograms:
 is a Hamming window with the same length as the segments.
 
 {\tt start} and {\tt end} are the slice indices that select
-the segments from the wave.  {\tt step} is the offset between
+segments from the wave.  {\tt step} is the offset between
 segments.  Since {\tt step} is half of \verb"seg_length", the
 segments overlap by half.  Figure~\ref{fig.windowing3} shows what
 these overlapping windows look like.
@@ -1750,9 +1764,9 @@ pseudocolor plot:
         ts = self.times()
         fs = self.frequencies()[low:high]
 
-        # copy amplitude from each spectrum into a column of the array
+        # initialize the array of results
         size = len(fs), len(ts)
-        array = numpy.zeros(size, dtype=numpy.float)
+        array = np.zeros(size, dtype=np.float)
 
         # copy each spectrum into a column of the array
         for i, t in enumerate(ts):
@@ -1762,13 +1776,13 @@ pseudocolor plot:
         thinkplot.pcolor(ts, fs, array)
 \end{verbatim}
 
-{\tt plot} uses {\tt times}, which the returns the midpoint of each
+{\tt plot} uses {\tt times}, which returns the midpoint of each
 time segment in a sorted sequence, and {\tt frequencies}, which returns
 the frequencies of the components in the spectrums.
 
 {\tt array} is a numpy array that holds the amplitudes from the
 spectrums, with one column for each point in time and one row
-for each frequency.  The {\tt for} loop iterates through the times
+for each frequency.  The {\tt for} loop iterates through the {\tt ts}
 and copies the amplitudes from each spectrum into a column of the array.
 
 Finally {\tt thinkplot.pcolor} is a wrapper around {\tt pyplot.pcolor},
@@ -1795,20 +1809,14 @@ Write a class called {\tt SawtoothChirp} that extends {\tt Chirp}
 and overrides {\tt evaluate} to generate a sawtooth waveform with
 frequency that increases (or decreases) linearly.
 
-Hint: combine the evaluate functions from {\tt Chirp} and {\tt
-  SawtoothSignal}.
+Hint: combine the evaluate functions from {\tt Chirp} and
+{\tt SawtoothSignal}.
 
 Draw a sketch of what you think the spectrogram of this signal
 looks like, and then plot it.  The effect of aliasing should be
 visually apparent, and if you listen carefully, you can hear it.
 \end{exercise}
 
-
-\begin{exercise}
-Another way to generate a sawtooth chirp is to add up a harmonic
-series of sinusoidal chirps.  Write another version of {\tt
-  SawtoothChirp} that uses this method and plot the spectrogram.
-\end{exercise}
 
 \begin{exercise}
 In musical terminology, a ``glissando'' is a note that slides from one
@@ -1827,12 +1835,12 @@ and back down to C3.  C3 is 262 Hz; F3 is 349 Hz.
 
 
 \begin{exercise}
-George Gershwin's {\it Rhapsody in Blue} starts with a famous
-clarinet glissando.  Find a recording of this piece and plot
-a spectrogram of the first few seconds.
-
-% http://archive.org/details/rhapblue11924
+Find or make a recording of a glissando and plot a spectrogram of the
+first few seconds.  One suggestion: George Gershwin's {\it Rhapsody in
+  Blue} starts with a famous clarinet glissando, which you can download
+from \url{http://archive.org/details/rhapblue11924}.
 \end{exercise}
+
 
 \begin{exercise}
 Make or find a recording of a series of vowel sounds and look at the
@@ -1865,6 +1873,7 @@ repository for this book (see Section~\ref{code}).  You can listen
 to the examples in {\tt chap04.ipynb}, which you can view at
 \url{http://tinyurl.com/thinkdsp04}.
 
+
 \section{Uncorrelated noise}
 
 \begin{figure}
@@ -1887,7 +1896,7 @@ This code generates UU noise:
     duration = 0.5
     framerate = 11025
     n = framerate * duration
-    ys = numpy.random.uniform(-1, 1, n)
+    ys = np.random.uniform(-1, 1, n)
     wave = thinkdsp.Wave(ys, framerate)
     wave.plot()
 \end{verbatim}
@@ -1974,13 +1983,13 @@ the spectrum up to $f$.
 
 \begin{verbatim}
     def make_integrated_spectrum(self):
-        cs = numpy.cumsum(self.power)
+        cs = np.cumsum(self.power)
         cs /= cs[-1]
         return IntegratedSpectrum(cs, self.fs)
 \end{verbatim}
 
 {\tt self.power} is a NumPy array containing power for each frequency.
-{\tt numpy.cumsum} computes the cumulative sum of the powers.
+{\tt np.cumsum} computes the cumulative sum of the powers.
 Dividing through by the last element normalizes the integrated
 spectrum so it runs from 0 to 1.
 
@@ -2044,14 +2053,14 @@ Here is a class definition that implements this algorithm:
 class BrownianNoise(_Noise):
 
     def evaluate(self, ts):
-        dys = numpy.random.uniform(-1, 1, len(ts))
-        ys = numpy.cumsum(dys)
+        dys = np.random.uniform(-1, 1, len(ts))
+        ys = np.cumsum(dys)
         ys = normalize(unbias(ys), self.amp)
         return ys
 \end{verbatim}
 
-We use {\tt numpy.random.uniform} to generate an uncorrelated signal
-and {\tt numpy.cumsum} to compute their cumulative sum.
+We use {\tt np.random.uniform} to generate an uncorrelated signal
+and {\tt np.cumsum} to compute their cumulative sum.
 
 Since the sum is likely to escape the range from -1 to
 1, we have to use {\tt unbias} to shift the mean to 0, and {\tt
@@ -2246,11 +2255,11 @@ Gaussian (UG) noise.
 class UncorrelatedGaussianNoise(_Noise):
 
     def evaluate(self, ts):
-        ys = numpy.random.normal(0, self.amp, len(ts))
+        ys = np.random.normal(0, self.amp, len(ts))
         return ys
 \end{verbatim}
 
-{\tt numpy.random.normal} returns a NumPy array of values from a
+{\tt np.random.normal} returns a NumPy array of values from a
 Gaussian distribution, in this case with mean 0 and standard deviation
 {\tt self.amp}.  In theory the range of values is from negative to
 positive infinity, but we expect about 99\% of the values to be
@@ -2387,7 +2396,7 @@ statistics, but less often relevant for signal processing, so I
 won't say more about them here.
 
 Python provides several ways to compute correlations.  {\tt
-  numpy.corrcoef} takes any number of variables and computes a {\bf
+  np.corrcoef} takes any number of variables and computes a {\bf
   correlation matrix} that includes correlations between each pair of
 variables.
 
@@ -2421,7 +2430,7 @@ waves look like.  When one wave is high, the other is usually high, so we
 expect them to be correlated.
 
 \begin{verbatim}
->>> corr_matrix = numpy.corrcoef(wave1.ys, wave2.ys, ddof=0)
+>>> corr_matrix = np.corrcoef(wave1.ys, wave2.ys, ddof=0)
 [[ 1.    0.54]
  [ 0.54  1.  ]]
 \end{verbatim}
@@ -2478,7 +2487,7 @@ the correlation of the shifted version with the original.
 
 \begin{verbatim}
 def corrcoef(xs, ys):
-    return numpy.corrcoef(xs, ys, ddof=0)[0, 1]
+    return np.corrcoef(xs, ys, ddof=0)[0, 1]
 
 def serial_corr(wave, lag=1):
     n = len(wave)
@@ -2489,7 +2498,7 @@ def serial_corr(wave, lag=1):
 \end{verbatim}
 
 {\tt corrcoef} is a convenience function that simplifies
-the interface to {\tt numpy.corrcoef}.
+the interface to {\tt np.corrcoef}.
 
 \verb"serial_corr" takes a Wave object and
 {\tt lag}, which is the integer number of places to shift the waves.
@@ -2752,7 +2761,7 @@ why Figure~\ref{fig.autocorr2} is a cosine curve.
 \begin{figure}
 % autocorr.py
 \centerline{\includegraphics[height=2.5in]{figs/autocorr9.pdf}}
-\caption{Autocorrelation function computed with {\tt numpy.correlate}.}
+\caption{Autocorrelation function computed with {\tt np.correlate}.}
 \label{fig.autocorr9}
 \end{figure}
 
@@ -2762,7 +2771,7 @@ function.  We can use it to compute the autocorrelation of
 the segment from the previous section:
 
 \begin{verbatim}
-corrs2 = numpy.correlate(segment.ys, segment.ys, mode='same')
+corrs2 = np.correlate(segment.ys, segment.ys, mode='same')
 \end{verbatim}
 
 The option {\tt mode} tells {\tt correlate} what range
@@ -2781,8 +2790,8 @@ from {\tt autocorr}, we can select the second half:
 \end{verbatim}
 
 If you compare Figure~\ref{fig.autocorr9} to Figure~\ref{fig.autocorr8},
-you'll notice that the correlations computed by {\tt numpy.correlate}
-get smaller as the lags increase.  That's because {\tt numpy.correlate}
+you'll notice that the correlations computed by {\tt np.correlate}
+get smaller as the lags increase.  That's because {\tt np.correlate}
 uses the unstandardized definition of correlation;
 as the lag gets bigger, the
 overlap between the two signals gets smaller, so the magnitude of
@@ -2803,10 +2812,10 @@ Finally, we can standardize the results so the correlation with
 \end{verbatim}
 
 With these adjustments, the results computed by {\tt autocorr} and
-{\tt numpy.correlate} are nearly the same.  They still differ by
+{\tt np.correlate} are nearly the same.  They still differ by
 1-2\%.  The reason not important, but if you are curious: {\tt autocorr}
 standardizes the correlations independently for each lag; for
-{\tt numpy.correlate}, we standardized them all at the end.
+{\tt np.correlate}, we standardized them all at the end.
 
 More importantly, now you know what autocorrelation is, how to
 use it to estimate the fundamental period of a signal, and two
@@ -2903,11 +2912,11 @@ time in {\tt ts}.
 We can test this function like this:
 
 \begin{verbatim}
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
     framerate = 11025
 
-    ts = numpy.linspace(0, 1, framerate)
+    ts = np.linspace(0, 1, framerate)
     ys = synthesize1(amps, freqs, ts)
     wave = thinkdsp.Wave(ys, framerate)
     wave.play()
@@ -2936,9 +2945,9 @@ Here's another way to write {\tt synthesize}:
 
 \begin{verbatim}
 def synthesize2(amps, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    ys = numpy.dot(M, amps)
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    ys = np.dot(M, amps)
     return ys
 \end{verbatim}
 
@@ -2947,7 +2956,7 @@ Let's see how it works:
 
 \begin{enumerate}
 
-\item {\tt numpy.outer} computes the outer product of {\tt ts} and
+\item {\tt np.outer} computes the outer product of {\tt ts} and
   {\tt freqs}.  The result is an array with one row for each element
   of {\tt ts} and one column for each element of {\tt freqs}.  Each
   element in the array is the product of a frequency and a time, $f
@@ -2958,7 +2967,7 @@ Let's see how it works:
   down the columns, each column contains a cosine signal at a
   particular frequency, evaluated at a sequence of times.
 
-\item {\tt numpy.dot} multiplies each row of {\tt M} by {\tt amps},
+\item {\tt np.dot} multiplies each row of {\tt M} by {\tt amps},
   element-wise, and then adds up the products.  In terms of linear
   algebra, we are multiplying a matrix, {\tt M}, by a vector, {\tt
     amps}.
@@ -3030,14 +3039,14 @@ Here's what the code looks like:
 
 \begin{verbatim}
 def analyze1(ys, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.linalg.solve(M, ys)
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.linalg.solve(M, ys)
     return amps
 \end{verbatim}
 
 The first two lines use {\tt ts} and {\tt freqs} to build the
-matrix, {\tt M}.  Then {\tt numpy.linalg.solve} computes {\tt amps}.
+matrix, {\tt M}.  Then {\tt np.linalg.solve} computes {\tt amps}.
 
 But there's a hitch.  In general we can only solve a system of linear
 equations if the matrix is square; that is, the number of equations
@@ -3097,7 +3106,7 @@ If we multiply $I$ by any vector $a$, the result is $a$, so
 \[ M^{-1}y = a \]
 %
 This implies that if we can compute $M^{-1}$ efficiently, we can find
-$a$ with a simple matrix multiplication (using {\tt numpy.dot}).  That
+$a$ with a simple matrix multiplication (using {\tt np.dot}).  That
 takes time proportional to $n^2$, which is better than $n^3$.
 
 In general inverting a matrix is slow, but some special cases are
@@ -3119,12 +3128,12 @@ to work with a smaller example:
 
 \begin{verbatim}
 def test1():
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
     time_unit = 0.001
-    ts = numpy.arange(N) / N * time_unit
+    ts = np.arange(N) / N * time_unit
     max_freq = N / time_unit / 2
-    freqs = numpy.arange(N) / N * max_freq
+    freqs = np.arange(N) / N * max_freq
     ys = synthesize2(amps, freqs, ts)
 \end{verbatim}
 
@@ -3183,10 +3192,10 @@ Here's an updated version of {\tt test1}:
 
 \begin{verbatim}
 def test2():
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
     ys = synthesize2(amps, freqs, ts)
 \end{verbatim}
 
@@ -3225,13 +3234,13 @@ is just $M/2$.  Now we can write a more efficient version of {\tt
 
 \begin{verbatim}
 def analyze2(ys, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.dot(M, ys) / 2
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.dot(M, ys) / 2
     return amps
 \end{verbatim}
 
-Instead of using {\tt numpy.linalg.solve}, we just multiply
+Instead of using {\tt np.linalg.solve}, we just multiply
 by $M/2$.
 
 Combining {\tt test2} and {\tt analyze2}, we can write an
@@ -3240,11 +3249,11 @@ implementation of DCT-IV:
 \begin{verbatim}
 def dct_iv(ys):
     N = len(ys)
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.dot(M, ys) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.dot(M, ys) / 2
     return amps
 \end{verbatim}
 
@@ -3255,10 +3264,10 @@ figure them out based on {\tt N}, the length of {\tt ys}.
 We can test \verb"dct_iv" like this
 
 \begin{verbatim}
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
     ys = synthesize2(amps, freqs, ts)
 
     amps2 = dct_iv(ys)
@@ -3419,7 +3428,7 @@ NumPy provides a version of {\tt exp} that works with complex numbers:
 \begin{verbatim}
 >>> i = complex(0, 1)
 >>> phi = 1.5
->>> z = numpy.exp(i * phi)
+>>> z = np.exp(i * phi)
 >>> z
 (0.0707+0.997j)
 \end{verbatim}
@@ -3428,8 +3437,8 @@ NumPy provides a version of {\tt exp} that works with complex numbers:
 imaginary parts of a complex number and returns a Python
 complex object.
 
-When the argument to {\tt numpy.exp} is imaginary or complex, the
-result is a complex number; specifically, a {\tt numpy.complex128},
+When the argument to {\tt np.exp} is imaginary or complex, the
+result is a complex number; specifically, a {\tt np.complex128},
 which is represented by two 64-bit floating-point numbers.  The result
 is {\tt 0.0707+0.997j}.  Note that Python uses {\tt j} to represent
 the imaginary unit, rather than {\tt i}.
@@ -3444,19 +3453,19 @@ Complex numbers have attributes {\tt real} and {\tt imag}:
 \end{verbatim}
 
 To get the magnitude, you can use the built-in function {\tt abs}
-or {\tt numpy.absolute}:
+or {\tt np.absolute}:
 
 \begin{verbatim}
 >>> abs(z)
 1.0
->>> numpy.absolute(z)
+>>> np.absolute(z)
 1.0
 \end{verbatim}
 
-To get the angle, you can use {\tt numpy.angle}:
+To get the angle, you can use {\tt np.angle}:
 
 \begin{verbatim}
->>> numpy.angle(z)
+>>> np.angle(z)
 1.5
 \end{verbatim}
 
@@ -3493,15 +3502,15 @@ class ComplexSinusoid(Sinusoid):
    def evaluate(self, ts):
         i = complex(0, 1)
         phases = PI2 * self.freq * ts + self.offset
-        ys = self.amp * numpy.exp(i * phases)
+        ys = self.amp * np.exp(i * phases)
         return ys
 \end{verbatim}
 
 {\tt ComplexSinusoid} inherits \verb"__init__" from
 {\tt Sinusoid}.  It provides a version of {\tt evaluate}
 that is almost identical to {\tt Sinusoid.evaluate}; the
-difference is that it uses {\tt numpy.exp} instead of
-{\tt numpy.sin}.
+difference is that it uses {\tt np.exp} instead of
+{\tt np.sin}.
 
 The result is a NumPy array of complex numbers:
 
@@ -3546,10 +3555,10 @@ Section~\ref{synth1}; the only difference is that I replaced
 Here's an example:
 
 \begin{verbatim}
->>> amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+>>> amps = np.array([0.6, 0.25, 0.1, 0.05])
 >>> freqs = [100, 200, 300, 400]
 >>> framerate = 11025
->>> ts = numpy.linspace(0, 1, framerate)
+>>> ts = np.linspace(0, 1, framerate)
 >>> ys = synthesize1(amps, freqs, ts)
 >>> print(ys)
 [ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
@@ -3612,9 +3621,9 @@ PI2 = 2 * math.pi
 i = complex(0, 1)
 
 def synthesize2(amps, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.exp(i * PI2 * args)
-    ys = numpy.dot(M, amps)
+    args = np.outer(ts, freqs)
+    M = np.exp(i * PI2 * args)
+    ys = np.dot(M, amps)
     return ys
 \end{verbatim}
 
@@ -3675,7 +3684,7 @@ We can test that claim by running the previous example with
 $\phi_0 = 1.5$ for all frequency components:
 
 \begin{verbatim}
-    amps2 = amps * numpy.exp(1.5j)
+    amps2 = amps * np.exp(1.5j)
     ys2 = synthesize2(amps2, freqs, ts)
 
     thinkplot.plot(ts[:n], ys.real[:n])
@@ -3683,7 +3692,7 @@ $\phi_0 = 1.5$ for all frequency components:
 \end{verbatim}
 
 Python recognizes {\tt 1.5j} as a complex number.  Since {\tt amps}
-is an array of reals, multiplying by {\tt numpy.exp(1.5j)} yields
+is an array of reals, multiplying by {\tt np.exp(1.5j)} yields
 an array of complex numbers with phase offset 1.5 radians, and
 the same magnitudes as {\tt amps}.
 
@@ -3711,9 +3720,9 @@ equations, $M a = y$ for $a$.
 
 \begin{verbatim}
 def analyze1(ys, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.exp(i * PI2 * args)
-    amps = numpy.linalg.solve(M, ys)
+    args = np.outer(ts, freqs)
+    M = np.exp(i * PI2 * args)
+    amps = np.linalg.solve(M, ys)
     return amps
 \end{verbatim}
 
@@ -3759,10 +3768,10 @@ want.  Here's the code that computes {\tt M} for $N=4$ components:
 
 \begin{verbatim}
 >>> N = 4
->>> ts = numpy.arange(N) / N
->>> freqs = numpy.arange(N)
->>> args = numpy.outer(ts, freqs)
->>> M = numpy.exp(i * PI2 * args)
+>>> ts = np.arange(N) / N
+>>> freqs = np.arange(N)
+>>> args = np.outer(ts, freqs)
+>>> M = np.exp(i * PI2 * args)
 \end{verbatim}
 
 If $M$ is unitary, $M^*M = I$, where $M^*$ is the conjugate transpose
@@ -3781,8 +3790,8 @@ We can use this result to write a faster version of {\tt analyze1}:
 
 \begin{verbatim}
 def analyze2(ys, freqs, ts):
-    args = numpy.outer(ts, freqs)
-    M = numpy.exp(i * PI2 * args)
+    args = np.outer(ts, freqs)
+    M = np.exp(i * PI2 * args)
     amps = M.conj().transpose().dot(ys) / N
     return amps
 \end{verbatim}
@@ -3791,9 +3800,9 @@ And test it with appropriate values of {\tt freqs} and {\tt ts}:
 
 \begin{verbatim}
 >>> N = 4
->>> amps = numpy.array([0.6, 0.25, 0.1, 0.05])
->>> freqs = numpy.arange(N)
->>> ts = numpy.arange(N) / N
+>>> amps = np.array([0.6, 0.25, 0.1, 0.05])
+>>> freqs = np.arange(N)
+>>> ts = np.arange(N) / N
 >>> ys = synthesize2(amps, freqs, ts)
 
 >>> amps2 = analyze2(ys, freqs, ts)
@@ -3816,10 +3825,10 @@ $M$:
 
 \begin{verbatim}
 def synthesis_matrix(N):
-    ts = numpy.arange(N) / N
-    freqs = numpy.arange(N)
-    args = numpy.outer(ts, freqs)
-    M = numpy.exp(i * PI2 * args)
+    ts = np.arange(N) / N
+    freqs = np.arange(N)
+    args = np.outer(ts, freqs)
+    M = np.exp(i * PI2 * args)
     return M
 \end{verbatim}
 
@@ -3844,10 +3853,10 @@ version:
 [ 2.4 +8.3e-17j  1.0 +5.6e-17j  0.4 -1.6e-16j  0.2 -3.3e-16j]
 \end{verbatim}
 
-And here's the version in {\tt numpy.fft}:
+And here's the version in {\tt np.fft}:
 
 \begin{verbatim}
->>> print(numpy.fft.fft(ys))
+>>> print(np.fft.fft(ys))
 [ 2.4 +8.0e-17j  1.0 -2.5e-17j  0.4 -3.1e-17j  0.2 -2.5e-17j]
 \end{verbatim}
 
@@ -3897,7 +3906,7 @@ matter.
 \label{fig.dft3}
 \end{figure}
 
-The Spectrum class in {\tt thinkdsp} is based on {\tt numpy.ftt.rfft},
+The Spectrum class in {\tt thinkdsp} is based on {\tt np.ftt.rfft},
 which computes the ``real DFT''; that is, it works with real signals.
 The DFT is more general than the real DFT; it works with complex
 signals.
@@ -3910,7 +3919,7 @@ an example:
 >>> signal = thinkdsp.SawtoothSignal(freq=500)
 >>> wave = signal.make_wave(duration=0.1, framerate=framerate)
 >>> hs = dft(wave.ys)
->>> amps = numpy.absolute(hs)
+>>> amps = np.absolute(hs)
 \end{verbatim}
 
 This code makes a sawtooth wave with frequency 500 Hz, sampled at
@@ -3920,7 +3929,7 @@ frequency do these amplitudes correspond to?  If we look at the
 body of {\tt dft}, we see:
 
 \begin{verbatim}
->>> fs = numpy.arange(N)
+>>> fs = np.arange(N)
 \end{verbatim}
 
 So it's tempting to think that these values are the right frequencies.
@@ -3931,7 +3940,7 @@ we have to convert from these arbitrary time units back to seconds,
 like this:
 
 \begin{verbatim}
->>> fs = numpy.arange(N) * framerate / N
+>>> fs = np.arange(N) * framerate / N
 \end{verbatim}
 
 With this change, the range of frequencies is from 0 to the actual
@@ -4046,7 +4055,7 @@ a window with 11 elements and normalize it so the elements
 add up to 1.
 
 \begin{verbatim}
->>> window = numpy.ones(11)
+>>> window = np.ones(11)
 >>> window /= sum(window)
 \end{verbatim}
 
@@ -4084,11 +4093,11 @@ The following code computes the rolling average for the whole
 wave:
 
 \begin{verbatim}
->>> smoothed = numpy.zeros_like(segment.ys)
+>>> smoothed = np.zeros_like(segment.ys)
 >>> rolled = padded
 >>> for i in range(len(segment.ys)):
         smoothed[i] = sum(rolled * segment.ys)
-        rolled = numpy.roll(rolled, 1)
+        rolled = np.roll(rolled, 1)
 \end{verbatim}
 
 {\tt smoothed} is the wave array where I store the results.
@@ -4114,11 +4123,11 @@ and it is such a common operation that NumPy provides an
 implementation that is simpler and faster than my version:
 
 \begin{verbatim}
->>> ys = numpy.convolve(segment.ys, window, mode='valid')
+>>> ys = np.convolve(segment.ys, window, mode='valid')
 >>> smooth2 = thinkdsp.Wave(ys, framerate=wave.framerate)
 \end{verbatim}
 
-{\tt numpy.convolve} computes the convolution of the wave
+{\tt np.convolve} computes the convolution of the wave
 array and the window.  The mode flag {\tt valid} indicates
 that it should only compute values when the window and the
 wave array overlap completely, so it stops when the right
@@ -4187,7 +4196,7 @@ of the original wave:
 Then the smoothed wave:
 
 \begin{verbatim}
->>> ys = numpy.convolve(wave.ys, window, mode='same')
+>>> ys = np.convolve(wave.ys, window, mode='same')
 >>> smooth = thinkdsp.Wave(ys, framerate=wave.framerate)
 >>> spectrum2 = smooth.make_spectrum()
 >>> spectrum2.plot()
@@ -4258,7 +4267,7 @@ we can compute the DFT of the window:
 
 \begin{verbatim}
     padded = zero_pad(window, len(wave))
-    dft_window = numpy.fft.rfft(padded)
+    dft_window = np.fft.rfft(padded)
     thinkplot.plot(abs(dft_window))
 \end{verbatim}
 
@@ -4385,10 +4394,10 @@ Next I'll create a Gaussian window and convolve it with {\tt ys}:
 \begin{verbatim}
     window = scipy.signal.gaussian(M=30, std=6)
     window /= window.sum()
-    smoothed = numpy.convolve(ys, window, mode='valid')
+    smoothed = np.convolve(ys, window, mode='valid')
 \end{verbatim}
 
-With {\tt mode='valid'}, {\tt numpy.convolve} returns values
+With {\tt mode='valid'}, {\tt np.convolve} returns values
 only where the window and the signal overlap completely, avoiding
 bogus values at the beginning and end.
 
@@ -4396,9 +4405,9 @@ bogus values at the beginning and end.
 
 \begin{verbatim}
 def fft_convolve(signal, window):
-    fft_signal = numpy.fft.fft(signal)
-    fft_window = numpy.fft.fft(window)
-    return numpy.fft.ifft(fft_signal * fft_window)
+    fft_signal = np.fft.fft(signal)
+    fft_window = np.fft.fft(window)
+    return np.fft.ifft(fft_signal * fft_window)
 \end{verbatim}
 
 We can test it by padding the window to the same length
@@ -4446,7 +4455,7 @@ autocorrelation of BitCoin prices:
 
 \begin{verbatim}
 N = len(ys)
-corrs = numpy.correlate(ys, ys, mode='same')
+corrs = np.correlate(ys, ys, mode='same')
 corrs = corrs[N//2:]
 \end{verbatim}
 
@@ -4491,7 +4500,7 @@ which contains correlations with non-negative lags.
 \end{verbatim}
 
 The thin, dark line in Figure~\ref{fig.convolution9} shows the result,
-which is identical to the result from {\tt numpy.correlate}, with
+which is identical to the result from {\tt np.correlate}, with
 about 7 digits of precision.
 
 Notice that the correlations in Figure~\ref{fig.convolution9} are
@@ -4559,10 +4568,10 @@ which is consistent with Brownian noise.
 \label{fig.systems1}
 \end{figure}
 
-Now let's compute the daily price change using {\tt numpy.diff}:
+Now let's compute the daily price change using {\tt np.diff}:
 
 \begin{verbatim}
-    diff = numpy.diff(ys)
+    diff = np.diff(ys)
     wave2 = thinkdsp.Wave(diff, framerate=1)
 \end{verbatim}
 
@@ -4598,9 +4607,9 @@ between successive elements is the same as convolution with
 the window {\tt [1, -1]}.
 
 \begin{verbatim}
-    window = numpy.array([1.0, -1.0])
+    window = np.array([1.0, -1.0])
     padded = zero_pad(window, len(wave))
-    fft_window = numpy.fft.rfft(padded)
+    fft_window = np.fft.rfft(padded)
     thinkplot.plot(abs(fft_window), color='0.7')
 \end{verbatim}
 
@@ -4703,7 +4712,7 @@ the DFT, multiply by a filter, and compute the inverse DFT.
 % systems.py
 \centerline{\includegraphics[height=2.5in]{figs/systems4.pdf}}
 \caption{Comparison of daily price changes computed by
-{\tt numpy.diff} and by filtering in the frequency domain.}
+{\tt np.diff} and by filtering in the frequency domain.}
 \label{fig.systems4}
 \end{figure}
 
@@ -4728,7 +4737,7 @@ We can use it to compute the derivative of the BitCoin time series:
 \end{verbatim}
 
 And then plot {\tt wave3}, compared to the previous result
-using {\tt numpy.diff}, {\tt wave3}:
+using {\tt np.diff}, {\tt wave3}:
 
 \begin{verbatim}
     wave2.plot(color='0.7', label='diff')
@@ -4850,7 +4859,7 @@ can see the answer by computing the DFT of an impulse.  Here's
 a wave array with an impulse at $t=0$:
 
 \begin{verbatim}
->>> impulse = numpy.zeros(8)
+>>> impulse = np.zeros(8)
 >>> impulse[0] = 1
 >>> print(impulse)
 [ 1.  0.  0.  0.  0.  0.  0.  0.]
@@ -4859,7 +4868,7 @@ a wave array with an impulse at $t=0$:
 And here's its spectrum:
 
 \begin{verbatim}
->>> spectrum = numpy.fft.fft(impulse)
+>>> spectrum = np.fft.fft(impulse)
 >>> print(spectrum)
 [ 1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j]
 \end{verbatim}
@@ -5363,8 +5372,8 @@ least we can estimate its slope.  Spectrum provides
 
 \begin{verbatim}
     def estimate_slope(self):
-        x = numpy.log(self.fs[1:])
-        y = numpy.log(self.power[1:])
+        x = np.log(self.fs[1:])
+        y = np.log(self.power[1:])
         t = scipy.stats.linregress(x,y)
         return t
 \end{verbatim}
