@@ -201,17 +201,54 @@ Unported License, which is available at
 \chapter{Preface}
 \label{preface}
 
-The premise of this book (and the other books in the {\it Think X}
-series) is that if you know how to program, you can use that skill to
-learn other things.  I am writing this book because I think the
-conventional approach to digital signal processing is backward: most
-books (and the classes that use them) present the material bottom-up,
-starting with mathematical abstractions like phasors.
+Signal processing is one of my favorite topics.  It is useful
+in many areas of science and engineering, and if you understand
+the fundamental ideas, it provides insight into many things
+we see in the world, and especially the things we hear.
 
-With a programming-based approach, I can go top-down, which means I
-can present the most important ideas right away.  By the end of the
-first chapter, you can decompose a sound into its harmonics, modify
-the harmonics, and generate new sounds.
+But unless you studied electrical or mechanical engineering, you
+probably haven't had a chance to learn about signal processing.  The
+problem is that most books (and the classes that use them) present the
+material bottom-up, starting with mathematical abstractions like
+phasors.  And they tend to be theoretical, with few applications and
+little apparent relevance.
+
+The premise of this book is that if you know how to program, you
+can use that skill to learn other things, and have fun doing it.
+
+With a programming-based approach, I can present the most important
+ideas right away.  By the end of the first chapter, you can analyze
+sound recordings and other signals, and generate new sounds.  Each
+chapter introduces a new technique and an application you can
+apply to real signals.  At each step you learn how to use a
+technique first, and then how it works.
+
+This approach is more practical and, I hope you'll agree, more fun.
+
+
+\section{Who is this book for?}
+
+The examples and supporting code for this book are in Python.  You
+should know core Python and you should be
+familiar with object-oriented features, at least using objects if not
+defining your own.
+
+If you are not already familiar with Python, you might want to start
+with my other book, {\it Think Python}, which is an introduction to
+Python for people who have never programmed, or Mark
+Lutz's {\it Learning Python}, which might be better for people with
+programming experience.
+
+I use NumPy and SciPy extensively.  If you are familiar with them
+already, that's great, but I will also explain the functions
+and data structures I use.
+
+I assume that the reader knows basic mathematics, including complex
+numbers.  You don't need much calculus; if you understand the concepts
+of integration and differentiation, that will do.
+I use some linear algebra, but I will explain it as we
+go along.
+
 
 \section{Using the code}
 \label{code}
@@ -236,8 +273,8 @@ on GitHub by pressing the {\sf Fork} button.  If you don't already
 have a GitHub account, you'll need to create one.  After forking, you'll
 have your own repository on GitHub that you can use to keep track
 of code you write while working on this book.  Then you can
-clone the repo, which means that you make a copy of the files
-on your computer.
+clone the repo, which means that you copy the files
+to your computer.
 \index{fork}
 
 \item Or you could clone
@@ -282,7 +319,7 @@ packages:
 
 Although these are commonly used packages, they are not included with
 all Python installations, and they can be hard to install in some
-environments.  If you have trouble installing them, I strongly
+environments.  If you have trouble installing them, I
 recommend using Anaconda or one of the other Python distributions
 that include these packages.
 \index{installation}
@@ -293,21 +330,7 @@ you start with the documentation at
 \url{http://ipython.org/ipython-doc/stable/notebook/notebook.html}.
 \index{IPython}
 
-I wrote this book assuming that the reader is familiar with core Python,
-including object-oriented features, but not
-NumPy, and SciPy.
-
-I assume that the reader knows basic mathematics, including complex
-numbers.  I use some linear algebra, but I will explain it as we
-go along.
-
-
-Allen B. Downey \\*
-
-Needham MA \\*
-
-Allen B. Downey is a Professor of Computer Science at 
-the Franklin W. Olin College of Engineering.
+Good luck, and have fun!
 
 
 
@@ -370,7 +393,7 @@ Both made many suggestions and corrections.
 \chapter{Sounds and signals}
 \label{sounds}
 
-A {\bf signal} is a representation of a quantity that varies in time,
+A {\bf signal} represents a quantity that varies in time,
 or space, or both.  That definition is pretty abstract, so let's start
 with a concrete example: sound.  Sound is variation in air pressure.
 A sound signal represents variations in air pressure over time.
@@ -414,7 +437,7 @@ that sound and plot the transduced signal, it looks like
 Figure~\ref{fig.tuning1}.\footnote{I got this recording from
   \url{http://www.freesound.org/people/zippi1/sounds/18871/}.}
 
-This signal is similar to a sinusoid, which means it has the same shape as
+This signal approximates a sinusoid, which means it has the same shape as
 the trigonometric sine function. 
 
 You can see that this signal is periodic.  I chose the duration
@@ -504,9 +527,9 @@ musically harmonious with the fundamental:
 \item 880 is the frequency of
 A5, one octave higher than the fundamental.  
 
-\item 1320 is approximately E6, which is a major fifth\footnote{If you
-  are not familiar with musical intervals like "major fifth'', see
-  \url{https://en.wikipedia.org/wiki/Interval_(music)}.} above A5.
+\item 1320 is approximately E6, which is a major fifth above A5.
+  If you are not familiar with musical intervals like "major fifth'', see
+  \url{https://en.wikipedia.org/wiki/Interval_(music)}.
 
 \item 1760 is A6, two octaves above the fundamental. 
 
@@ -550,15 +573,13 @@ signals.
 {\tt freq} is frequency in Hz.  {\tt amp} is amplitude in unspecified
 units where 1.0 is generally the largest amplitude we can play.
 
-{\tt offset} is a {\bf phase offset} in radians.
-Phase offset determines where in the period the signal starts
-(that is, when {\tt t=0}).  For example, a cosine signal with {\tt
-  offset=0} starts at $\cos 0$, which is 1.  With {\tt offset=pi/2} it
-starts at $\cos \pi/2$, which is 0.
-A sine signal with
-{\tt offset=0} also starts at 0.  In fact,
-a cosine signal with {\tt offset=pi/2} is identical to a sine
-signal with {\tt offset=0}.
+{\tt offset} is a {\bf phase offset} in radians.  Phase offset
+determines where in the period the signal starts.  For example, a
+cosine signal with {\tt offset=0} starts at $\cos 0$, which is 1.
+With {\tt offset=pi/2} it starts at $\cos \pi/2$, which is 0.  A sine
+signal with {\tt offset=0} also starts at 0.  In fact, a cosine signal
+with {\tt offset=pi/2} is identical to a sine signal with {\tt
+  offset=0}.
 
 Signals have an \verb"__add__" method, so you can use the {\tt +}
 operator to add them:
@@ -671,7 +692,8 @@ the media player as a subprocess:
     thinkdsp.play_wave(filename='example1.wav', player='aplay')
 \end{verbatim}
 
-It uses {\tt aplay} by default, but you can provide another player.
+It uses {\tt aplay} by default, but you can provide the
+name of another player.
 
 
 \section{Spectrums}
@@ -692,8 +714,7 @@ And {\tt Spectrum} provides {\tt plot}:
 \end{verbatim}
 
 {\tt thinkplot} is a module I wrote to provide wrappers around some of
-the functions in {\tt pyplot}.  You can download it from
-\url{http://think-dsp.com/thinkplot.py}.  It is also included in the
+the functions in {\tt pyplot}.  It is included in the
 Git repository for this book (see Section~\ref{code}).
 
 {\tt Spectrum} provides three methods that modify the spectrum:
@@ -718,11 +739,18 @@ This example attenuates all frequencies above 600 by 99\%:
    spectrum.low_pass(cutoff=600, factor=0.01)
 \end{verbatim}
 
-Finally, you can convert a Spectrum back to a Wave:
+A low pass filter removes bright, high-frequency sounds, so
+the result sounds muffled and darker.  To hear what it sounds
+like, you can convert the Spectrum back to a Wave, and then play it.
 
 \begin{verbatim}
     wave = spectrum.make_wave()
+    wave.play('temp.wav')
 \end{verbatim}
+
+The {\tt play} method write the wave to a file and then plays it.
+If you use IPython notebooks, you can use \verb"make_audio", which
+makes an Audio widget that plays the sound.
 
 At this point you know how to use many of the classes and functions in
 {\tt thinkdsp}, and you are ready to do the exercises at the end of
@@ -756,8 +784,10 @@ changes you made in the spectrum?
 
 
 \begin{exercise}
-Synthesize a wave by creating a spectrum with arbitrary harmonics,
-inverting it, and listening.  What happens as you add frequency
+Synthesize a compound signal by creating SinSignal and CosSignal
+objects and adding them up.  Evaluate the signal to get a Wave,
+and listen to it.  Compute its Spectrum and plot it.
+What happens if you add frequency
 components that are not multiples of the fundamental?
 \end{exercise}
 
@@ -766,16 +796,25 @@ components that are not multiples of the fundamental?
 \chapter{Harmonics}
 \label{harmonics}
 
+In the previous chapter you used the classes defined in {\tt thinkdsp.py};
+in this chapter I explain more about how they work.
+
+I present several new waveforms and we will look and their
+spectrums to understand their {\bf harmonic structure}, which is
+the set of sinusoids they comprise.
+
+Finally, I introduce one of the most interesting phenomena in
+digital signal processing: aliasing.
+
 The code for this chapter is in {\tt aliasing.py}, which is in the
 repository for this book (see Section~\ref{code}).
 
 
-\section{Implementing Signals and Spectrums}
+\section{Implementing Sinusoids}
 
-If you have done the exercises, you know how to use the classes and
-methods in {\tt thinkdsp}.  Now let's see how they work.
-
-We'll start with {\tt CosSignal} and {SinSignal}:
+The {\tt thinkdsp} module, which you saw in the previous chapter,
+provides {\tt CosSignal} and {SinSignal}, which create cosine
+and sine signals: 
 
 \begin{verbatim}
 def CosSignal(freq=440, amp=1.0, offset=0):
@@ -809,7 +848,7 @@ The parameters of \verb"__init__" are:
 usually chosen so 1.0 corresponds to the maximum input from a
 microphone or maximum output to a speaker.
 
-\item {\tt offset}: where in its period the signal starts, at $t=0$.
+\item {\tt offset}: where in its period the signal starts;
 {\tt offset} is in units of radians, for reasons I explain below.
 
 \item {\tt func}: a Python function used
@@ -822,7 +861,9 @@ cosine signal.
 Like many \verb"__init__" methods, this one just tucks the
 parameters away for future use.
 
-The parent class of {\tt Sinusoid}, {\tt Signal}, provides \verb"make_wave":
+The parent class of {\tt Sinusoid}, {\tt Signal}, provides
+\verb"make_wave", which evaluates the signal at a sequence of
+points in time and returns a Wave.
 
 \begin{verbatim}
     def make_wave(self, duration=1, start=0, framerate=11025):
@@ -837,13 +878,13 @@ in seconds.  {\tt framerate} is the number of frames (samples)
 per second.
 
 {\tt dt} is the time between samples, and {\tt ts} is the sequence
-of sample times.
+of sample times.  {\tt numpy.arange} returns a NumPy array.
 
 \verb"make_wave" invokes {\tt evaluate}, which has to be provided
 by a child class of {\tt Signal}, in this case {\tt Sinusoid}.
 
-{\tt evaluate} takes the sequence of sample times and returns an array of
-corresponding quantities:
+{\tt evaluate} takes the array of times and returns an array of
+samples:
 
 \begin{verbatim}
     def evaluate(self, ts):
@@ -852,18 +893,12 @@ corresponding quantities:
         return ys
 \end{verbatim}
 
-{\tt PI2} is a constant set to $2 \pi$.
-
-{\tt ts} and {\tt ys} are NumPy arrays.  I use NumPy and SciPy
-throughout the book.  If you are familiar with these libraries,
-that's great, but I will also explain as we go along.
-
 Let's unwind this function one step at time:
 
 \begin{enumerate}
 
 \item {\tt self.freq} is frequency in cycles per second, and each
-  element of {\tt ts} a time in seconds, so their product is the
+  element of {\tt ts} is a time in seconds, so their product is the
   number of cycles since the start time.
 
 \item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying by
@@ -871,7 +906,7 @@ Let's unwind this function one step at time:
   phase as ``cycles since the start time'' expressed in radians; each
   cycle is $2 \pi$ radians.
 
-\item {\tt self.offset} is the phase, in radians, at the start time.
+\item {\tt self.offset} is the phase when $t=0$.
   It has the effect of shifting the signal left or right in time.
 
 \item If {\tt self.func} is {\tt sin} or {\tt cos}, the result is a
@@ -912,8 +947,7 @@ the discrete Fourier transform using an algorithm called
 The result of {\tt rfft} is a sequence of complex numbers, {\tt hs},
 which is stored in a Spectrum.
 
-There are two ways to think about
-complex numbers:
+There are two ways to think about complex numbers:
 
 \begin{itemize}
 
@@ -963,10 +997,10 @@ The maximum frequency is {\tt framerate/2}, for reasons we'll see
 soon.
 
 Finally, {\tt amps} contains the magnitude of {\tt hs}, which
-is proportional to the amplitude of the components.
+is the amplitude of each component.
 
-{\tt Spectrum} also provides {\tt plot}, which plots the magnitude for
-each frequency:
+{\tt Spectrum} provides {\tt plot}, which plots the amplitudes
+versus the frequencies:
 
 \begin{verbatim}
     def plot(self, low=0, high=None):
@@ -975,6 +1009,10 @@ each frequency:
 
 {\tt low} and {\tt high} specify the slice of the Spectrum that
 should be plotted.
+
+At this point you should have a better idea of how the Signal, Wave,
+and Spectrum classes work, but I have not explained how the
+Discrete Fourier Transform works.  That will take a few more chapters.
 
 
 \section{Other waveforms}
@@ -1015,23 +1053,23 @@ The only difference is {\tt evaluate}.  As we saw before,
 {\tt ts} is the sequence of sample times where we want to
 evaluate the signal.
 
-There are lots of ways to generate a triangle wave.  The details
+There are many ways to generate a triangle wave.  The details
 are not important, but here's how {\tt evaluate} works:
 
 \begin{enumerate}
 
 \item {\tt cycles} is the number of cycles since the start time.
 {\tt numpy.modf} splits the number of cycles into the fraction
-part, stored in {\tt frac}, and the integer part, which is ignored.
+part, stored in {\tt frac}, and the integer part, which is ignored
 \footnote{Using an underscore as a variable name is a convention that
-means, ``I don't intend to use this value''.}
+means, ``I don't intend to use this value''.}.
 
 \item {\tt frac} is a sequence that ramps from 0 to 1 with the given
   frequency.  Subtracting 0.5 yields values between -0.5 and 0.5.
   Taking the absolute value yields a waveform that zig-zags between
   0.5 and 0.
 
-\item {\tt unbias} shifts the waveform down so it is centered at 0, then
+\item {\tt unbias} shifts the waveform down so it is centered at 0; then
 {\tt normalize} scales it to the given amplitude, {\tt amp}.
 
 \end{enumerate}
@@ -1075,12 +1113,13 @@ odd multiples of the fundamental frequency, in this example
 600, 1000, 1400, etc.
 
 Another feature of this spectrum is the relationship between the
-amplitude and frequency of the harmonics.  The amplitude of the
-harmonics drops off in proportion to frequency squared.  For example
-the frequency ratio of the first two harmonics (200 and 600 Hz) is 3,
-and the amplitude ratio is approximately 9.  The frequency ratio of
-the next two harmonics (600 and 1000 Hz) is 1.7, and the amplitude
-ratio is approximately $1.7^2 = 2.9$.
+amplitude and frequency of the harmonics.  Their amplitude drops off
+in proportion to frequency squared.  For example the frequency ratio
+of the first two harmonics (200 and 600 Hz) is 3, and the amplitude
+ratio is approximately 9.  The frequency ratio of the next two
+harmonics (600 and 1000 Hz) is 1.7, and the amplitude ratio is
+approximately $1.7^2 = 2.9$.  This relationship is called the
+{\bf harmonic structure}.
 
 \begin{figure}
 % example2.py
@@ -1132,6 +1171,9 @@ But the amplitude of the harmonics drops off more slowly.
 Specifically, amplitude drops in proportion to frequency (not frequency
 squared).
 
+The exercises at the end of this chapter give you a chance to
+explore other waveforms and other harmonic structures.
+
 
 \section{Aliasing}
 \label{aliasing}
@@ -1149,15 +1191,16 @@ carefully, to avoid showing you something confusing.  But now it's
 time to get confused.
 
 Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave
-at 1100 Hz, sampled at 10,000 frames per second.
+at 1100 Hz, sampled at 10,000 frames per second.  The harmonics
+of this wave should be at 3300, 5500, 7700, and 9900 Hz.
 
-As expected, there are peaks at 1100 and 3300 Hz, but the third
-peak is at 4500, not 5500 Hz as expected.  There is a small fourth peak
-at 2300, not 7700 Hz.  And if you look very closely, the peak that should
-be at 9900 is actually at 100 Hz.  What's going on?
+In the figure, there are peaks at 1100 and 3300 Hz, as expected, but
+the third peak is at 4500, not 5500 Hz.  The
+fourth peak is at 2300, not 7700 Hz.  And if you look closely, the
+peak that should be at 9900 is actually at 100 Hz.  What's going on?
 
 The problem is that when you evaluate the signal at
-discrete points in time, you lose information about what happens
+discrete points in time, you lose information about what happened
 between samples.  For low frequency components, that's not a
 problem, because you have lots of samples per period.
 
@@ -1255,7 +1298,7 @@ Figure~\ref{fig.triangle.1100.2}
 \end{exercise}
 
 \begin{exercise}
-The triangle and square waves have odd harmonics only; the sawtooth
+Triangle and square waves have odd harmonics only; the sawtooth
 wave has both even and odd harmonics.  The harmonics of the
 square and sawtooth waves drop off in proportion to $1/f$; the
 harmonics of the triangle wave drop off like $1/f^2$.  Can you

@@ -148,6 +148,8 @@ class _SpectrumParent(object):
         """
         return copy.deepcopy(self)
 
+    # TODO: add primitives for working with hs
+
     @property
     def max_freq(self):
         return self.framerate / 2.0
