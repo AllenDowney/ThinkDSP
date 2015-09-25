@@ -59,21 +59,20 @@ plastex:
 	rm -rf /home/downey/thinkdsp/trunk/book/.svn
 
 xxe:
-	xmlcopyeditor ~/thinkstats/trunk/thinkdsp/book/book.xml &
+	xmlcopyeditor ~/ThinkDSP/book/book/book.xml &
 	#~/Downloads/xxe-perso-4_8_0/bin/xxe book/book.xml
 
 lint:
 	xmllint -noout book/book.xml
 
-OREILLY = ~/oreilly/thinkdsp
+OREILLY = atlas
 
 oreilly:
 	rsync -a book/ $(OREILLY)
 	rsync -a figs/* $(OREILLY)/figs/
 	cd $(OREILLY); git add .
 	cd $(OREILLY); git commit -m "Automated check in."
-	cd $(OREILLY); git push origin master
-	#cp thinkdsp.pdf ~/oreilly/1234000001745/pdf
+	cd $(OREILLY); git push
 
 clean:
 	rm -f *~ *.aux *.log *.dvi *.idx *.ilg *.ind *.toc

@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.11}
+\newcommand{\theversion}{0.9.14}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -768,7 +768,10 @@ for this book, following the instructions in Section~\ref{code}.
 If you have IPython, load {\tt chap01.ipynb}, read through it, and run
 the examples.  You can also view this notebook at
 \url{http://tinyurl.com/thinkdsp01}.
+\end{exercise}
 
+
+\begin{exercise}
 Go to \url{http://freesound.org} and download a sound sample that
 include music, speech, or other sounds that have a well-defined pitch.
 Select a segment with duration 0.5 to 2 seconds where the pitch is
@@ -1577,6 +1580,7 @@ asks you to experiment with these other windows.
 
 
 \section{Spectrum of a chirp}
+\label{sauron}
 
 \begin{figure}
 % chirp.py
@@ -1852,7 +1856,7 @@ spectrogram.  Can you identify different vowels?
 \chapter{Noise}
 
 In English, ``noise'' means an unwanted or unpleasant sound.  In the
-context of digital signal processing, it has two different senses:
+context of signal processing, it has two different senses:
 
 \begin{enumerate}
 
@@ -1890,20 +1894,32 @@ distribution; that is, every value in the range is equally likely.
 ``Uncorrelated'' means that the values are independent; that is,
 knowing one value provides no information about the others.
 
-This code generates UU noise:
+Here's a class that represents UU noise:
 
 \begin{verbatim}
-    duration = 0.5
-    framerate = 11025
-    n = framerate * duration
-    ys = np.random.uniform(-1, 1, n)
-    wave = thinkdsp.Wave(ys, framerate)
-    wave.plot()
+class UncorrelatedUniformNoise(_Noise):
+
+    def evaluate(self, ts):
+        ys = np.random.uniform(-self.amp, self.amp, len(ts))
+        return ys
 \end{verbatim}
 
-The result is a wave with duration 0.5 seconds at 11,025
-samples per second.  Each sample is drawn from a uniform distribution
-between -1 and 1.
+{\tt UncorrelatedUniformNoise} inherits from \verb"_Noise", which
+inherits from {\tt Signal}.
+
+As usual, the evaluate function takes {\tt ts}, the times when the
+signal should be evaluated.  It uses
+{\tt np.random.uniform}, which generates values from a
+uniform distribution.  In this example, the values are in
+the range between {\tt -amp} to {\tt amp}.
+
+The following example makes generates UU noise with duration 0.5
+seconds at 11,025 samples per second.
+
+\begin{verbatim}
+signal = thinkdsp.UncorrelatedUniformNoise()
+wave = signal.make_wave(duration=0.5, framerate=11025)
+\end{verbatim}
 
 If you play this wave, it sounds like the static you hear if you tune
 a radio between channels.  Figure~\ref{fig.whitenoise0} shows what the
@@ -1919,20 +1935,20 @@ waveform looks like.  As expected, it looks pretty random.
 Now let's take a look at the spectrum:
 
 \begin{verbatim}
-    spectrum = wave.make_spectrum()
-    spectrum.plot_power()
+spectrum = wave.make_spectrum()
+spectrum.plot_power()
 \end{verbatim}
 
 \verb"Spectrum.plot_power" is similar to \verb"Spectrum.plot",
 except that it plots power density instead of amplitude.  Power 
 density is the square of amplitude, expressed in units of power per Hz.
-(I am switching from amplitude to power in this section because
-it is more conventional in the context of noise.)
+I am switching from amplitude to power in this chapter because
+it is more conventional in the context of noise.
 
 Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
-spectrum looks pretty random.  And it is, but we have to be more
-precise about the word ``random''.  There are at least three things we
-might like to know about a noise signal or its spectrum:
+spectrum looks pretty random.  In fact, it is random, but we have to
+be more precise about the word ``random''.  There are at least three
+things we might like to know about a noise signal or its spectrum:
 
 \begin{itemize}
 
@@ -1956,11 +1972,10 @@ might like to know about a noise signal or its spectrum:
 
 \item Relationship between power and frequency: In the spectrum of UU
   noise, the power at all frequencies is drawn from the same
-  distribution; that is, there is no relationship between power and
-  frequency (or, if you like, the relationship is a constant).  An
-  alternative is {\bf pink noise}, where power is inversely related
-  to frequency; that is, the power at frequency $f$ is drawn from
-  a distribution whose mean is proportional to $1/f$.
+  distribution; that is, the average power is the same for all
+  frequencies.  An alternative is {\bf pink noise}, where power is
+  inversely related to frequency; that is, the power at frequency $f$
+  is drawn from a distribution whose mean is proportional to $1/f$.
 
 \end{itemize}
 
@@ -1969,7 +1984,7 @@ might like to know about a noise signal or its spectrum:
 
 For UU noise we can see the relationship between power and frequency
 more clearly by looking at the {\bf integrated spectrum}, which
-is a function of frequency, $f$, that shows the cumulative total power in
+is a function of frequency, $f$, that shows the cumulative power in
 the spectrum up to $f$.
 
 \begin{figure}
@@ -2018,6 +2033,7 @@ Noise with equal power at all frequencies is called {\bf white noise}
 by analogy with light, because an equal mixture of light at all
 visible frequencies is white.
 
+% TODO: logical quotation marks
 
 
 \section{Brownian noise}
@@ -2059,8 +2075,9 @@ class BrownianNoise(_Noise):
         return ys
 \end{verbatim}
 
-We use {\tt np.random.uniform} to generate an uncorrelated signal
-and {\tt np.cumsum} to compute their cumulative sum.
+{\tt evaluate} uses {\tt np.random.uniform} to generate an
+uncorrelated signal and {\tt np.cumsum} to compute their cumulative
+sum.
 
 Since the sum is likely to escape the range from -1 to
 1, we have to use {\tt unbias} to shift the mean to 0, and {\tt
@@ -2091,7 +2108,7 @@ If you plot the spectrum of Brownian noise, it doesn't look like
 much.  Nearly all of the power is at the lowest frequencies; on a
 linear scale, the higher frequency components are not visible.
 
-To see the shape of the spectrum, we have to plot power density
+To see the shape of the spectrum more clearly, we can plot power density
 and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
@@ -2103,13 +2120,15 @@ and frequency on a log-log scale.  Here's the code:
                    yscale='log')
 \end{verbatim}
 
-The slope of this line is approximately -2 (we'll see why in
+The result is in Figure~\ref{fig.redline}.  The relationship between
+power and frequency is noisy, but nearly linear.  
+The slope of the line is approximately -2 (we'll see why in
 Chapter~\ref{systems}), so we can write this relationship:
 %
 \[ \log P = k -2 \log f \]
 %
 where $P$ is power, $f$ is frequency, and $k$ is the intercept
-of the line (which is not relevant for our purposes).
+of the line, which is not relevant for our purposes.
 Exponentiating both sides yields:
 %
 \[ P = K / f^{2} \]
@@ -2179,12 +2198,12 @@ class PinkNoise(_Noise):
 
         wave2 = spectrum.make_wave()
         wave2.unbias()
-        wave2.normalize()
+        wave2.normalize(self.amp)
         return wave2
 \end{verbatim}
 
 {\tt duration} is the length of the wave in seconds.  {\tt start} is
-the start time of the wave, which is included so that \verb"make_wave"
+the start time of the wave; it is included so that \verb"make_wave"
 has the same interface for all types of noise, but for random noises,
 start time is irrelevant.  And {\tt framerate} is the number of
 samples per second.
@@ -2214,8 +2233,8 @@ the wave.
 $f^{\beta/2}$.  Since power is the square of amplitude, this
 operation divides the power at
 each component by $f^\beta$.  It treats the component
-at $f=0$ as a special case, partly to avoid dividing by 0, but
-also because this element represents the bias of the signal,
+at $f=0$ as a special case, partly to avoid dividing by 0, partly
+because this element represents the bias of the signal,
 which we are going to set to 0 anyway. 
 
 Figure~\ref{fig.pinknoise0} shows the resulting waveform.  Like
@@ -2286,8 +2305,8 @@ way to test whether a distribution is Gaussian.
 
 {\tt NormalProbabilityPlot} is provided by {\tt thinkstats2}, which is
 included in the repository for this book.  If you are not familiar
-with normal probability plots, you can read about them in
-{\it Think Stats} at \url{http://thinkstats2.com}.
+with normal probability plots, you can read about them in Chapter 5
+of {\it Think Stats} at \url{http://thinkstats2.com}.
 
 Figure~\ref{fig.noise1} shows the results.  The gray lines
 show a linear model fit to the data; the dark lines show the
@@ -2301,21 +2320,11 @@ which indicates that the spectrum of UG noise is UG noise.
 The spectrum of UU noise is also UG noise, at least approximately.  In
 fact, by the Central Limit Theorem, the spectrum of almost any
 uncorrelated noise is approximately Gaussian, as long as the
-distribution has finite mean and standard deviation and the number of
+distribution has finite mean and standard deviation, and the number of
 samples is large.
 
 
 \section{Exercises}
-
-\begin{exercise}
-The algorithm in this chapter for generating pink noise is
-conceptually simple but computationally expensive.  There are
-more efficient alternatives, like the Voss-McCartney algorithm.
-Research this method, implement it, compute the spectrum of
-the result, and confirm that it has the desired relationship
-between power and frequency.
-\end{exercise}
-
 
 \begin{exercise}
 ``A Soft Murmur'' is a web site that plays a mixture of natural
@@ -2330,9 +2339,7 @@ or Brownian noise?  How does the spectrum vary over time?
 
 
 \begin{exercise}
-%TODO: make this part of the text?
-
-In a white noise signal, the mixture of frequencies changes over time.
+In a noise signal, the mixture of frequencies changes over time.
 In the long run, we expect the power at all frequencies to be equal,
 but in any sample, the power at each frequency is random.
 
@@ -2342,10 +2349,27 @@ density for each segment, and then compute the average across
 the segments.  You can read more about this algorithm at
 \url{http://en.wikipedia.org/wiki/Bartlett's_method}.
 
+Implement Bartlett's method and use it to estimate the power
+spectral density for a noise wave.  Hint: look at the implementation
+of \verb"make_spectrogram".
+\end{exercise}
+
+
+\begin{exercise}
 At \url{http://www.coindesk.com} you can download the daily
 price of a BitCoin as a CSV file.  Read this file and compute
-the power spectrum of BitCoin prices as a function of time.
+the spectrum of BitCoin prices as a function of time.
 Does it resemble white, pink, or Brownian noise?
+\end{exercise}
+
+
+\begin{exercise}
+The algorithm in this chapter for generating pink noise is
+conceptually simple but computationally expensive.  There are
+more efficient alternatives, like the Voss-McCartney algorithm.
+Research this method, implement it, compute the spectrum of
+the result, and confirm that it has the desired relationship
+between power and frequency.
 \end{exercise}
 
 
@@ -2359,7 +2383,7 @@ value.  In this chapter I define these terms more precisely and
 present the {\bf autocorrelation function}, which is a useful tool
 for signal analysis.
 
-But before we get to autocorrelation, let's start with correlation.
+But before we get to autocorrelation, we'll start with correlation.
 
 The code for this chapter is in {\tt autocorr.py}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -2382,7 +2406,7 @@ Pearson's correlation is always between -1 and +1 (including both).
 If $\rho$ is positive, we say that the correlation is positive,
 which means that when one variable is high, the other tends to be
 high.  If $\rho$ is negative, the correlation is negative, so
-when one variable is high, the other is low.
+when one variable is high, the other tends to be low.
 
 The magnitude of $\rho$ indicates the strength of the correlation.  If
 $\rho$ is 1 or -1, the variables are perfectly correlated, which means
@@ -2421,8 +2445,8 @@ def make_wave(offset):
 Next I instantiate two waves with different offsets:
 
 \begin{verbatim}
-    wave1 = make_wave(offset=0)
-    wave2 = make_wave(offset=1)
+wave1 = make_wave(offset=0)
+wave2 = make_wave(offset=1)
 \end{verbatim}
 
 Figure~\ref{fig.autocorr1} shows what the first few periods of these
@@ -2464,7 +2488,7 @@ Figure~\ref{fig.autocorr2} shows the relationship between correlation and
 phase offset for a sine wave.  The shape of that curve should look
 familiar; it is a cosine.  
 
-{\tt thinkdsp} also provides a simple interface for computing the
+{\tt thinkdsp} provides a simple interface for computing the
 correlation between waves:
 
 \begin{verbatim}
@@ -2477,7 +2501,7 @@ correlation between waves:
 
 Signals often represent measurements of quantities that vary in
 time.  For example, the sound signals we've worked with represent
-measurements of voltage (or current), which represent the changes
+measurements of voltage (or current), which correspond to the changes
 in air pressure we perceive as sound.
 
 Measurements like this almost always have serial correlation, which
@@ -2501,7 +2525,9 @@ def serial_corr(wave, lag=1):
 the interface to {\tt np.corrcoef}.
 
 \verb"serial_corr" takes a Wave object and
-{\tt lag}, which is the integer number of places to shift the waves.
+{\tt lag}, which is the integer number of places to shift the wave.
+It computes the correlation of the wave with a shifted version
+of itself.
 
 We can test this function with the noise signals from the previous
 chapter.  We expect UU noise to be uncorrelated, based on the
@@ -2556,8 +2582,7 @@ ranges from 0 to almost 1, as shown in Figure~\ref{fig.autocorr3}.
 
 In the previous section we computed the correlation between each
 value and the next, so we shifted the elements of the array by 1.
-But if you noticed the {\tt lag} parameter in \verb"serial_corr",
-you realize we can compute serial correlations with
+But we can easily compute serial correlations with
 different lags.
 
 \begin{figure}
@@ -2587,16 +2612,11 @@ is the sequence of serial correlations for each lag.
 Figure~\ref{fig.autocorr4} shows autocorrelation functions for pink
 noise with three values of $\beta$.  For low values of $\beta$, the
 signal is less correlated, and the autocorrelation function drops
-toward zero relatively quickly.  For larger values, serial correlation
-is stronger and drops off more slowly.  With $\beta=1.2$ serial
+off to zero quickly.  For larger values, serial correlation
+is stronger and drops off more slowly.  With $\beta=1.7$ serial
 correlation is strong even for long lags; this phenomenon is called
 {\bf long-range dependence}, because it indicates that each value in
 the signal depends on many preceding values.
-
-If you plot these autocorrelation functions on a log-x scale, they
-are approximately straight lines, which indicates that they are
-decreasing exponentially.  An exponential autocorrelation function
-is one of the identifying characteristics of pink noise.
 
 
 \section{Autocorrelation of periodic signals}
@@ -2614,7 +2634,7 @@ periodic signals is more useful.
 
 As an example, I downloaded from \url{freesound.org} a recording of
 someone singing a chirp; the repository for this book includes the
-file: \url{28042__bcjordan__voicedownbew.wav}.  And you can use the
+file: \url{28042__bcjordan__voicedownbew.wav}.  You can use the
 IPython notebook for this chapter, {\tt chap05.ipynb}, to play it.
 
 Figure~\ref{fig.autocorr5} shows the spectrogram of this wave.
@@ -2629,7 +2649,8 @@ from C5 to E4.
 \label{fig.autocorr6}
 \end{figure}
 
-To estimate pitch at a particular point in time, we can take
+To estimate pitch at a particular point in time, we could use the
+spectrum, but it doesn't work very well.  To see why not, I'll take
 a short segment from the wave and plot its spectrum:
 
 \begin{verbatim}
@@ -2640,15 +2661,18 @@ a short segment from the wave and plot its spectrum:
 \end{verbatim}
 
 This segment starts at 0.2 seconds and lasts 0.01 seconds.
-Figure~\ref{fig.autocorr6} shows its spectrum.  There is a clear peak near
-400 Hz, but it is hard to identify the pitch precisely.  The length of
-the segment is 441 samples at a framerate of 44100 Hz, so the
-frequency resolution is 100 Hz (see Section~\ref{gabor}).
+Figure~\ref{fig.autocorr6} shows its spectrum.  There is a clear peak
+near 400 Hz, but it is hard to identify the pitch precisely.  The
+length of the segment is 441 samples at a framerate of 44100 Hz, so
+the frequency resolution is 100 Hz (see Section~\ref{gabor}).
+That means the estimated pitch might be off by 50 Hz; in musical
+terms, the range from 350 Hz to 450 Hz is about 5 semitones, which is
+a big difference!
 
-If we take a longer segment, we get better frequency resolution, but
-since the pitch is changing over time, we would see ``motion blur'';
-that is, the peak would be spread between the start and end pitch
-of the segment.
+We could get better frequency resolution by taking a longer segment,
+but since the pitch is changing over time, we would also get ``motion
+blur''; that is, the peak would spread between the start and end pitch of
+the segment, as we saw in Section~\ref{sauron}.
 
 We can estimate pitch more precisely using autocorrelation.
 If a signal is periodic, we expect the autocorrelation to spike
@@ -2690,8 +2714,8 @@ of 435 Hz.
 \label{fig.autocorr8}
 \end{figure}
 
-In this example, I estimated the period by trial and error.  To automate
-this process, we can use the autocorrelation function.
+For this example, I estimated the period by trial and error.  To automate
+the process, we can use the autocorrelation function.
 
 \begin{verbatim}
     lags, corrs = autocorr(segment)
@@ -2700,8 +2724,8 @@ this process, we can use the autocorrelation function.
 
 Figure~\ref{fig.autocorr8} shows the autocorrelation function for
 the segment starting at $t=0.2$ seconds.  The first peak occurs at
-{\tt lag=101}.  Then we can compute the frequency that corresponds
-to that period:
+{\tt lag=101}.  We can compute the frequency that corresponds
+to that period like this:
 
 \begin{verbatim}
     period = lag / segment.framerate
@@ -2711,8 +2735,9 @@ to that period:
 The estimated fundamental frequency is 437 Hz.  To evaluate the
 precision of the estimate, we can run the same computation with
 lags 100 and 102, which correspond to frequencies 432 and 441 Hz.
-So the frequency precision using autocorrelation is less than 10 Hz,
-compared with 100 Hz using the spectrum.
+The frequency precision using autocorrelation is less than 10 Hz,
+compared with 100 Hz using the spectrum.  In musical terms, the
+expected error is about 30 cents (a third of a semitone).
 
 
 \section{Correlation as dot product}
@@ -2775,7 +2800,7 @@ corrs2 = np.correlate(segment.ys, segment.ys, mode='same')
 \end{verbatim}
 
 The option {\tt mode} tells {\tt correlate} what range
-of {\tt lag} it should use.  With the value {\tt 'same'}, the
+of {\tt lag} to use.  With the value {\tt 'same'}, the
 range is from $-N/2$ to $N/2$, where $N$ is the length of the
 wave array.
 
@@ -2829,13 +2854,18 @@ ways to compute it.
 If you did the exercises in the previous chapter, you downloaded
 the historical price of BitCoins and estimated the power spectrum
 of the price changes.  Using the same data, compute the autocorrelation
-of BitCoin prices.  Does the autocorrelation function decay
-exponentially?  Is there evidence of periodic behavior?
+of BitCoin prices.  Does the autocorrelation function drop off quickly?
+Is there evidence of periodic behavior?
 \end{exercise}
 
 \begin{exercise}
-% TODO: finish this exercise
-Estimate the pitch of a segment from the saxophone recording.
+The example code in \verb"chap05.ipynb" shows how to use autocorrelation
+to estimate the fundamental frequency of a periodic signal.
+Encapsulate this code in a function called \verb"estimate_fundamental",
+and use it to track the pitch of a recorded sound.
+
+To see how well it works, try superimposing your pitch estimates on a
+spectrogram of the recording.
 \end{exercise}
 
 
@@ -2843,15 +2873,12 @@ Estimate the pitch of a segment from the saxophone recording.
 \chapter{Discrete cosine transform}
 \label{dct}
 
-The code for this chapter is in {\tt dct.py}, which is in the
-repository for this book (see Section~\ref{code}).
-
 The topic of this chapter is the {\bf Discrete Cosine
   Transform} (DCT), which is used in MP3 and related formats for
 compressing music, JPEG and similar formats for images, and the MPEG
 family of formats for video.
 
-DCT is similar in many ways to the discrete Fourier transform (DFT),
+DCT is similar in many ways to the Discrete Fourier Transform (DFT),
 which we have been using for spectral analysis.
 Once we learn how DCT works, it will be easier to explain DFT.
 
@@ -2877,7 +2904,8 @@ Here are the steps we'll follow to get there:
 
 \end{enumerate}
 
-Let's get started.
+The code for this chapter is in {\tt dct.py}, which is in the
+repository for this book (see Section~\ref{code}).
 
 
 \section{Synthesis}
@@ -2997,12 +3025,12 @@ the previous section to
 check that the two versions of {\tt synthesize} produce the same results.
 
 \begin{verbatim}
-    ys1 = synthesize1(amps, freqs, ts)
-    ys2 = synthesize2(amps, freqs, ts)
-    print max(abs(ys1 - ys2))
+ys1 = synthesize1(amps, freqs, ts)
+ys2 = synthesize2(amps, freqs, ts)
+max(abs(ys1 - ys2))
 \end{verbatim}
 
-The biggest difference between {\tt ys1} and {\tt y2} is about {\tt
+The biggest difference between {\tt ys1} and {\tt ys2} is about {\tt
   1e-13}, which is what we expect due to floating-point errors.
 
 Writing this computation in terms of linear algebra makes the code
@@ -3069,12 +3097,11 @@ Using the values of {\tt ys}, {\tt freqs} and {\tt ts} from
 the previous section, we can run {\tt analyze1} like this:
 
 \begin{verbatim}
-    n = len(freqs)
-    amps2 = analyze1(ys[:n], freqs, ts[:n])
-    print(amps2)
+n = len(freqs)
+amps2 = analyze1(ys[:n], freqs, ts[:n])
 \end{verbatim}
 
-And sure enough, we get
+And sure enough, {\tt amps2} is
 
 \begin{verbatim}
 [ 0.6   0.25  0.1   0.05 ]
@@ -3109,18 +3136,16 @@ This implies that if we can compute $M^{-1}$ efficiently, we can find
 $a$ with a simple matrix multiplication (using {\tt np.dot}).  That
 takes time proportional to $n^2$, which is better than $n^3$.
 
-In general inverting a matrix is slow, but some special cases are
+Inverting a matrix is slow, in general, but some special cases are
 faster.  In particular, if $M$ is {\bf orthogonal}, the inverse of $M$
 is just the transpose of $M$, written $M^T$.  In NumPy
 transposing an array is a constant-time operation.  It
 doesn't actually move the elements of the array; instead, it creates a
 ``view'' that changes the way the elements are accessed.
 
-Again, a matrix is orthogonal
-if its transpose is also
-its inverse; that is, $M^T = M^{-1}$.  That implies that $M^TM = I$,
-which means we can check whether a matrix is orthogonal by computing
-$M^TM$.
+Again, a matrix is orthogonal if its transpose is also its inverse;
+that is, $M^T = M^{-1}$.  That implies that $M^TM = I$, which means we
+can check whether a matrix is orthogonal by computing $M^TM$.
 
 So let's see what the matrix looks like in {\tt synthesize2}.  In 
 the previous example, $M$ has 11,025 rows, so it might be a good idea
@@ -3223,8 +3248,8 @@ And $M^TM$ is
 \end{verbatim}
 
 Some of the off-diagonal elements are displayed as -0, which means
-that the floating-point representation is a small negative number.  So
-this matrix is very close to $2I$, which means $M$ is almost
+that the floating-point representation is a small negative number.
+This matrix is very close to $2I$, which means $M$ is almost
 orthogonal; it's just off by a factor of 2.  And for our purposes,
 that's good enough.
 
@@ -3261,21 +3286,22 @@ Again, {\tt ys} is the wave array.  We don't have to pass
 {\tt ts} and {\tt freqs} as parameters; \verb"dct_iv" can
 figure them out based on {\tt N}, the length of {\tt ys}.
 
-We can test \verb"dct_iv" like this
+If we've got it right, this function should solve the analysis
+problem; that is, given {\tt ys} it should be able to recover
+{\tt amps}.  We can test it like this.
 
 \begin{verbatim}
-    amps = np.array([0.6, 0.25, 0.1, 0.05])
-    N = 4.0
-    ts = (0.5 + np.arange(N)) / N
-    freqs = (0.5 + np.arange(N)) / 2
-    ys = synthesize2(amps, freqs, ts)
-
-    amps2 = dct_iv(ys)
-    print max(abs(amps - amps2))
+amps = np.array([0.6, 0.25, 0.1, 0.05])
+N = 4.0
+ts = (0.5 + np.arange(N)) / N
+freqs = (0.5 + np.arange(N)) / 2
+ys = synthesize2(amps, freqs, ts)
+amps2 = dct_iv(ys)
+max(abs(amps - amps2))
 \end{verbatim}
 
 Starting with {\tt amps}, we synthesize a wave array, then use
-\verb"dct_iv" to see if we can recover the amplitudes.  The biggest
+\verb"dct_iv" to compute {\tt amps2}.  The biggest
 difference between {\tt amps} and {\tt amps2} is about {\tt 1e-16},
 which is what we expect due to floating-point errors.
 
@@ -3291,16 +3317,17 @@ def inverse_dct_iv(amps):
     return dct_iv(amps) * 2
 \end{verbatim}
 
-\verb"inverse_dct_iv" takes the vector of amplitudes and returns
-the wave array, {\tt ys}.  We can confirm that it works by starting
+\verb"inverse_dct_iv" solves the synthesis problem: it
+takes the vector of amplitudes and returns
+the wave array, {\tt ys}.  We can test it by starting
 with {\tt amps}, applying \verb"inverse_dct_iv" and \verb"dct_iv",
 and testing that we get back what we started with.
 
 \begin{verbatim}
-    amps = [0.6, 0.25, 0.1, 0.05]
-    ys = inverse_dct_iv(amps)
-    amps2 = dct_iv(ys)
-    print max(abs(amps - amps2))
+amps = [0.6, 0.25, 0.1, 0.05]
+ys = inverse_dct_iv(amps)
+amps2 = dct_iv(ys)
+max(abs(amps - amps2))
 \end{verbatim}
 
 Again, the biggest difference is about {\tt 1e-16}.
@@ -3309,9 +3336,27 @@ Again, the biggest difference is about {\tt 1e-16}.
 \section{Exercises}
 
 \begin{exercise}
-Test the algorithmic complexity of {\tt analyze1}, {\tt analyze2}
+SciPy provides an implementation of DCT in
+{\tt fftpack}.  Read the documentation of {\tt scipy.fftpack.dct}
+and run it on one of the examples in this chapter.  Confirm that
+the results are the same as my implementation.
+\end{exercise}
+
+
+\begin{exercise}
+In this chapter I claim that {\tt analyze1} takes time proportional
+to $n^2$ and {\tt analyze2} takes time proportional to $n^2$.  To
+see if that's true, run them on a range of input sizes and time
+them.  In IPython, you can use the ``magic command'' \verb"%timeit".
+
+If you plot run time versus input size on a log-log scale, you
+should get a straight line with slope 3 for  {\tt analyze1} and
+slope 2 for {\tt analyze2}.
+
+You also might want to test \verb"dct_iv"
 and {\tt scipy.fftpack.dct}.
 \end{exercise}
+
 
 \begin{exercise}
 One of the major applications of the DCT is compression for both
@@ -3337,6 +3382,11 @@ Implement a version of this algorithm and apply it to a recording
 of music or speech.  How many components can you eliminate before
 the difference is perceptible?
 
+In order to make this method practical, you need some way to store a
+sparse array; that is, an array where most of the elements are zero.
+NumPy provides several implementations of sparse arrays, which you can
+read about at
+\url{http://docs.scipy.org/doc/scipy/reference/sparse.html}.
 \end{exercise}
 
 
@@ -3405,12 +3455,19 @@ However, exponentiation can also be expressed as a power series:
 \[ e^\phi = 1 + \phi + \phi^2/2! + \phi^3/3! + ... \]
 %
 This definition works with imaginary numbers and, by a simple
-extension, with complex numbers.  It turns out that:
+extension, with complex numbers.  Applying this definition
+to a pure imaginary number, $i\phi$, we get
+%
+\[ e^{i\phi} = 1 + i\phi - \phi^2/2! - i\phi^3/3! + ... \]
+%
+By rearranging terms, we can show that this is equivalent to:
 %
 \[ e^{i\phi} = \cos \phi + i \sin \phi \]
 %
 You can see the derivation at
-\url{http://en.wikipedia.org/wiki/Euler's_formula}.  This formula
+\url{http://en.wikipedia.org/wiki/Euler's_formula}.
+
+This formula
 implies that $e^{i\phi}$ is a complex number with magnitude 1; if you
 think of it as a point in the complex plane, it is always on the unit
 circle.  And if you think of it as a vector, the angle in radians
@@ -3525,18 +3582,18 @@ The frequency of this signal is 1 cycle per second; the amplitude
 is 0.6 (in unspecified units); and the phase offset is 1 radian.
 
 This example evaluates the signal at 4 places equally spaced between
-0 and 1 second.  The resulting samples are complex numbers.  You
-might wonder how to interpret these values.  We'll get to it soon.
+0 and 1 second.  The resulting samples are complex numbers.
 
 
 \section{The synthesis problem}
 
-We can create compound signals by adding up complex
-sinusoids with different frequencies.  And that brings us
-to the synthesis problem: given the frequency and amplitude of
-each component, how do we evaluate the signal?
+Just as we did with real sinusoids, we we can create compound signals
+by adding up complex sinusoids with different frequencies.  And that
+brings us to the complex version of the synthesis problem: given the
+frequency and amplitude of each complex component, how do we evaluate the
+signal?
 
-The simplest solution is to instantiate {\tt ComplexSignal}
+The simplest solution is to instantiate {\tt ComplexSinusoid}
 objects and add them up.
 
 \begin{verbatim}
@@ -3604,10 +3661,10 @@ signal into its real and imaginary parts:
 
 Figure~\ref{fig.dft1} shows a segment of the result.  The
 real part is a sum of cosines; the imaginary part is
-the sum of sines.  Although the waveforms look different, they
+a sum of sines.  Although the waveforms look different, they
 contain the same frequency components in the same proportions.
-To our ears, they sound the same; in general, we don't hear
-phase offsets.
+To our ears, they sound the same (in general, we don't hear
+phase offsets).
 
 
 \section{Synthesis with matrices}
@@ -3642,9 +3699,8 @@ Figure~\ref{fig.synthesis}).
 Each column of matrix {\tt M} contains a complex sinusoid with
 a particular frequency, evaluated at a sequence of {\tt ts}.
 
-When we multiply {\tt M} by the amplitudes, the result is a
-vectors whose
-elements correspond to the {\tt ts}; each element is the sum of
+When we multiply {\tt M} by the amplitudes, the result is a vector
+whose elements correspond to the {\tt ts}; each element is the sum of
 several complex sinusoids, evaluated at a particular time.
 
 Here's the example from the previous section again:
@@ -3818,10 +3874,10 @@ arithmetic.
 
 As a function, {\tt analyze2} would be hard to use because it
 only works if {\tt freqs} and {\tt ts} are chosen correctly.
-We can clean it up by writing functions to compute DFT and IDFT.
+Instead, I will rewrite it to take just {\tt ys} and compute {\tt freq}
+and {\tt ts} itself.
 
-First, I'll make a function to compute the synthesis matrix,
-$M$:
+First, I'll make a function to compute the synthesis matrix, $M$:
 
 \begin{verbatim}
 def synthesis_matrix(N):
@@ -3832,8 +3888,20 @@ def synthesis_matrix(N):
     return M
 \end{verbatim}
 
-Now we can write a version of {\tt dft} that takes
-{\tt ys} and returns {\tt amps}:
+Then I'll write the function that takes {\tt ys} and returns 
+{\tt amps}:
+
+\begin{verbatim}
+def analyze3(ys):
+    N = len(ys)
+    M = synthesis_matrix(N)
+    amps = M.conj().transpose().dot(ys) / N
+    return amps
+\end{verbatim}
+
+We are almost done.  This function computes something very
+close to the DFT, with one difference: the conventional definition
+of DFT does not divide by {\tt N}:
 
 \begin{verbatim}
 def dft(ys):
@@ -3843,20 +3911,18 @@ def dft(ys):
     return amps
 \end{verbatim}
 
-Notice that I made one small change; this version of {\tt DFT}
-does not divide through by {\tt N}.  I did that to make it
-consistent with the conventional definition of DFT.  Here's my
-version:
+Now we can confirm that my version yields the same result as
+FFT:
 
 \begin{verbatim}
->>> print(dft(ys))
+>>> dft(ys)
 [ 2.4 +8.3e-17j  1.0 +5.6e-17j  0.4 -1.6e-16j  0.2 -3.3e-16j]
 \end{verbatim}
 
 And here's the version in {\tt np.fft}:
 
 \begin{verbatim}
->>> print(np.fft.fft(ys))
+>>> np.fft.fft(ys)
 [ 2.4 +8.0e-17j  1.0 -2.5e-17j  0.4 -3.1e-17j  0.2 -2.5e-17j]
 \end{verbatim}
 
@@ -3879,7 +3945,7 @@ Finally, we can confirm that {\tt dft(idft(amps))} yields {\tt amps}.
 
 \begin{verbatim}
 >>> ys = idft(amps)
->>> print(dft(ys))
+>>> dft(ys)
 [ 0.60 +2.1e-17j  0.25 +1.4e-17j  0.10 -3.9e-17j  0.05 -8.3e-17j]
 \end{verbatim}
 
@@ -3968,13 +4034,15 @@ at 4500 Hz.  So when we evaluate the DFT at 5500 Hz, we get the same
 value as at 4500 Hz.  Similarly, the value at 6000 Hz is the same
 as the one at 4000 Hz, and so on.
 
-So the DFT of a real signal is symmetric around the folding frequency.
+The DFT of a real signal is symmetric around the folding frequency.
 Since there is no additional information past this point, we can
 save time by evaluating only the first half of the DFT,
-and that's exactly what {\tt rfft} does.
+and that's exactly what {\tt np.fft.rfft} does.
 
 
 \section{Exercises}
+
+% TODO: exercises
 
 \begin{exercise}
 In this chapter, I showed how we can express the DFT and inverse
