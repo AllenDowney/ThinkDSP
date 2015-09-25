@@ -1630,7 +1630,9 @@ class EstimatedPdf(Pdf):
 
         n: size of sample
         """
-        return self.kde.resample(n)
+        # NOTE: we have to flatten because resample returns a 2-D
+        # array for some reason.
+        return self.kde.resample(n).flatten()
 
 
 def CredibleInterval(pmf, percentage=90):
@@ -1768,6 +1770,16 @@ def EvalBinomialPmf(k, n, p):
     """
     return stats.binom.pmf(k, n, p)
     
+
+def MakeBinomialPmf(n, p):
+    """Evaluates the binomial PMF.
+
+    Returns the distribution of successes in n trials with probability p.
+    """
+    pmf = Pmf()
+    for k in range(n+1):
+        pmf[k] = stats.binom.pmf(k, n, p)
+    return pmf
 
 def EvalHypergeomPmf(k, N, K, n):
     """Evaluates the hypergeometric PMF.
@@ -2172,7 +2184,7 @@ def Jitter(values, jitter=0.5):
     returns: new numpy array
     """
     n = len(values)
-    return np.random.uniform(-jitter, +jitter, n) + values
+    return np.random.normal(0, jitter, n) + values
 
 
 def NormalProbabilityPlot(sample, fit_color='0.8', **options):

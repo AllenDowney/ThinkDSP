@@ -64,7 +64,7 @@ systems8.pdf systems8.eps \
 all_figs:
 	python violin.py
 
-FIGDEST = ../trunk/figs
+FIGDEST = ../book/figs
 
 %.html: %.py
 	pydoc -w $<

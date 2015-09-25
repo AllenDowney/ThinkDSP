@@ -160,13 +160,13 @@ def plot_autocorr():
     numpy.random.seed(19)
     thinkplot.preplot(3)
 
-    for beta in [1.2, 1.0, 0.7]:
+    for beta in [1.7, 1.0, 0.3]:
         label = r'$\beta$ = %.1f' % beta
         plot_pink_autocorr(beta, label)
 
     thinkplot.config(xlabel='lag', 
                      ylabel='correlation', 
-                     xlim=[-1, 200], 
+                     xlim=[-1, 1000], 
                      ylim=[-0.05, 1.05])
     thinkplot.save(root='autocorr4')
 
@@ -235,11 +235,11 @@ def plot_correlate():
 
 
 def main():
-    plot_sines()
-    plot_serial_corr()
+    #plot_sines()
+    #plot_serial_corr()
     plot_autocorr()
-    plot_singing_chirp()
-    plot_correlate()
+    #plot_singing_chirp()
+    #plot_correlate()
 
 
 if __name__ == '__main__':
