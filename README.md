@@ -10,7 +10,11 @@ the material bottom-up, starting with mathematical abstractions like phasors.
 
 With a programming-based approach, I can go top-down, which means I can present the most important
 ideas right away.  By the end of the first chapter, you can
-break down a sound into its harmonics, modify the harmonics, and generate new sounds.  
+break down a sound into its harmonics, modify the harmonics, and generate new sounds.
+
+###Run the code for this book on Binder: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/AllenDowney/ThinkDSP)
+
+
 
 
 
