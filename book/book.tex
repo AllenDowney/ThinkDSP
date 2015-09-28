@@ -3336,16 +3336,8 @@ Again, the biggest difference is about {\tt 1e-16}.
 \section{Exercises}
 
 \begin{exercise}
-SciPy provides an implementation of DCT in
-{\tt fftpack}.  Read the documentation of {\tt scipy.fftpack.dct}
-and run it on one of the examples in this chapter.  Confirm that
-the results are the same as my implementation.
-\end{exercise}
-
-
-\begin{exercise}
 In this chapter I claim that {\tt analyze1} takes time proportional
-to $n^2$ and {\tt analyze2} takes time proportional to $n^2$.  To
+to $n^3$ and {\tt analyze2} takes time proportional to $n^2$.  To
 see if that's true, run them on a range of input sizes and time
 them.  In IPython, you can use the ``magic command'' \verb"%timeit".
 
@@ -3800,8 +3792,9 @@ slicing {\tt ys} and {\tt ts} down to the length of {\tt freqs}:
 [ 0.60 +4.6e-13j  0.25 -1.4e-12j  0.10 +1.4e-12j  0.05 -4.6e-13j]
 \end{verbatim}
 
-Each component of {\tt amps} has a small imaginary part due to
-floating-point errors, but the results are approximately correct.
+These are approximately the amplitudes we started with, although
+each component has a small imaginary part due to
+floating-point errors.
 
 
 \section{Efficient analysis}
@@ -3919,6 +3912,7 @@ FFT:
 [ 2.4 +8.3e-17j  1.0 +5.6e-17j  0.4 -1.6e-16j  0.2 -3.3e-16j]
 \end{verbatim}
 
+The result is close to {\tt amps * N}.
 And here's the version in {\tt np.fft}:
 
 \begin{verbatim}
@@ -3928,10 +3922,8 @@ And here's the version in {\tt np.fft}:
 
 They are the same, within floating point error.
 
-The inverse DFT is almost the same, except we don't have to transpose and
-conjugate $M$, and
-{\em now} we have to
-divide through by N:
+The inverse DFT is almost the same, except we don't have to transpose
+and conjugate $M$, and {\em now} we have to divide through by N:
 
 \begin{verbatim}
 def idft(ys):
@@ -4042,7 +4034,12 @@ and that's exactly what {\tt np.fft.rfft} does.
 
 \section{Exercises}
 
-% TODO: exercises
+\begin{exercise}
+The notebook for this chapter, {\tt chap07.ipynb}, contains
+additional examples and explanations.  Read through it and run
+the code.
+\end{exercise}
+
 
 \begin{exercise}
 In this chapter, I showed how we can express the DFT and inverse
