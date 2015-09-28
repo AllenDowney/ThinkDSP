@@ -592,6 +592,20 @@ class Wave(object):
         return Wave(ys, self.framerate)
 
     def __mul__(self, other):
+        """Multiplies two waves elementwise.
+
+        other: Spectrum
+
+        returns: new Spectrum
+        """
+        # the spectrums have to have the same framerate and duration
+        assert self.framerate == other.framerate
+        assert len(self) == len(other)
+
+        ys = self.ys * other.ys
+        return Wave(ys, self.framerate)
+        
+    def convolve(self, other):
         """Convolves two waves.
 
         other: Wave
