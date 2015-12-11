@@ -2016,6 +2016,11 @@ class Beta(object):
         more careful because the PDF goes to infinity at x=0
         and x=1.  In that case we evaluate the CDF and compute
         differences.
+
+        The result is a little funny, because the values at 0 and 1
+        are not symmetric.  Nevertheless, it is a reasonable discrete
+        model of the continuous distribution, and behaves well as
+        the number of values increases.
         """
         if self.alpha < 1 or self.beta < 1:
             cdf = self.MakeCdf()
@@ -2030,9 +2035,18 @@ class Beta(object):
     def MakeCdf(self, steps=101):
         """Returns the CDF of this distribution."""
         xs = [i / (steps - 1.0) for i in range(steps)]
-        ps = [special.betainc(self.alpha, self.beta, x) for x in xs]
+        ps = special.betainc(self.alpha, self.beta, xs)
         cdf = Cdf(xs, ps)
         return cdf
+
+    def Percentile(self, ps):
+        """Returns the given percentiles from this distribution.
+
+        ps: scalar, array, or list of [0-100]
+        """
+        ps = np.asarray(ps) / 100
+        xs = special.betaincinv(self.alpha, self.beta, ps)
+        return xs
 
 
 class Dirichlet(object):

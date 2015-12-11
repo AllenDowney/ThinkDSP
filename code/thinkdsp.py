@@ -48,7 +48,7 @@ class UnimplementedMethodException(Exception):
     """Exception if someone calls a method that should be overridden."""
 
 
-class WavFileWriter(object):
+class WavFileWriter:
     """Writes wav files."""
 
     def __init__(self, filename='sound.wav', framerate=11025):
@@ -138,7 +138,7 @@ def play_wave(filename='sound.wav', player='aplay'):
     popen.communicate()
 
 
-class _SpectrumParent(object):
+class _SpectrumParent:
     """Contains code common to Spectrum and DCT.
     """
 
@@ -149,7 +149,28 @@ class _SpectrumParent(object):
         """
         return copy.deepcopy(self)
 
-    # TODO: add primitives for working with hs
+    def ratio(self, denom, thresh=1, val=0):
+        """The ratio of two spectrums.
+
+        denom: Spectrum
+        thresh: values smaller than this are replaced 
+        val: with this value
+
+        returns: new Wave
+        """
+        ratio_spectrum = self.copy()
+        ratio_spectrum.hs /= denom.hs
+        ratio_spectrum.hs[denom.amps < thresh] = val
+        return ratio_spectrum
+
+    def invert(self):
+        """Inverts this spectrum/filter.
+
+        returns: new Wave
+        """
+        inverse = self.copy()
+        inverse.hs = 1 / inverse.hs
+        return inverse
 
     @property
     def max_freq(self):
@@ -343,7 +364,7 @@ class Spectrum(_SpectrumParent):
         return Wave(ys, self.framerate)
 
 
-class IntegratedSpectrum(object):
+class IntegratedSpectrum:
     """Represents the integral of a spectrum."""
     
     def __init__(self, cs, fs):
@@ -416,7 +437,7 @@ class Dct(_SpectrumParent):
         return Wave(ys, self.framerate)
 
 
-class Spectrogram(object):
+class Spectrogram:
     """Represents the spectrum of a signal."""
 
     def __init__(self, spec_map, seg_length=512, window_func=None):
@@ -511,11 +532,13 @@ class Spectrogram(object):
         return Wave(ys, wave.framerate)
 
 
-class Wave(object):
+class Wave:
     """Represents a discrete-time waveform.
 
-    Note: the ys attribute is a "wave array" which is a numpy
-    array of floats.
+    ys: a "wave array" which is a numpy array of floats.
+    framerate: sample rate in samples per second
+    start: optional start time in seconds
+
     """
 
     def __init__(self, ys, framerate, start=0):
@@ -617,6 +640,22 @@ class Wave(object):
 
         ys = np.convolve(self.ys, other.ys, mode='full')
         ys = ys[:len(self.ys)]
+        return Wave(ys, self.framerate)
+
+    def diff(self):
+        """Computes the difference between successive elements.
+
+        returns: new Wave
+        """
+        ys = np.diff(self.ys)
+        return Wave(ys, self.framerate)
+
+    def cumsum(self):
+        """Computes the cumulative sum of the elements.
+
+        returns: new Wave
+        """
+        ys = np.cumsum(self.ys)
         return Wave(ys, self.framerate)
 
     def quantize(self, bound, dtype):
@@ -932,7 +971,7 @@ def apodize(ys, framerate, denom=20, duration=0.1):
     return ys * window
 
 
-class Signal(object):
+class Signal:
     """Represents a time-varying signal."""
 
     def __add__(self, other):
@@ -1463,6 +1502,19 @@ def mag(a):
     returns: float
     """
     return np.sqrt(np.dot(a, a))
+
+
+def zero_pad(array, n):
+    """Extends an array with zeros.
+
+    array: numpy array
+    n: length of result
+
+    returns: new NumPy array
+    """
+    res = np.zeros(n)
+    res[:len(array)] = array
+    return res
 
 
 def main():
