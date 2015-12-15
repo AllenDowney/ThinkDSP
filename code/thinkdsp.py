@@ -180,10 +180,22 @@ class _SpectrumParent:
     def plot(self, low=0, high=None, **options):
         """Plots amplitude vs frequency.
 
+        Note: if this is a full spectrum, it ignores low and high
+
         low: int index to start at 
         high: int index to end at
         """
-        thinkplot.plot(self.fs[low:high], self.amps[low:high], **options)
+        # TODO: get rid of low, make high in frequency, and
+        # make it work for full, too
+
+        if self.full:
+            hs = np.fft.fftshift(self.hs)
+            amps = np.abs(hs)
+            fs = np.fft.fftshift(self.fs)
+            thinkplot.plot(fs, amps, **options)
+        else:
+            thinkplot.plot(self.fs[low:high], self.amps[low:high], **options)
+
 
     def plot_power(self, low=0, high=None, **options):
         """Plots power vs frequency.
@@ -241,7 +253,7 @@ class Spectrum(_SpectrumParent):
         if other == 0:
             return self.copy()
 
-        assert self.fs == other.fs
+        assert all(self.fs == other.fs)
         hs = self.hs + other.hs
         return Spectrum(hs, self.fs, self.framerate, self.full)
 
@@ -254,7 +266,7 @@ class Spectrum(_SpectrumParent):
 
         returns: new Spectrum
         """
-        assert self.fs == other.fs
+        assert all(self.fs == other.fs)
         hs = self.hs * other.hs
         return Spectrum(hs, self.fs, self.framerate, self.full)
         
@@ -644,16 +656,18 @@ class Wave:
         Note: this operation ignores the timestamps; the result
         has the timestamps of self.
 
-        other: Wave
+        other: Wave or NumPy array
         
         returns: Wave
         """
-        assert self.framerate == other.framerate
+        if isinstance(other, Wave):
+            assert self.framerate == other.framerate
+            window = other.ys
+        else:
+            window = other
 
-        #TODO: see if mode='same' does this just as well
-        ys = np.convolve(self.ys, other.ys, mode='full')
-        ys = ys[:len(self.ys)]
-        ts = copy.copy(self.ts)
+        ys = np.convolve(self.ys, window, mode='full')
+        ts = np.arange(len(ys)) / self.framerate
         return Wave(ys, ts, self.framerate)
 
     def diff(self):
@@ -715,19 +729,20 @@ class Wave:
         self.ys *= factor
 
     def shift(self, shift):
-        """Shifts the wave left or right by index shift.
+        """Shifts the wave left or right in time.
 
-        shift: integer number of places to shift
+        shift: float time shift
         """
-        if shift < 0:
-            self.ys = shift_left(self.ys, shift)
-        if shift > 0:
-            self.ys = shift_right(self.ys, shift)
+        # TODO: track down other uses of this function and check them
+        self.ts += shift
         
     def truncate(self, n):
         """Trims this wave to the given length.
+
+        n: integer index
         """
         self.ys = truncate(self.ys, n)
+        self.ts = truncate(self.ts, n)
 
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
