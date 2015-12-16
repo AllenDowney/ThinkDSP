@@ -585,6 +585,14 @@ class Wave:
         return len(self.ys)
 
     @property
+    def start(self):
+        return self.ts[0]
+
+    @property
+    def end(self):
+        return self.ts[-1]
+
+    @property
     def duration(self):
         """Duration (property).
 
@@ -735,6 +743,11 @@ class Wave:
         """
         # TODO: track down other uses of this function and check them
         self.ts += shift
+
+    def roll(self, roll):
+        """Rolls this wave by the given number of locations.
+        """
+        self.ys = np.roll(self.ys, roll)
         
     def truncate(self, n):
         """Trims this wave to the given length.
@@ -756,6 +769,14 @@ class Wave:
         """
         self.ys = unbias(self.ys)
 
+    def find_index(self, t):
+        """Find the index corresponding to a given time."""
+        n = len(self)
+        start = self.ts[0]
+        end = self.ts[-1]
+        i = round((n-1) * (t - start) / (end - start))
+        return int(i)
+
     def segment(self, start=0, duration=None):
         """Extracts a segment.
 
@@ -764,7 +785,7 @@ class Wave:
 
         returns: Wave
         """
-        i = round(start * self.framerate)
+        i = self.find_index(start)
 
         if duration is None:
             j = None
@@ -832,6 +853,12 @@ class Wave:
 
         """
         thinkplot.plot(self.ts, self.ys, **options)
+
+    def plot_vlines(self, **options):
+        """Plots the wave with vertical lines for samples.
+
+        """
+        thinkplot.vlines(self.ts, 0, self.ys, **options)
 
     def corr(self, other):
         """Correlation coefficient two waves.

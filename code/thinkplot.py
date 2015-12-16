@@ -223,8 +223,22 @@ def Plot(obj, ys=None, style='', **options):
         pyplot.plot(xs, ys, style, **options)
 
 
+def Vlines(xs, y1, y2, style='', **options):
+    """Plots a set of vertical lines.
+
+    Args:
+      xs: sequence of x values
+      y1: sequence of y values
+      y2: sequence of y values
+      options: keyword args passed to pyplot.vlines
+    """
+    options = _UnderrideColor(options)
+    options = _Underride(options, linewidth=1, alpha=0.5)
+    pyplot.vlines(xs, y1, y2, **options)
+
+
 def FillBetween(xs, y1, y2=None, where=None, **options):
-    """Plots a line.
+    """Fills the space between two lines.
 
     Args:
       xs: sequence of x values
@@ -690,6 +704,8 @@ subplot = SubPlot
 clf = Clf
 figure = Figure
 plot = Plot
+vlines = Vlines
+fill_between = FillBetween
 text = Text
 scatter = Scatter
 pmf = Pmf
