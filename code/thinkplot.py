@@ -121,6 +121,7 @@ def PrePlot(num=None, rows=None, cols=None):
                 (2, 2): (10, 10),
                 (2, 3): (16, 10),
                 (3, 1): (8, 10),
+                (4, 1): (8, 12),
                 }
 
     if (rows, cols) in size_map:
@@ -129,22 +130,26 @@ def PrePlot(num=None, rows=None, cols=None):
 
     # create the first subplot
     if rows > 1 or cols > 1:
-        pyplot.subplot(rows, cols, 1)
+        ax = pyplot.subplot(rows, cols, 1)
         global SUBPLOT_ROWS, SUBPLOT_COLS
         SUBPLOT_ROWS = rows
         SUBPLOT_COLS = cols
+    else:
+        ax = pyplot.gca()
 
+    return ax
 
-def SubPlot(plot_number, rows=None, cols=None):
+def SubPlot(plot_number, rows=None, cols=None, **options):
     """Configures the number of subplots and changes the current plot.
 
     rows: int
     cols: int
     plot_number: int
+    options: passed to subplot
     """
     rows = rows or SUBPLOT_ROWS
     cols = cols or SUBPLOT_COLS
-    pyplot.subplot(rows, cols, plot_number)
+    return pyplot.subplot(rows, cols, plot_number, **options)
 
 
 def _Underride(d, **options):
@@ -605,19 +610,6 @@ def Config(**options):
         if name in options:
             getattr(pyplot, name)(options[name])
 
-    # looks like this is not necessary: matplotlib understands text loc specs
-    loc_dict = {'upper right': 1,
-                'upper left': 2,
-                'lower left': 3,
-                'lower right': 4,
-                'right': 5,
-                'center left': 6,
-                'center right': 7,
-                'lower center': 8,
-                'upper center': 9,
-                'center': 10,
-                }
-
     global LEGEND
     LEGEND = options.get('legend', LEGEND)
 
@@ -625,6 +617,13 @@ def Config(**options):
         global LOC
         LOC = options.get('loc', LOC)
         pyplot.legend(loc=LOC)
+
+    val = options.get('xticklabels', None)
+    if val is not None:
+        if val == 'invisible':
+            ax = pyplot.gca()
+            labels = ax.get_xticklabels()
+            pyplot.setp(labels, visible=False)
 
 
 def Show(**options):
