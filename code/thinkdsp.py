@@ -139,6 +139,15 @@ def play_wave(filename='sound.wav', player='aplay'):
     popen.communicate()
 
 
+def find_index(x, xs):
+    """Find the index corresponding to a given value is an array."""
+    n = len(xs)
+    start = xs[0]
+    end = xs[-1]
+    i = round((n-1) * (x - start) / (end - start))
+    return int(i)
+
+
 class _SpectrumParent:
     """Contains code common to Spectrum and DCT.
     """
@@ -177,16 +186,15 @@ class _SpectrumParent:
     def freq_res(self):
         return self.framerate / 2 / (len(self.fs) - 1)
 
-    def plot(self, low=0, high=None, **options):
+    def plot(self, high=None, **options):
         """Plots amplitude vs frequency.
 
         Note: if this is a full spectrum, it ignores low and high
 
-        low: int index to start at 
-        high: int index to end at
+        high: frequency to cut off at
         """
-        # TODO: get rid of low, make high in frequency, and
-        # make it work for full, too
+        i = None if high is None else find_index(high, self.fs)
+        #TODO: make high work for full spectrum, too
 
         if self.full:
             hs = np.fft.fftshift(self.hs)
@@ -194,15 +202,15 @@ class _SpectrumParent:
             fs = np.fft.fftshift(self.fs)
             thinkplot.plot(fs, amps, **options)
         else:
-            thinkplot.plot(self.fs[low:high], self.amps[low:high], **options)
+            thinkplot.plot(self.fs[:i], self.amps[:i], **options)
 
-
-    def plot_power(self, low=0, high=None, **options):
+    def plot_power(self, high=None, **options):
         """Plots power vs frequency.
 
-        low: int index to start at 
-        high: int index to end at
+        high: frequency to cut off at
         """
+        #TODO: make this work for full spectrum, too
+        i = None if high is None else find_index(high, self.fs)
         thinkplot.plot(self.fs[low:high], self.power[low:high], **options)
 
     def estimate_slope(self):
@@ -1088,8 +1096,8 @@ class Signal:
 
         returns: Wave
         """
-        dt = 1.0 / framerate
-        ts = np.arange(start, start+duration, dt)
+        n = round(duration * framerate)
+        ts = start + np.arange(n) / framerate
         ys = self.evaluate(ts)
         return Wave(ys, ts, framerate=framerate)
 

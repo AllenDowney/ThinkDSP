@@ -39,15 +39,9 @@ class _Brewer(object):
     """
     color_iter = None
 
-    colors = ['#081D58',
-              '#253494',
-              '#225EA8',
-              '#1D91C0',
-              '#41B6C4',
-              '#7FCDBB',
-              '#C7E9B4',
-              '#EDF8B1',
-              '#FFFFD9']
+    colors = ['#f7fbff', '#deebf7', '#c6dbef',
+              '#9ecae1', '#6baed6', '#4292c6',
+              '#2171b5','#08519c','#08306b'][::-1]
 
     # lists that indicate which colors to use depending on how many are used
     which_colors = [[],
@@ -58,7 +52,11 @@ class _Brewer(object):
                     [0, 2, 3, 5, 6],
                     [0, 2, 3, 4, 5, 6],
                     [0, 1, 2, 3, 4, 5, 6],
+                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    [0, 1, 2, 3, 4, 5, 6, 7, 8],
                     ]
+
+    current_figure = None
 
     @classmethod
     def Colors(cls):
@@ -67,17 +65,17 @@ class _Brewer(object):
         return cls.colors
 
     @classmethod
-    def ColorGenerator(cls, n):
+    def ColorGenerator(cls, num):
         """Returns an iterator of color strings.
 
         n: how many colors will be used
         """
-        for i in cls.which_colors[n]:
+        for i in cls.which_colors[num]:
             yield cls.colors[i]
-        raise StopIteration('Ran out of colors in _Brewer.ColorGenerator')
+        raise StopIteration('Ran out of colors in _Brewer.')
 
     @classmethod
-    def InitializeIter(cls, num):
+    def InitIter(cls, num):
         """Initializes the color iterator with the given number of colors."""
         cls.color_iter = cls.ColorGenerator(num)
 
@@ -87,12 +85,35 @@ class _Brewer(object):
         cls.color_iter = None
 
     @classmethod
-    def GetIter(cls):
+    def GetIter(cls, num):
         """Gets the color iterator."""
+        fig = pyplot.gcf()
+        if fig != cls.current_figure:
+            cls.InitIter(num)
+            cls.current_figure = fig  
+
         if cls.color_iter is None:
-            cls.InitializeIter(7)
+            cls.InitIter(num)
 
         return cls.color_iter
+
+
+def _UnderrideColor(options):
+    """If color is not in the options, chooses a color.
+    """
+    if 'color' in options:
+        return options
+
+    color_iter = _Brewer.GetIter(4)
+
+    try:
+        options['color'] = next(color_iter)
+    except StopIteration:
+        warnings.warn('Ran out of colors.  Starting over.')
+        _Brewer.ClearIter()
+        _UnderrideColor(options)
+
+    return options
 
 
 def PrePlot(num=None, rows=None, cols=None):
@@ -185,22 +206,6 @@ def Figure(**options):
     pyplot.figure(**options)
 
 
-def _UnderrideColor(options):
-    if 'color' in options:
-        return options
-
-    color_iter = _Brewer.GetIter()
-
-    if color_iter:
-        try:
-            options['color'] = next(color_iter)
-        except StopIteration:
-            # TODO: reconsider whether this should warn
-            # warnings.warn('Warning: Brewer ran out of colors.')
-            _Brewer.ClearIter()
-    return options
-
-
 def Plot(obj, ys=None, style='', **options):
     """Plots a line.
 
@@ -212,7 +217,7 @@ def Plot(obj, ys=None, style='', **options):
     """
     options = _UnderrideColor(options)
     label = getattr(obj, 'label', '_nolegend_')
-    options = _Underride(options, linewidth=3, alpha=0.8, label=label)
+    options = _Underride(options, linewidth=3, alpha=0.7, label=label)
 
     xs = obj
     if ys is None:
