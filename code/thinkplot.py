@@ -104,11 +104,14 @@ def _UnderrideColor(options):
     if 'color' in options:
         return options
 
-    color_iter = _Brewer.GetIter(4)
+    # get the current color iterator; if there is none, init one
+    color_iter = _Brewer.GetIter(5)
 
     try:
         options['color'] = next(color_iter)
     except StopIteration:
+        # if you run out of colors, initialize the color iterator
+        # and try again
         warnings.warn('Ran out of colors.  Starting over.')
         _Brewer.ClearIter()
         _UnderrideColor(options)
@@ -124,7 +127,7 @@ def PrePlot(num=None, rows=None, cols=None):
     cols: number of columns of subplots
     """
     if num:
-        _Brewer.InitializeIter(num)
+        _Brewer.InitIter(num)
 
     if rows is None and cols is None:
         return

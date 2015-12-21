@@ -10,11 +10,11 @@ DOCPY = thinkdsp.py thinkplot.py
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
-FIGS = sinusoid1.pdf sinusoid1.eps \
-violin1.pdf  violin1.eps  \
-tuning1.pdf  tuning1.eps  \
-violin2.pdf  violin2.eps  \
-example1.pdf example1.eps \
+FIGS = \
+sounds1.pdf sounds1.eps  \
+sounds2.pdf sounds2.eps  \
+sounds3.pdf sounds3.eps  \
+sounds4.pdf sounds4.eps  \
 aliasing-3.eps  square-100-1.eps  triangle-1100-1.eps  triangle-200-1.eps \
 aliasing-3.pdf  square-100-1.pdf  triangle-1100-1.pdf  triangle-200-1.pdf \
 square-100-2.eps  triangle-1100-2.eps  triangle-200-2.eps \
@@ -60,9 +60,18 @@ systems5.pdf systems5.eps \
 systems6.pdf systems6.eps \
 systems7.pdf systems7.eps \
 systems8.pdf systems8.eps \
+sampling1.pdf sampling1.eps \
+sampling2.pdf sampling2.eps \
+sampling3.pdf sampling3.eps \
+sampling4.pdf sampling4.eps \
+sampling5.pdf sampling5.eps \
+sampling6.pdf sampling6.eps \
+sampling7.pdf sampling7.eps \
+sampling8.pdf sampling8.eps \
 
 all_figs:
 	python violin.py
+	python sampling.py
 
 FIGDEST = ../book/figs
 
