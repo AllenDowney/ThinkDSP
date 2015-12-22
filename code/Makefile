@@ -15,12 +15,13 @@ sounds1.pdf sounds1.eps  \
 sounds2.pdf sounds2.eps  \
 sounds3.pdf sounds3.eps  \
 sounds4.pdf sounds4.eps  \
-aliasing-3.eps  square-100-1.eps  triangle-1100-1.eps  triangle-200-1.eps \
-aliasing-3.pdf  square-100-1.pdf  triangle-1100-1.pdf  triangle-200-1.pdf \
+aliasing1.eps  square-100-1.eps  triangle-1100-1.eps  triangle-200-1.eps \
+aliasing1.pdf  square-100-1.pdf  triangle-1100-1.pdf  triangle-200-1.pdf \
 square-100-2.eps  triangle-1100-2.eps  triangle-200-2.eps \
 square-100-2.pdf  triangle-1100-2.pdf  triangle-200-2.pdf \
 chirp1.pdf chirp1.eps \
 chirp2.pdf chirp2.eps \
+chirp3.pdf chirp3.eps \
 windowing1.pdf windowing1.eps \
 windowing2.pdf windowing2.eps \
 windowing3.pdf windowing3.eps \

@@ -236,7 +236,7 @@ def Plot(obj, ys=None, style='', **options):
         pyplot.plot(xs, ys, style, **options)
 
 
-def Vlines(xs, y1, y2, style='', **options):
+def Vlines(xs, y1, y2, **options):
     """Plots a set of vertical lines.
 
     Args:
@@ -248,6 +248,20 @@ def Vlines(xs, y1, y2, style='', **options):
     options = _UnderrideColor(options)
     options = _Underride(options, linewidth=1, alpha=0.5)
     pyplot.vlines(xs, y1, y2, **options)
+
+
+def Hlines(ys, x1, x2, **options):
+    """Plots a set of horizontal lines.
+
+    Args:
+      ys: sequence of y values
+      x1: sequence of x values
+      x2: sequence of x values
+      options: keyword args passed to pyplot.vlines
+    """
+    options = _UnderrideColor(options)
+    options = _Underride(options, linewidth=1, alpha=0.5)
+    pyplot.hlines(ys, x1, x2, **options)
 
 
 def FillBetween(xs, y1, y2=None, where=None, **options):
@@ -633,6 +647,13 @@ def Config(**options):
             labels = ax.get_xticklabels()
             pyplot.setp(labels, visible=False)
 
+    val = options.get('yticklabels', None)
+    if val is not None:
+        if val == 'invisible':
+            ax = pyplot.gca()
+            labels = ax.get_yticklabels()
+            pyplot.setp(labels, visible=False)
+
 
 def Show(**options):
     """Shows the plot.
@@ -712,6 +733,7 @@ clf = Clf
 figure = Figure
 plot = Plot
 vlines = Vlines
+hlines = Hlines
 fill_between = FillBetween
 text = Text
 scatter = Scatter

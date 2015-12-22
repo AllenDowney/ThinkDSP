@@ -125,6 +125,7 @@ def read_wave(filename='sound.wav'):
 
     ts = np.arange(len(ys)) / framerate
     wave = Wave(ys, ts, framerate)
+    wave.normalize()
     return wave
 
 
@@ -186,6 +187,20 @@ class _SpectrumParent:
     def freq_res(self):
         return self.framerate / 2 / (len(self.fs) - 1)
 
+    def render_full(self, high=None):
+        """Extracts amps and fs from a full spectrum.
+
+        high: cutoff frequency
+
+        returns: fs, amps
+        """
+        hs = np.fft.fftshift(self.hs)
+        amps = np.abs(hs)
+        fs = np.fft.fftshift(self.fs)
+        i = 0 if high is None else find_index(-high, fs)
+        j = None if high is None else find_index(high, fs)
+        return fs[i:j+1], amps[i:j+1]
+
     def plot(self, high=None, **options):
         """Plots amplitude vs frequency.
 
@@ -193,15 +208,11 @@ class _SpectrumParent:
 
         high: frequency to cut off at
         """
-        i = None if high is None else find_index(high, self.fs)
-        #TODO: make high work for full spectrum, too
-
         if self.full:
-            hs = np.fft.fftshift(self.hs)
-            amps = np.abs(hs)
-            fs = np.fft.fftshift(self.fs)
+            fs, amps = self.render_full(high)
             thinkplot.plot(fs, amps, **options)
         else:
+            i = None if high is None else find_index(high, self.fs)
             thinkplot.plot(self.fs[:i], self.amps[:i], **options)
 
     def plot_power(self, high=None, **options):
@@ -209,9 +220,12 @@ class _SpectrumParent:
 
         high: frequency to cut off at
         """
-        #TODO: make this work for full spectrum, too
-        i = None if high is None else find_index(high, self.fs)
-        thinkplot.plot(self.fs[low:high], self.power[low:high], **options)
+        if self.full:
+            fs, amps = self.render_full(high)
+            thinkplot.plot(fs, amps**2, **options)
+        else:
+            i = None if high is None else find_index(high, self.fs)
+            thinkplot.plot(self.fs[:i], self.power[:i], **options)
 
     def estimate_slope(self):
         """Runs linear regression on log power vs log frequency.
@@ -322,15 +336,20 @@ class Spectrum(_SpectrumParent):
         """Returns a sequence of powers (read-only property)."""
         return self.amps ** 2
 
+    def scale(self, factor):
+        """Multiplies all elements by the given factor.
+
+        factor: what to multiply the magnitude by (could be complex)
+        """
+        self.hs *= factor
+
     def low_pass(self, cutoff, factor=0):
         """Attenuate frequencies above the cutoff.
 
         cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in range(len(self.hs)):
-            if abs(self.fs[i]) > cutoff:
-                self.hs[i] *= factor
+        self.hs[abs(self.fs) > cutoff] *= factor
 
     def high_pass(self, cutoff, factor=0):
         """Attenuate frequencies below the cutoff.
@@ -338,9 +357,7 @@ class Spectrum(_SpectrumParent):
         cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in range(len(self.hs)):
-            if abs(self.fs[i]) < cutoff:
-                self.hs[i] *= factor
+        self.hs[abs(self.fs) < cutoff] *= factor
 
     def band_stop(self, low_cutoff, high_cutoff, factor=0):
         """Attenuate frequencies between the cutoffs.
@@ -349,9 +366,10 @@ class Spectrum(_SpectrumParent):
         high_cutoff: frequency in Hz
         factor: what to multiply the magnitude by
         """
-        for i in range(len(self.hs)):
-            if low_cutoff < abs(self.fs[i]) < high_cutoff:
-                self.hs[i] *= factor
+        # TODO: test this function
+        fs = abs(self.fs)
+        indices = (low_cutoff < fs) & (fs < high_cutoff)
+        self.hs[indices] *= factor
 
     def pink_filter(self, beta=1):
         """Apply a filter that would make white noise pink.
@@ -471,20 +489,19 @@ class Dct(_SpectrumParent):
 class Spectrogram:
     """Represents the spectrum of a signal."""
 
-    def __init__(self, spec_map, seg_length=512, window_func=None):
+    def __init__(self, spec_map, seg_length):
         """Initialize the spectrogram.
 
         spec_map: map from float time to Spectrum
         seg_length: number of samples in each segment
-        window_func: function that computes the window
         """
         self.spec_map = spec_map
         self.seg_length = seg_length
-        self.window_func = window_func
 
     def any_spectrum(self):
         """Returns an arbitrary spectrum from the spectrogram."""
-        return self.spec_map.itervalues().next()
+        index = next(iter(self.spec_map))
+        return self.spec_map[index]
 
     @property
     def time_res(self):
@@ -513,23 +530,24 @@ class Spectrogram:
         fs = self.any_spectrum().fs
         return fs
 
-    def plot(self, low=0, high=None, **options):
+    def plot(self, high=None, **options):
         """Make a pseudocolor plot.
 
-        low: index of the lowest frequency component to plot
-        high: index of the highest frequency component to plot
+        high: highest frequency component to plot
         """
+        fs = self.frequencies()
+        i = None if high is None else find_index(high, fs)
+        fs = fs[:i]
         ts = self.times()
-        fs = self.frequencies()[low:high]
 
         # make the array
         size = len(fs), len(ts)
         array = np.zeros(size, dtype=np.float)
 
         # copy amplitude from each spectrum into a column of the array
-        for i, t in enumerate(ts):
+        for j, t in enumerate(ts):
             spectrum = self.spec_map[t]
-            array[:,i] = spectrum.amps[low:high]
+            array[:, j] = spectrum.amps[:i]
 
         thinkplot.pcolor(ts, fs, array, **options)
 
@@ -538,15 +556,16 @@ class Spectrogram:
 
         returns: Wave
         """
+        # TODO: test this function
         res = []
         for t, spectrum in sorted(self.spec_map.iteritems()):
             wave = spectrum.make_wave()
             n = len(wave)
             
-            if self.window_func:
-                window = 1 / self.window_func(n)
-                wave.window(window)
+            window = 1 / np.hamming(n)
+            wave.window(window)
 
+            # TODO: clean this up
             i = int(round(t * wave.framerate))
             start = i - n / 2
             end = start + n
@@ -692,7 +711,7 @@ class Wave:
         returns: new Wave
         """
         ys = np.diff(self.ys)
-        ts = self.ts[1:]
+        ts = self.ts[1:].copy()
         return Wave(ys, ts, self.framerate)
 
     def cumsum(self):
@@ -701,7 +720,7 @@ class Wave:
         returns: new Wave
         """
         ys = np.cumsum(self.ys)
-        ts = copy.copy(self.ts)
+        ts = self.ts.copy()
         return Wave(ys, ts, self.framerate)
 
     def quantize(self, bound, dtype):
@@ -785,7 +804,7 @@ class Wave:
         i = round((n-1) * (t - start) / (end - start))
         return int(i)
 
-    def segment(self, start=0, duration=None):
+    def segment(self, start=None, duration=None):
         """Extracts a segment.
 
         start: float start time in seconds
@@ -793,15 +812,18 @@ class Wave:
 
         returns: Wave
         """
-        i = self.find_index(start)
+        i = 0 if start is None else self.find_index(start)
+        j = None if duration is None else self.find_index(start + duration)
+        return self.slice(i, j)
 
-        if duration is None:
-            j = None
-        else:
-            j = i + round(duration * self.framerate)
+    def slice(self, i, j):
+        """Makes a slice from a Wave.
 
-        ys = self.ys[i:j]
-        ts = self.ts[i:j]
+        i: first slice index
+        j: second slice index
+        """
+        ys = self.ys[i:j].copy()
+        ts = self.ts[i:j].copy()
         return Wave(ys, ts, self.framerate)
 
     def make_spectrum(self, full=False):
@@ -828,33 +850,32 @@ class Wave:
         amps = scipy.fftpack.dct(self.ys, type=2)
         return Dct(amps, self.framerate)
 
-    def make_spectrogram(self, seg_length, window_func=np.hamming):
+    def make_spectrogram(self, seg_length):
         """Computes the spectrogram of the wave.
 
         seg_length: number of samples in each segment
-        window_func: function used to compute the window
 
         returns: Spectrogram
         """
-        window = window_func(seg_length)
-        start, end, step = 0, seg_length, seg_length / 2
-        d = 1 / self.framerate
+        window = np.hamming(seg_length)
+        i, j = 0, seg_length
+        step = seg_length / 2
 
+        # map from time to Spectrum
         spec_map = {}
 
-        #TODO: test this function
-        while end < len(self.ys):
-            ys = self.ys[start:end] * window
-            hs = np.fft.rfft(ys)
-            fs = np.fft.rfftfreq(seg_length, d)
+        while j < len(self.ys):
+            segment = self.slice(i, j)
+            segment.window(window)
 
-            t = (start + end) / 2.0 / self.framerate
-            spec_map[t] = Spectrum(hs, fs, self.framerate)
+            # the nominal time for this segment is the midpoint
+            t = (segment.start + segment.end) / 2
+            spec_map[t] = segment.make_spectrum()
 
-            start += step
-            end += step
+            i += step
+            j += step
 
-        return Spectrogram(spec_map, seg_length, window_func)
+        return Spectrogram(spec_map, seg_length)
 
     def plot(self, **options):
         """Plots the wave.
@@ -1072,7 +1093,9 @@ class Signal:
     def period(self):
         """Period of the signal in seconds (property).
 
-        For non-periodic signals, use the default, 0.1 seconds
+        Since this is used primarily for purposes of plotting,
+        the default behavior is to return a value, 0.1 seconds,
+        that is reasonable for many signals.
 
         returns: float seconds
         """
@@ -1080,6 +1103,8 @@ class Signal:
 
     def plot(self, framerate=11025):
         """Plots the signal.
+
+        The default behavior is to plot three periods.
 
         framerate: samples per second
         """
@@ -1385,7 +1410,7 @@ class ExpoChirp(Chirp):
         
         returns: float wave array
         """
-        start, end = math.log10(self.start), math.log10(self.end)
+        start, end = np.log10(self.start), np.log10(self.end)
         freqs = np.logspace(start, end, len(ts)-1)
         return self._evaluate(ts, freqs)
 

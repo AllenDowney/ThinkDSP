@@ -1,25 +1,28 @@
 """This file contains code used in "Think DSP",
 by Allen B. Downey, available from greenteapress.com
 
-Copyright 2013 Allen B. Downey
+Copyright 2015 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 from __future__ import print_function, division
 
 import math
-import numpy
+import numpy as np
 
 import thinkdsp
 import thinkplot
 
 import matplotlib.pyplot as pyplot
 
+import warnings
+warnings.filterwarnings('ignore')
+
 PI2 = math.pi * 2
 
 
 def linear_chirp_evaluate(ts, low=440, high=880, amp=1.0):
-    """Computes the waveform of a linear chirp and print intermediate values.
+    """Computes the waveform of a linear chirp and prints intermediate values.
 
     low: starting frequency
     high: ending frequency
@@ -27,19 +30,19 @@ def linear_chirp_evaluate(ts, low=440, high=880, amp=1.0):
     """
     print('ts', ts)
 
-    freqs = numpy.linspace(low, high, len(ts)-1)
+    freqs = np.linspace(low, high, len(ts)-1)
     print('freqs', freqs)
 
-    dts = numpy.diff(ts)
+    dts = np.diff(ts)
     print('dts', dts)
 
-    dphis = numpy.insert(PI2 * freqs * dts, 0, 0)
+    dphis = np.insert(PI2 * freqs * dts, 0, 0)
     print('dphis', dphis)
 
-    phases = numpy.cumsum(dphis)
+    phases = np.cumsum(dphis)
     print('phases', phases)
 
-    ys = amp * numpy.cos(phases)
+    ys = amp * np.cos(phases)
     print('ys', ys)
 
     return ys
@@ -60,7 +63,7 @@ def discontinuity(num_periods=30, hamming=False):
 
     print(len(wave.ys), wave.ys[0], wave.ys[-1])
     spectrum = wave.make_spectrum()
-    spectrum.plot(high=60)
+    spectrum.plot(high=880)
 
 
 def three_spectrums():    
@@ -97,8 +100,9 @@ def window_plot():
     wave1 = signal.make_wave(duration)
     wave2 = signal.make_wave(duration)
 
-    ys = numpy.hamming(len(wave1.ys))
-    window = thinkdsp.Wave(ys, wave1.framerate)
+    ys = np.hamming(len(wave1.ys))
+    ts = wave1.ts
+    window = thinkdsp.Wave(ys, ts, wave1.framerate)
 
     wave2.hamming()
 
@@ -119,7 +123,7 @@ def window_plot():
     thinkplot.subplot(3)
     wave2.plot()
     thinkplot.config(axis=[0, duration, -1.07, 1.07],
-                     xlabel='time (s)')
+                     xlabel='Time (s)')
 
     thinkplot.save(root='windowing2')
 
@@ -129,11 +133,28 @@ def chirp_spectrum():
     """
     signal = thinkdsp.Chirp(start=220, end=440)
     wave = signal.make_wave(duration=1)
+
+    thinkplot.preplot(3, cols=3)
+    duration = 0.01
+    wave.segment(0, duration).plot()
+    thinkplot.config(ylim=[-1.05, 1.05])
+
+    thinkplot.subplot(2)
+    wave.segment(0.5, duration).plot()
+    thinkplot.config(yticklabels='invisible',
+                     xlabel='Time (s)')
+
+    thinkplot.subplot(3)
+    wave.segment(0.9, duration).plot()
+    thinkplot.config(yticklabels='invisible')
+
+    thinkplot.save('chirp3')
+
+
     spectrum = wave.make_spectrum()
-    spectrum.plot(high=660)
+    spectrum.plot(high=700)
     thinkplot.save('chirp1',
-                   xlabel='frequency (Hz)',
-                   ylabel='amplitude')
+                   xlabel='Frequency (Hz)')
     
 
 def chirp_spectrogram():
@@ -147,29 +168,29 @@ def chirp_spectrogram():
     print('freq res', spectrogram.freq_res)
     print('product', spectrogram.time_res * spectrogram.freq_res)
 
-    spectrogram.plot(high=32)
+    spectrogram.plot(high=700)
 
     thinkplot.save('chirp2',
-                   xlabel='time (s)',
-                   ylabel='frequency (Hz)')
+                   xlabel='Time (s)',
+                   ylabel='Frequency (Hz)')
     
     
 def overlapping_windows():
     """Makes a figure showing overlapping hamming windows.
     """
     n = 256
-    window = numpy.hamming(n)
+    window = np.hamming(n)
 
     thinkplot.preplot(num=5)
     start = 0
     for i in range(5):
-        xs = numpy.arange(start, start+n)
+        xs = np.arange(start, start+n)
         thinkplot.plot(xs, window)
 
         start += n/2
 
     thinkplot.save(root='windowing3',
-                   xlabel='time (s)',
+                   xlabel='Time (s)',
                    axis=[0, 800, 0, 1.05])
 
 
@@ -188,8 +209,9 @@ def invert_spectrogram():
 
     
 def main():
-    chirp_spectrogram()
     chirp_spectrum()
+    return
+    chirp_spectrogram()
     overlapping_windows()
     window_plot()
     three_spectrums()
