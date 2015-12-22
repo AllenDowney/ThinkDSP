@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.9.16}
+\newcommand{\theversion}{0.10.0}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -417,28 +417,28 @@ a signal that varies in two-dimensional space {\it and} time.
 
 But we start with simple one-dimensional sound.
 
-The code for this chapter is in {\tt sounds.py}, which is in the
+The code for this chapter is in {\tt chap01.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
 
 
 \section{Periodic signals}
+\label{violin}
 
 \begin{figure}
 % sounds.py
-\centerline{\includegraphics[height=2.5in]{figs/tuning1.pdf}}
-\caption{Segment from a recording of a tuning fork.}
-\label{fig.tuning1}
+\centerline{\includegraphics[height=2.5in]{figs/sounds1.pdf}}
+\caption{Segment from a recording of a bell.}
+\label{fig.sounds1}
 \end{figure}
 
 We'll start with {\bf periodic signals}, which are signals that
 repeat themselves after some period of time.  For example, if you
-strike a tuning fork, it vibrates and generates sound.  If you record
+strike a bell, it vibrates and generates sound.  If you record
 that sound and plot the transduced signal, it looks like
-Figure~\ref{fig.tuning1}.\footnote{I got this recording from
-  \url{http://www.freesound.org/people/zippi1/sounds/18871/}.}
+Figure~\ref{fig.sounds1}.
 
-This signal approximates a sinusoid, which means it has the same shape as
-the trigonometric sine function. 
+This signal resembles a {\bf sinusoid}, which means it has the same
+shape as the trigonometric sine function.
 
 You can see that this signal is periodic.  I chose the duration
 to show three full periods, also known as {\bf cycles}.
@@ -459,21 +459,22 @@ A5 is one octave higher.  See
 
 \begin{figure}
 % sounds.py
-\centerline{\includegraphics[height=2.5in]{figs/violin1.pdf}}
+\centerline{\includegraphics[height=2.5in]{figs/sounds2.pdf}}
 \caption{Segment from a recording of a violin.}
-\label{fig.violin1}
+\label{fig.sounds2}
 \end{figure}
 
 A tuning fork generates a sinusoid because the vibration of the tines
 is a form of simple harmonic motion.  Most musical instruments
 produce periodic signals, but the shape of these signals is not
-sinusoidal.  For example, Figure~\ref{fig.violin1} shows a segment
+sinusoidal.  For example, Figure~\ref{fig.sounds2} shows a segment
 from a recording of a violin playing
 Boccherini's String Quintet No. 5 in E, 3rd
-movement.\footnote{The recording is from
-  \url{http://www.freesound.org/people/jcveliz/sounds/92002/}.
-I identified the piece using \url{http://www.musipedia.org}.}
+movement.
 
+%\footnote{The recording is from
+%  \url{http://www.freesound.org/people/jcveliz/sounds/92002/}.
+%I identified the piece using \url{http://www.musipedia.org}.}
 % Parson's code: DUUDDUURDR
 
 Again we can see that the signal is periodic, but the shape of the
@@ -489,24 +490,28 @@ more interesting than sinusoids.
 
 \begin{figure}
 % sounds.py
-\centerline{\includegraphics[height=2.5in]{figs/violin2.pdf}}
+\centerline{\includegraphics[height=2.5in]{figs/sounds3.pdf}}
 \caption{Spectrum of a segment from the violin recording.}
-\label{fig.violin2}
+\label{fig.sounds3}
 \end{figure}
 
 The most important topic in this book is {\bf spectral decomposition},
 which is the idea that any signal can be expressed as the sum of
-simpler signals with different frequencies.
+sinusoids with different frequencies.
 
-And the most important algorithm in this book is the {\bf discrete
-  Fourier transform}, or {\bf DFT}, which takes a signal (a quantity
-varying in time) and produces its {\bf spectrum}, which is the set of
-sinusoids that add up to produce the signal.
+The most important mathematical idea in this book is the {\bf discrete
+  Fourier transform}, or {\bf DFT}, which takes a signal and produces
+its {\bf spectrum}.  The spectrum is the set of sinusoids that add up to
+produce the signal.
 
-For example, Figure~\ref{fig.violin2} shows the spectrum of the violin
-recording in Figure~\ref{fig.violin1}.  The x-axis is the range of
-frequencies that make up the signal.  The y-axis shows the strength of
-each frequency component.
+And the most important algorithm in this book is the {\bf Fast
+Fourier transform}, or {\bf FFT}, which is an efficient way to
+compute the DFT.
+
+For example, Figure~\ref{fig.sounds3} shows the spectrum of the violin
+recording in Figure~\ref{fig.sounds2}.  The x-axis is the range of
+frequencies that make up the signal.  The y-axis shows the strength
+or {\bf amplitude} of each frequency component.
 
 The lowest frequency component is called the {\bf fundamental
   frequency}.  The fundamental frequency of this signal is near 440 Hz
@@ -524,8 +529,7 @@ musically harmonious with the fundamental:
 
 \begin{itemize}
 
-\item 880 is the frequency of
-A5, one octave higher than the fundamental.  
+\item 880 is the frequency of A5, one octave higher than the fundamental.  
 
 \item 1320 is approximately E6, which is a major fifth above A5.
   If you are not familiar with musical intervals like "major fifth'', see
@@ -551,12 +555,12 @@ Next we'll see how.
 
 \section{Signals}
 
-I wrote a Python module called {\tt thinkdsp} that contains
-classes and functions for working with signals and spectrums.
-\footnote{In Latin the plural of ``spectrum'' is ``spectra'', but 
-since I am not writing in Latin, I
-generally use standard English plurals.}  You can download
-it from \url{http://think-dsp.com/thinkdsp.py}.
+I wrote a Python module called {\tt thinkdsp.py} that contains classes
+and functions for working with signals and spectrums\footnote{The
+plural of ``spectrum'' is often written ``spectra'', but I prefer
+to use standard English plurals.  If you are familiar with ``spectra'',
+I hope my choice doesn't sound too strange.}.  You
+will find it in the repository for this book (see Section~\ref{code}).
 
 To represent signals, {\tt thinkdsp} provides a class called
 {\tt Signal}, which is the parent class for several signal types,
@@ -571,7 +575,8 @@ signals.
 \end{verbatim}
 
 {\tt freq} is frequency in Hz.  {\tt amp} is amplitude in unspecified
-units where 1.0 is generally the largest amplitude we can play.
+units where 1.0 is defined as the largest amplitude we can record or
+play back.
 
 {\tt offset} is a {\bf phase offset} in radians.  Phase offset
 determines where in the period the signal starts.  For example, a
@@ -596,10 +601,10 @@ function.  Most signals are defined for all values of {\tt t},
 from negative infinity to infinity.
 
 You can't do much with a Signal until you evaluate it.  In this
-context, ``evaluate'' means taking a sequence of {\tt ts} and
-computing the corresponding values of the signal, which I call {\tt
-  ys}.  I encapsulate {\tt ts} and {\tt ys} in an object called a
-Wave.
+context, ``evaluate'' means taking a sequence of points in time, {\tt
+  ts}, and computing the corresponding values of the signal, {\tt ys}.
+I represent {\tt ts} and {\tt ys} using NumPy arrays and excapsulate
+them in an object called a Wave.
 
 A Wave represents a signal evaluated at a sequence of points in
 time.  Each point in time is called a {\bf frame} (a term borrowed
@@ -639,10 +644,10 @@ You can plot the wave like this:
 Python distributions, or you might have to install it.
 
 \begin{figure}
-% example1.py
-\centerline{\includegraphics[height=2.5in]{figs/example1.pdf}}
+% sounds4.py
+\centerline{\includegraphics[height=2.5in]{figs/sounds4.pdf}}
 \caption{Segment from a mixture of two sinusoid signals.}
-\label{fig.example1}
+\label{fig.sounds4}
 \end{figure}
 
 At {\tt freq=440} there are 220 periods in 0.5 seconds, so this plot
@@ -660,7 +665,7 @@ and returns a new wave:
 {\tt start} and {\tt duration} are in seconds.  This example copies
 the first three periods from {\tt mix}.  The result is a Wave object.
 
-If we plot {\tt segment}, it looks like Figure~\ref{fig.example1}.
+If we plot {\tt segment}, it looks like Figure~\ref{fig.sounds4}.
 This signal contains two frequency components, so it is more
 complicated than the signal from the tuning fork, but less complicated
 than the violin.
@@ -672,13 +677,13 @@ than the violin.
 file and returns a Wave:
 
 \begin{verbatim}
-    violin_wave = thinkdsp.read_wave('violin1.wav')
+    violin_wave = thinkdsp.read_wave('input.wav')
 \end{verbatim}
 
 And {\tt Wave} provides {\tt write}, which writes a WAV file:
 
 \begin{verbatim}
-    wave.write(filename='example1.wav')
+    wave.write(filename='output.wav')
 \end{verbatim}
 
 You can listen to the Wave with any media player that plays WAV
@@ -689,7 +694,7 @@ and included in many Linux distributions.
 the media player as a subprocess:
 
 \begin{verbatim}
-    thinkdsp.play_wave(filename='example1.wav', player='aplay')
+    thinkdsp.play_wave(filename='output.wav', player='aplay')
 \end{verbatim}
 
 It uses {\tt aplay} by default, but you can provide the
@@ -748,89 +753,75 @@ like, you can convert the Spectrum back to a Wave, and then play it.
     wave.play('temp.wav')
 \end{verbatim}
 
-The {\tt play} method write the wave to a file and then plays it.
+The {\tt play} method writes the wave to a file and then plays it.
 If you use IPython notebooks, you can use \verb"make_audio", which
 makes an Audio widget that plays the sound.
 
-At this point you know how to use many of the classes and functions in
-{\tt thinkdsp}, and you are ready to do the exercises at the end of
-the chapter.  In Chapter~\ref{harmonics} I explain more
-about how these classes are implemented.
 
+\section{Wave objects}
 
+\begin{figure}
+% http://yuml.me/edit/5294b377
+% pdftops -eps diagram1.pdf
+\centerline{\includegraphics[width=3.5in]{figs/diagram1.pdf}}
+\caption{Relationships among the classes in {\tt thinkdsp}.}
+\label{fig.diagram1}
+\end{figure}
 
-\section{Exercises}
+There is nothing very complicated in {\tt thinkdsp.py}.  Most
+of the functions it provides are thin wrappers around functions
+from NumPy and SciPy.
 
-Before you begin this exercises, you should download the code
-for this book, following the instructions in Section~\ref{code}.
+The primary classes in {\tt thinkdsp} are Signal, Wave, and Spectrum.
+Given a Signal, you can make a Wave.  Given a Wave, you can
+make a Spectrum, and vice versa.  These relationships are shown
+in Figure~\ref{fig.diagram1}.
 
-\begin{exercise}
-If you have IPython, load {\tt chap01.ipynb}, read through it, and run
-the examples.  You can also view this notebook at
-\url{http://tinyurl.com/thinkdsp01}.
-\end{exercise}
+A Wave object contains three attributes: {\tt ys} is a NumPy array
+that contains the values in the signal; {\tt ts} is an array of the
+times where the signal was evaluated or sampled; and {\tt
+  framerate} is the number of samples per unit of time.  The
+unit of time is usually seconds, but it doesn't have to be.  In
+one of my examples, it's days.
 
+Wave also provides three read-only properties: {\tt start},
+{\tt end}, and {\tt duration}.  If you modify {\tt ts}, these
+properties change accordingly.
 
-\begin{exercise}
-Go to \url{http://freesound.org} and download a sound sample that
-include music, speech, or other sounds that have a well-defined pitch.
-Select a segment with duration 0.5 to 2 seconds where the pitch is
-constant.  Compute and plot the spectrum of the segment you selected.
-What connection can you make between the timbre of the sound and the
-harmonic structure you see in the spectrum?
-
-Use \verb"high_pass", \verb"low_pass", and \verb"band_stop" to
-filter out some of the harmonics.  Then convert the spectrum back
-to a wave and listen to it.  How does the sound relate to the
-changes you made in the spectrum?
-\end{exercise}
-
-
-\begin{exercise}
-Synthesize a compound signal by creating SinSignal and CosSignal
-objects and adding them up.  Evaluate the signal to get a Wave,
-and listen to it.  Compute its Spectrum and plot it.
-What happens if you add frequency
-components that are not multiples of the fundamental?
-\end{exercise}
-
-
-
-\chapter{Harmonics}
-\label{harmonics}
-
-In the previous chapter you used the classes defined in {\tt thinkdsp.py};
-in this chapter I explain more about how they work.
-
-I present several new waveforms and we will look and their
-spectrums to understand their {\bf harmonic structure}, which is
-the set of sinusoids they comprise.
-
-Finally, I introduce one of the most interesting phenomena in
-digital signal processing: aliasing.
-
-The code for this chapter is in {\tt aliasing.py}, which is in the
-repository for this book (see Section~\ref{code}).
-
-
-\section{Implementing Sinusoids}
-
-The {\tt thinkdsp} module, which you saw in the previous chapter,
-provides {\tt CosSignal} and {SinSignal}, which create cosine
-and sine signals: 
+To modify a wave, you can access the {\tt ts} and {\tt ys} directly.
+For example:
 
 \begin{verbatim}
-import numpy as np
+wave.ys *= 2
+wave.ts += 1
+\end{verbatim} 
 
-def CosSignal(freq=440, amp=1.0, offset=0):
-    return Sinusoid(freq, amp, offset, func=np.cos)
+The first line scales the wave by a factor of 2, making
+it louder.  The second line shifts the wave in time, making it
+start 1 second later.
 
-def SinSignal(freq=440, amp=1.0, offset=0):
-    return Sinusoid(freq, amp, offset, func=np.sin)
-\end{verbatim}
+But Wave provides methods that perform many common operations.
+For example, the same two transformations could be written:
 
-These functions are just wrappers for {\tt Sinusoid}, which
-is a kind of Signal:
+\begin{verbatim}
+wave.scale(2)
+wave.shift(1)
+\end{verbatim} 
+
+You can read the documentation of these methods and others at
+\url{http://think-dsp.com/thinkdsp.html}.
+
+
+\section{Signal objects}
+\label{sigobs}
+
+Signal is a parent class that provides functions common to all
+kinds of signals, like \verb"make_wave".  Child classes inherit
+these methods and provide {\tt evaluate}, which evaluates the
+signal at a given sequence of times.
+
+For example, Sinusoid is a child class of Signal, with this
+definition:
 
 \begin{verbatim}
 class Sinusoid(Signal):
@@ -853,7 +844,7 @@ The parameters of \verb"__init__" are:
 usually chosen so 1.0 corresponds to the maximum input from a
 microphone or maximum output to a speaker.
 
-\item {\tt offset}: where in its period the signal starts;
+\item {\tt offset}: indicates where in its period the signal starts;
 {\tt offset} is in units of radians, for reasons I explain below.
 
 \item {\tt func}: a Python function used
@@ -863,33 +854,29 @@ cosine signal.
 
 \end{itemize}
 
-Like many \verb"__init__" methods, this one just tucks the
-parameters away for future use.
+Like many init methods, this one just tucks the parameters away for
+future use.
 
-The parent class of {\tt Sinusoid}, {\tt Signal}, provides
-\verb"make_wave", which evaluates the signal at a sequence of
-points in time and returns a Wave.
+Signal provides \verb"make_wave", which looks like
+this:
 
 \begin{verbatim}
     def make_wave(self, duration=1, start=0, framerate=11025):
-        dt = 1.0 / framerate
-        ts = np.arange(start, duration, dt)
+        n = round(duration * framerate)
+        ts = start + np.arange(n) / framerate
         ys = self.evaluate(ts)
-        return Wave(ys, framerate)
+        return Wave(ys, ts, framerate=framerate)
 \end{verbatim}
 
 {\tt start} and {\tt duration} are the start time and duration
 in seconds.  {\tt framerate} is the number of frames (samples)
 per second.
 
-{\tt dt} is the time between samples, and {\tt ts} is the sequence
-of sample times.  {\tt np.arange} returns a NumPy array.
+{\tt n} is the number of samples, and {\tt ts} is a NumPy array
+of sample times.
 
-\verb"make_wave" invokes {\tt evaluate}, which has to be provided
-by a child class of {\tt Signal}, in this case {\tt Sinusoid}.
-
-{\tt evaluate} takes the array of times and returns an array of
-samples:
+To compute the {\tt ys}, \verb"make_wave" invokes {\tt evaluate}, 
+is provided by {\tt Sinusoid}:
 
 \begin{verbatim}
     def evaluate(self, ts):
@@ -908,13 +895,13 @@ Let's unwind this function one step at time:
 
 \item {\tt PI2} is a constant that stores $2 \pi$.  Multiplying by
   {\tt PI2} converts from cycles to {\bf phase}.  You can think of
-  phase as ``cycles since the start time'' expressed in radians; each
+  phase as ``cycles since the start time'' expressed in radians.  Each
   cycle is $2 \pi$ radians.
 
 \item {\tt self.offset} is the phase when $t=0$.
   It has the effect of shifting the signal left or right in time.
 
-\item If {\tt self.func} is {\tt sin} or {\tt cos}, the result is a
+\item If {\tt self.func} is {\tt np.sin} or {\tt np.cos}, the result is a
   value between $-1$ and $+1$.
 
 \item Multiplying by {\tt self.amp} yields a signal that ranges from
@@ -924,108 +911,82 @@ Let's unwind this function one step at time:
 
 In math notation, {\tt evaluate} is written like this:
 %
-\[ A \cos (2 \pi f t + \phi_0) \]
+\[ y = A \cos (2 \pi f t + \phi_0) \]
 %
 where $A$ is amplitude, $f$ is frequency, $t$ is time, and $\phi_0$
 is the phase offset.  It may seem like I wrote a lot of code
-to evaluate one simple function, but as we'll see, this code
+to evaluate one simple expression, but as we'll see, this code
 provides a framework for dealing with all kinds of signals, not
 just sinusoids.
 
 
-\section{Computing the spectrum}
+\section{Exercises}
 
-Given a Signal, we can compute a Wave.  Given a Wave, we can compute
-a Spectrum.  {\tt Wave} provides \verb"make_spectrum", which returns
-a new {\tt Spectrum} object.
+Before you begin these exercises, you should download the code
+for this book, following the instructions in Section~\ref{code}.
 
-\begin{verbatim}
-    def make_spectrum(self):
-        hs = np.fft.rfft(self.ys)
-        return Spectrum(hs, self.framerate)
-\end{verbatim}
+Solutions to these exercises are in {\tt chap01soln.ipynb}.
 
-\verb"make_spectrum" uses {\tt rfft}, which computes
-the discrete Fourier transform using an algorithm called
-{\bf Fast Fourier Transform} or FFT.
-
-The result of {\tt rfft} is a sequence of complex numbers, {\tt hs},
-which is stored in a Spectrum.
-
-There are two ways to think about complex numbers:
-
-\begin{itemize}
-
-\item A complex number is the sum of a real part and an imaginary
-part, often written $x + iy$, where $i$ is the imaginary unit, $\sqrt{-1}$.
-You can think of $x$ and $y$ as Cartesian coordinates.
-
-\item A complex number is also the product of a magnitude
-and a complex exponential, $A e^{i \phi}$, where $A$ is the
-{\bf magnitude} and $\phi$ is the
-{\bf angle} in radians, also called the ``argument''.   You
-can think of $A$ and $\phi$ as polar coordinates.
-
-\end{itemize}
-
-Each element of {\tt hs} corresponds to a frequency component.  The
-magnitude of each element is proportional to the amplitude of the
-corresponding component.  The angle of each element is the phase
-offset.
-
-NumPy provides {\tt absolute}, which computes the magnitude of a
-complex number, also called the ``absolute value'', and {\tt angle},
-which computes the angle.
-
-Here is the definition of {\tt Spectrum}:
-
-\begin{verbatim}
-class Spectrum(object):
-
-    def __init__(self, hs, framerate):
-        self.hs = hs
-        self.framerate = framerate
-
-        n = len(hs)
-        f_max = framerate / 2.0
-        self.fs = np.linspace(0, f_max, n)
-
-        self.amps = np.absolute(self.hs)
-\end{verbatim}
-
-Again, {\tt hs} is the result of the FFT and {\tt framerate}
-is the number of frames per second.
-
-The elements of {\tt hs} correspond to a sequence of frequencies, {\tt
-  fs}, equally spaced from 0 to the maximum frequency, \verb"f_max".
-The maximum frequency is {\tt framerate/2}, for reasons we'll see
-soon.
-
-Finally, {\tt amps} contains the magnitude of {\tt hs}, which
-is the amplitude of each component.
-
-{\tt Spectrum} provides {\tt plot}, which plots the amplitudes
-versus the frequencies:
-
-\begin{verbatim}
-    def plot(self, low=0, high=None):
-        thinkplot.plot(self.fs[low:high], self.amps[low:high])
-\end{verbatim}
-
-{\tt low} and {\tt high} specify the slice of the Spectrum that
-should be plotted.
-
-At this point you should have a better idea of how the Signal, Wave,
-and Spectrum classes work, but I have not explained how the
-Discrete Fourier Transform works.  That will take a few more chapters.
+\begin{exercise}
+If you have IPython, load {\tt chap01.ipynb}, read through it, and run
+the examples.  You can also view this notebook at
+\url{http://tinyurl.com/thinkdsp01}.
+\end{exercise}
 
 
-\section{Other waveforms}
+\begin{exercise}
+Go to \url{http://freesound.org} and download a sound sample that
+includes music, speech, or other sounds that have a well-defined pitch.
+Select a roughly half-second segment where the pitch is
+constant.  Compute and plot the spectrum of the segment you selected.
+What connection can you make between the timbre of the sound and the
+harmonic structure you see in the spectrum?
 
-A sinusoid contains only one frequency component, so its DFT
+Use \verb"high_pass", \verb"low_pass", and \verb"band_stop" to
+filter out some of the harmonics.  Then convert the spectrum back
+to a wave and listen to it.  How does the sound relate to the
+changes you made in the spectrum?
+\end{exercise}
+
+
+\begin{exercise}
+Synthesize a compound signal by creating SinSignal and CosSignal
+objects and adding them up.  Evaluate the signal to get a Wave,
+and listen to it.  Compute its Spectrum and plot it.
+What happens if you add frequency
+components that are not multiples of the fundamental?
+\end{exercise}
+
+
+\begin{exercise}
+Write a function called {\tt stretch} that takes a Wave and a stretch
+factor and speeds up or slows down the wave by modifying {\tt ts} and
+{\tt framerate}.  Hint: it should only take two lines of code.
+\end{exercise}
+
+
+\chapter{Harmonics}
+\label{harmonics}
+
+In this chapter I present several new waveforms; we will look and
+their spectrums to understand their {\bf harmonic structure}, which is
+the set of sinusoids they are made up of.
+
+I'll also introduce one of the most important phenomena in digital
+signal processing: aliasing.  And I'll explain a little more about how
+the Spectrum class works.
+
+The code for this chapter is in {\tt chap02.ipynb}, which is in the
+repository for this book (see Section~\ref{code}).
+
+
+\section{Triangle waves}
+\label{triangle}
+
+A sinusoid contains only one frequency component, so its spectrum
 has only one peak.  More complicated waveforms, like the
 violin recording, yield DFTs with many peaks.  In this section we
-investigate the relationship between waveforms and their DFTs.
+investigate the relationship between waveforms and their spectrums.
 
 \begin{figure}
 % example2.py
@@ -1067,7 +1028,7 @@ are not important, but here's how {\tt evaluate} works:
 {\tt np.modf} splits the number of cycles into the fraction
 part, stored in {\tt frac}, and the integer part, which is ignored
 \footnote{Using an underscore as a variable name is a convention that
-means, ``I don't intend to use this value''.}.
+means, ``I don't intend to use this value.''}.
 
 \item {\tt frac} is a sequence that ramps from 0 to 1 with the given
   frequency.  Subtracting 0.5 yields values between -0.5 and 0.5.
@@ -1082,15 +1043,9 @@ means, ``I don't intend to use this value''.}.
 Here's the code that generates Figure~\ref{fig.triangle.200.1}:
 
 \begin{verbatim}
-    signal = thinkdsp.TriangleSignal(200)
-    duration = signal.period * 3
-    segment = signal.make_wave(duration, framerate=10000)
-    segment.plot()
+signal = thinkdsp.TriangleSignal(200)
+signal.plot()
 \end{verbatim}
-
-
-\section{Harmonics}
-\label{harmonics}
 
 \begin{figure}
 % example2.py
@@ -1099,12 +1054,13 @@ Here's the code that generates Figure~\ref{fig.triangle.200.1}:
 \label{fig.triangle.200.2}
 \end{figure}
 
-Next we can compute the spectrum of this waveform:
+Next we can use the Signal to make a Wave, and use the Wave to
+make a Spectrum:
 
 \begin{verbatim}
-    wave = signal.make_wave(duration=0.5, framerate=10000)
-    spectrum = wave.make_spectrum()
-    spectrum.plot()
+wave = signal.make_wave(duration=0.5, framerate=10000)
+spectrum = wave.make_spectrum()
+spectrum.plot()
 \end{verbatim}
 
 Figure~\ref{fig.triangle.200.2} shows the result.  As expected, the
@@ -1125,6 +1081,10 @@ ratio is approximately 9.  The frequency ratio of the next two
 harmonics (600 and 1000 Hz) is 1.7, and the amplitude ratio is
 approximately $1.7^2 = 2.9$.  This relationship is called the
 {\bf harmonic structure}.
+
+
+\section{Square waves}
+\label{square}
 
 \begin{figure}
 % example2.py
@@ -1192,7 +1152,7 @@ explore other waveforms and other harmonic structures.
 \end{figure}
 
 I have a confession.  I chose the examples in the previous section
-carefully, to avoid showing you something confusing.  But now it's
+carefully to avoid showing you something confusing.  But now it's
 time to get confused.
 
 Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave
@@ -1210,13 +1170,8 @@ between samples.  For low frequency components, that's not a
 problem, because you have lots of samples per period.
 
 But if you sample a signal at 5000 Hz with 10,000 frames per second,
-you only have two samples per period.  That's enough to measure the
-frequency (it turns out), but it doesn't tell you much about
-the shape of the signal.
-
-If the frequency is higher, like the 5500 Hz component of the
-triangle wave, things are worse: you don't even get the
-frequency right.
+you only have two samples per period.  That turns out to be enough,
+just barely, but if the frequency is higher, it's not.
 
 To see why, let's generate cosine signals at 4500 and 5500 Hz,
 and sample them at 10,000 frames per second:
@@ -1242,23 +1197,24 @@ per second.  They are identical.}
 \label{fig.aliasing-3}
 \end{figure}
 
-Figure~\ref{fig.aliasing-3} shows the result.  The
-sampled waveform doesn't look very much like a sinusoid, but the
-bigger problem is that the two waveforms are exactly the same!
+Figure~\ref{fig.aliasing-3} shows the result.  I plotted the
+samples using vertical lines, to make it easier to compare the
+two Waves, and I offset them slightly in time.  The problem
+should be clear: the
+the two Waves are exactly the same!
 
 When we sample a 5500 Hz signal at 10,000 frames per second, the
 result is indistinguishable from a 4500 Hz signal.
-
 For the same reason, a 7700 Hz signal is indistinguishable
 from 2300 Hz, and a 9900 Hz is indistinguishable from 100 Hz.
 
 This effect is called {\bf aliasing} because when the high frequency
-signal is sampled, it disguises itself as a low frequency signal.
+signal is sampled, it appears to be a low frequency signal.
 
 In this example, the highest frequency we can measure is 5000 Hz,
 which is half the sampling rate.  Frequencies above 5000 Hz are folded
 back below 5000 Hz, which is why this threshold is sometimes called
-the ``folding frequency'', but more often it is called the {\bf
+the ``folding frequency''.  Is is sometimes also called the {\bf
   Nyquist frequency}.  See
 \url{http://en.wikipedia.org/wiki/Nyquist_frequency}.
 
@@ -1270,7 +1226,108 @@ small peak at 2100 Hz in Figure~\ref{fig.square.100.2}, and the next
 one at 4300 Hz.
 
 
+\section{Computing the spectrum}
+
+We have seen the Wave method \verb"make_spectrum" several times.
+Here is the implementation (leaving out some details we'll get
+to later):
+
+\begin{verbatim}
+from np.fft import rfft, rfftfreq
+
+# class Wave:
+    def make_spectrum(self):
+        n = len(self.ys)
+        d = 1 / self.framerate
+
+        hs = rfft(self.ys)
+        fs = rfftfreq(n, d)
+
+        return Spectrum(hs, fs, self.framerate)
+\end{verbatim}
+
+The parameter {\tt self} is a Wave object.  {\tt n} is the number
+of samples in the wave, and {\tt d} is the inverse of the
+frame rate, which is the time between samples.
+
+{\tt np.fft} is the NumPy module that provides functions related
+to the {\bf Fast Fourier Transform} (FFT), which is an efficient
+algorithm that computes the Discrete Fourier Transform (DFT).
+
+%TODO: add a forward reference to full fft
+\verb"make_spectrum" uses {\tt rfft}, which stands for ``real
+FFT'', because the Wave contains real values, not complex.  Later
+we'll see the full FFT, which can handle complex signals.  The result
+of {\tt rfft}, which I call {\tt hs}, is a NumPy array of complex
+numbers that represents the amplitude and phase offset of each
+frequency component in the wave.
+
+The result of {\tt rfftfreq}, which I call {\tt fs}, is an array that
+contains frequencies corresponding to the {\tt hs}. 
+
+To understand the values in {\tt hs}, consider these two ways to think
+about complex numbers:
+
+\begin{itemize}
+
+\item A complex number is the sum of a real part and an imaginary
+  part, often written $x + iy$, where $i$ is the imaginary unit,
+  $\sqrt{-1}$.  You can think of $x$ and $y$ as Cartesian coordinates.
+
+\item A complex number is also the product of a magnitude and a
+  complex exponential, $A e^{i \phi}$, where $A$ is the {\bf
+    magnitude} and $\phi$ is the {\bf angle} in radians, also called
+  the ``argument''.  You can think of $A$ and $\phi$ as polar
+  coordinates.
+
+\end{itemize}
+
+Each value in {\tt hs} corresponds to a frequency component: its
+magnitude is proportional to the amplitude of the corresponding
+component; its angle is the phase offset.
+
+The Spectrum class provides two read-only properties, {\tt amps}
+and {\tt angles}, which return NumPy arrays representing the
+magnitudes and angles of the {\tt hs}.  When we plot a Spectrum
+object, we usually plot {\tt amps} versus {\tt fs}.  Sometimes
+it is also useful to plot {\tt angles} versus {\tt fs}.
+
+Although it might be tempting to look at the real and imaginary
+parts of {\tt hs}, you will almost never need to.  I encourage
+you to think of the DFT as a vector of amplitudes and phase offsets
+that happen to be encoded in the form of complex numbers.
+
+To modify a Spectrum, you can access the {\tt hs} directly.
+For example:
+
+\begin{verbatim}
+spectrum.hs *= 2
+spectrum.hs[spectrum.fs > cutoff] = 0
+\end{verbatim}
+
+The first line multiples the elements of {\tt hs} by 2, which
+doubles the amplitudes of all components.  The second line
+sets to 0 only the elements of {\tt hs} where the corresponding
+frequency exceeds some cutoff frequency.
+
+But Spectrum also provides methods to perform these operations:
+
+\begin{verbatim}
+spectrum.scale(2)
+spectrum.low_pass(cutoff)
+\end{verbatim}
+
+You can read the documentation of these methods and others at
+\url{http://think-dsp.com/thinkdsp.html}.
+
+At this point you should have a better idea of how the Signal, Wave,
+and Spectrum classes work, but I have not explained how the Fast
+Fourier Transform works.  That will take a few more chapters.
+
+
 \section{Exercises}
+
+Solutions to these exercises are in {\tt chap02soln.ipynb}.
 
 \begin{exercise}
 If you use IPython, load {\tt chap02.ipynb} and try out the examples.
@@ -1290,20 +1347,58 @@ Compute the spectrum of a sawtooth wave.  How does the harmonic
 structure compare to triangle and square waves?
 \end{exercise}
 
-%\begin{exercise}
-% TODO: add an exercise about plotting phases
-%\end{exercise}
-
 \begin{exercise}
-Sample an 1100 Hz triangle at 10000 frames per second and listen to it.
-Can you hear the aliased harmonic?  It might help if you play a sequence of
-notes with increasing pitch.
+Make a square signal at 1100 Hz and make a wave that samples it
+at 10000 frames per second.  If you plot the spectrum, you can
+see that most of the harmonics are aliased.
+When you listen to the wave, can you hear the aliased harmonics?  
 \end{exercise}
 
+
 \begin{exercise}
-Compute the spectrum of an 1100 Hz square wave sampled at 10 kHz, and
-compare it to the spectrum of a triangle wave in
-Figure~\ref{fig.triangle.1100.2}
+If you have a spectrum object, {\tt spectrum}, and print the
+first few values of {\tt spectrum.fs}, you'll see that they
+start at zero.  So {\tt spectrum.hs[0]} is the magnitude
+of the component with frequency 0.  But what does that mean?
+
+Try this experiment:
+
+\begin{enumerate}
+
+\item Make a triangle signal with frequency 440 and make
+a Wave with duration 0.01 seconds.  Plot the waveform.
+
+\item Make a Spectrum object and print {\tt spectrum.hs[0]}.
+What is the amplitude and phase of this component?
+
+\item Set {\tt spectrum.hs[0] = 100}.  Make a Wave from the
+modified Spectrum and plot it.  What effect does this operation
+have on the waveform?
+
+\end{enumerate}
+
+\end{exercise}
+
+
+\begin{exercise}
+Write a function that takes a Spectrum as a parameter and modifies
+it by dividing each element of {\tt hs} by the corresponding frequency
+from {\tt fs}.  Hint: since division by zero is undefined, you
+might want to set {\tt spectrum.hs[0] = 0}.  
+
+Test your function using a square, triangle, or sawtooth wave.
+
+\begin{enumerate}
+
+\item Compute the Spectrum and plot it.
+
+\item Modify the Spectrum using your function and plot it again.
+
+\item Make a Wave from the modified Spectrum and listen to it.  What
+effect does this operation have on the signal?
+
+\end{enumerate}
+
 \end{exercise}
 
 \begin{exercise}
@@ -1313,9 +1408,12 @@ square and sawtooth waves drop off in proportion to $1/f$; the
 harmonics of the triangle wave drop off like $1/f^2$.  Can you
 find a waveform that has even and odd harmonics that drop off
 like $1/f^2$?
-\end{exercise}
 
-% TODO: chap02soln.ipynb
+Hint: There are two ways you could approach this: you could
+construct the signal you want by adding up sinusoids, or you
+could start with a signal that is similar to what you want and
+modify it.
+\end{exercise}
 
 
 \chapter{Non-periodic signals}
@@ -1330,14 +1428,38 @@ In other words, pretty much all sound signals.
 This chapter also presents spectrograms, a common way to visualize
 non-periodic signals.
 
-The code for this chapter is in {\tt chirp.py}, which is in the
+The code for this chapter is in {\tt chap03.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
 
 
-\section{Chirp}
+\section{Linear chirp}
+
+\begin{figure}
+% chirp.py
+\centerline{\includegraphics[height=2.5in]{figs/chirp3.pdf}}
+\caption{Chirp waveform near the beginning, middle, and end.}
+\label{fig.chirp3}
+\end{figure}
 
 We'll start with a {\bf chirp}, which is a signal with variable
-frequency.  Here is a class that represents a chirp:
+frequency.  {\tt thinkdsp} provides a Signal called Chirp that
+makes a sinusoid that sweeps linearly through a range of
+frequencies.
+
+Here's an example what sweeps from 220 to 880 Hz, which
+is two octaves from A3 to A5:
+
+\begin{verbatim}
+signal = thinkdsp.Chirp(start=220, end=880)
+wave = signal.make_wave()
+\end{verbatim}
+
+Figure~\ref{fig.chirp3} shows segments of this wave near the
+beginning, middle, and end.  It's clear that the frequency is
+increasing.
+
+Before we go on, let's see how Chirp is implemented.  Here
+is the class definition:
 
 \begin{verbatim}
 class Chirp(Signal):
@@ -1351,8 +1473,7 @@ class Chirp(Signal):
 {\tt start} and {\tt end} are the frequencies, in Hz, at the start
 and end of the chirp.  {\tt amp} is amplitude.
 
-In a linear chirp, the frequency increases linearly from {\tt start}
-to {\tt end}.  Here is the function that evaluates the signal:
+Here is the function that evaluates the signal:
 
 \begin{verbatim}
     def evaluate(self, ts):
@@ -1365,18 +1486,20 @@ evaluated; to keep this function simple, I assume they are equally-spaced.
 
 If the length of {\tt ts} is $n$, you can think of it as a sequence of
 $n-1$ intervals of time.  To compute the frequency during each
-interval, I use {\tt np.linspace}.
+interval, I use {\tt np.linspace}, which returns a NumPy array of
+$n-1$ values between {\tt start} and {\tt end}.
 
-\verb"_evaluate" is a private method\footnote{Beginning a method name
+\verb"_evaluate" is a private method
+that does the rest of the math\footnote{Beginning a method name
   with an underscore makes it ``private'', indicating that it is not
-  part of the API that should be used outside the class definition.}
-that does the rest of the math:
+  part of the API that should be used outside the class definition.}:
 
 \begin{verbatim}
     def _evaluate(self, ts, freqs):
         dts = np.diff(ts)
         dphis = PI2 * freqs * dts
         phases = np.cumsum(dphis)
+        phases = np.insert(phases, 0, 0)
         ys = self.amp * np.cos(phases)
         return ys
 \end{verbatim}
@@ -1387,35 +1510,40 @@ If the elements of {\tt ts} are equally spaced,
 the {\tt dts} are all the same.
 
 The next step is to figure out how much the phase changes during
-each interval.  Since we know the frequency and duration of each
-interval, the {\em change} in phase during each interval is
-{\tt dphis = PI2 * freqs * dts}.  In math notation:
+each interval.  In Section~\ref{sigobs} we saw that when frequency is
+constant, the phase, $\phi$, increases linearly over time:
+%
+\[ \phi = 2 \pi f t \]
+%
+When frequency is a function of time, the {\em change} in phase
+during a short time interval, $\Delta t$ is:
 %
 \[ \Delta \phi = 2 \pi f(t) \Delta t \]
 %
-{\tt np.cumsum} computes the cumulative sum, which you can think
-of as a simple kind of integration.  If you know calculus, explanations
-like that might help; otherwise you can ignore them.
+In Python, since {\tt freqs} contains $f(t)$ and {\tt dts}
+contains the time intervals, we can write
+
+\begin{verbatim}
+dphis = PI2 * freqs * dts
+\end{verbatim}
+
+Now, since {\tt dphis} contains the changes in phase, we can
+get the total phase at each timestep by adding up the changes:
+
+\begin{verbatim}
+phases = np.cumsum(dphis)
+phases = np.insert(phases, 0, 0)
+\end{verbatim}
+
+{\tt np.cumsum} computes the cumulative sum, which is almost
+what we want, but it doesn't start at 0.  So I use {\tt np.insert}
+to add a 0 at the beginnign.
 
 The result is a NumPy array where the {\tt i}th element contains the
 sum of the first {\tt i} terms from {\tt dphis}; that is, the total
 phase at the end of the {\tt i}th interval.  Finally, {\tt np.cos}
-maps from phase to amplitude.
-
-Here's an example that creates and plays a chirp from 220 to 880 Hz, which
-is two octaves from A3 to A5:
-
-\begin{verbatim}
-    signal = thinkdsp.Chirp(start=220, end=880)
-    wave1 = signal.make_wave(duration=2)
-
-    filename = 'chirp.wav'
-    wave1.write(filename)
-    thinkdsp.play_wave(filename)
-\end{verbatim}
-
-You can run this code in {\tt chap03.ipynb} or view the notebook
-at \url{http://tinyurl.com/thinkdsp03}.
+computes the amplitude of the wave as a function of phase (remember
+that phase is expressed in radians).
 
 
 \section{Exponential chirp}
@@ -1449,7 +1577,7 @@ Here's the code that makes one:
 class ExpoChirp(Chirp):
     
     def evaluate(self, ts):
-        start, end = math.log10(self.start), math.log10(self.end)
+        start, end = np.log10(self.start), np.log10(self.end)
         freqs = np.logspace(start, end, len(ts)-1)
         return self._evaluate(ts, freqs)
 \end{verbatim}
@@ -1464,119 +1592,11 @@ that makes one:
 
 \begin{verbatim}
     signal = thinkdsp.ExpoChirp(start=220, end=880)
-    wave1 = signal.make_wave(duration=2)
-
-    filename = 'expo_chirp.wav'
-    wave1.write(filename)
-    thinkdsp.play_wave(filename)
+    wave = signal.make_wave(duration=1)
 \end{verbatim}
 
-You can run this example in {\tt chap03.ipynb}.  If you have a musical
-ear, it might sound more like music than the linear chirp.
-
-
-\section{Leakage}
-
-\begin{figure}
-% chirp.py
-\centerline{\includegraphics[height=2.5in]{figs/windowing1.pdf}}
-\caption{Spectrum of (a) a periodic segment of a sinusoid, (b)
-a non-periodic segment, (c) a tapered non-periodic segment.}
-\label{fig.windowing1}
-\end{figure}
-
-In previous chapters, we used the Fast Fourier Transform (FFT) to
-compute the spectrum of a wave.  When we discuss how FFT works in
-Chapter~\ref{dft}, we will learn that it is based on the assumption
-that the signal is periodic.  In theory we should not use FFT on
-non-periodic signals.  In practice it happens all the time, but there
-are a few things you have to be careful about.
-
-One common problem is dealing with discontinuities at the beginning
-and end of a segment.  Because FFT assumes that the signal is periodic,
-it implicitly connects the end of the segment back to the beginning
-to make a loop.  If the end does not connect smoothly to the beginning,
-the discontinuity creates additional frequency components in the
-segment that are not in the signal.
-
-As an example, let's start with a sine wave that contains only
-one frequency component at 440 Hz.
-
-\begin{verbatim}
-    signal = thinkdsp.SinSignal(freq=440)
-\end{verbatim}
-
-If we select a segment that happens to be an integer multiple of
-the period, the end of the segment connects smoothly with the
-beginning, and FFT behaves well.
-
-\begin{verbatim}
-    duration = signal.period * 30
-    wave = signal.make_wave(duration)
-    spectrum = wave.make_spectrum()
-\end{verbatim}
-
-Figure~\ref{fig.windowing1}a shows the result.  As expected, there is
-a single peak at 440 Hz.
-
-But if the duration is not a multiple of the period, bad things
-happen.  With {\tt duration = signal.period * 30.25}, the signal
-starts at 0 and ends at 1.  Figure~\ref{fig.windowing1}b shows the
-spectrum of this segment.  Again, the peak is at 440 Hz, but now there
-are additional components spread out from 240 to 640 Hz.  This spread
-is called ``spectral leakage'', because some of the energy that is
-actually at the fundamental frequency leaks into other frequencies.
-
-In this example, leakage happens because we are using FFT on a segment
-that is not periodic.
-
-
-\section{Windowing}
-
-\begin{figure}
-% chirp.py
-\centerline{\includegraphics[height=3.5in]{figs/windowing2.pdf}}
-\caption{(a) Segment of a sinusoid, (b) Hamming window, (c) product
-of the segment and the window.}
-\label{fig.windowing2}
-\end{figure}
-
-We can reduce leakage by smoothing out the discontinuity between
-the beginning and end of the segment, and one way to do that is
-{\bf windowing}.
-
-A ``window'' is a function designed to transform a non-periodic
-segment into something that can pass for periodic.
-Figure~\ref{fig.windowing2}a shows a segment where the end does not
-connect smoothly to the beginning.
-
-Figure~\ref{fig.windowing2}b shows a ``Hamming window'', one of the
-more common window functions.  No window function is perfect, but some
-can be shown to be optimal for different applications, and Hamming
-is a good, all-purpose window.
-
-Figure~\ref{fig.windowing2}c shows the result of multiplying the
-window by the original signal.  Where the window is close to 1, the
-signal is unchanged.  Where the window is close to 0, the signal is
-attenuated.  Because the window tapers at both ends, the end of the
-segment connects smoothly to the beginning.
-
-Figure~\ref{fig.windowing1}c shows the spectrum of the tapered signal.
-Windowing has reduced leakage substantially, but not completely. 
-
-Here's what the code looks like.  {\tt Wave} provides {\tt hamming},
-which applies a Hamming window:
-
-\begin{verbatim}
-    def hamming(self):
-        self.ys *= np.hamming(len(self.ys))
-\end{verbatim}
-
-{\tt np.hamming} computes the Hamming window with the given number
-of elements.  NumPy provides functions to compute other window
-functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
-and {\tt kaiser}.  One of the exercises at the end of this chapter
-asks you to experiment with these other windows.
+You can listen to these examples in {\tt chap03.ipynb}.  If you have a
+musical ear, it might sound more like music than the linear chirp.
 
 
 \section{Spectrum of a chirp}
@@ -1633,14 +1653,19 @@ is a {\bf spectrogram}, which shows time on the x-axis and frequency
 on the y-axis.  Each column in the spectrogram shows the spectrum of
 a short segment, using color or grayscale to represent amplitude.
 
+As an example, I'll compute the spectrogram of this chirp:
+
+\begin{verbatim}
+signal = thinkdsp.Chirp(start=220, end=440)
+wave = signal.make_wave(duration=1, framerate=11025)
+\end{verbatim}
+
 {\tt Wave} provides \verb"make_spectrogram", which returns a
 {\tt Spectrogram} object:
 
 \begin{verbatim}
-    signal = thinkdsp.Chirp(start=220, end=440)
-    wave = signal.make_wave(duration=1)
-    spectrogram = wave.make_spectrogram(seg_length=512)
-    spectrogram.plot(high=32)
+spectrogram = wave.make_spectrogram(seg_length=512)
+spectrogram.plot(high=700)
 \end{verbatim}
 
 \verb"seg_length" is the number of samples in each segment.  I chose
@@ -1699,6 +1724,118 @@ This tradeoff is called the {\bf Gabor limit} and it is a fundamental
 limitation of this kind of time-frequency analysis.
 
 
+\section{Leakage}
+
+\begin{figure}
+% chirp.py
+\centerline{\includegraphics[height=2.5in]{figs/windowing1.pdf}}
+\caption{Spectrum of a periodic segment of a sinusoid (left), a
+  non-periodic segment (middle), a windowed non-periodic segment
+  (right).}
+\label{fig.windowing1}
+\end{figure}
+
+In order to explain how \verb"make_spectrogram" works, I have
+to explain windowing, and in order to explain windowing, I have to
+show you the problem it is meant to address, which is leakage.
+
+The Discrete Fourier Transform (DFT), which we use to compute
+Spectrums, treats waves as if they are periodic; that is, it assumes
+that the finite segment it operates on is a complete period from an
+infinite signal that repeats over all time.  In practice, this
+assumption is often not true, which creates problems.
+
+One common problem is discontinuity at the beginning and end of the
+segment.  Because DFT assumes that the signal is periodic, it
+implicitly connects the end of the segment back to the beginning to
+make a loop.  If the end does not connect smoothly to the beginning,
+the discontinuity creates additional frequency components in the
+segment that are not in the signal.
+
+As an example, let's start with a sine signal that contains only
+one frequency component at 440 Hz.
+
+\begin{verbatim}
+    signal = thinkdsp.SinSignal(freq=440)
+\end{verbatim}
+
+If we select a segment that happens to be an integer multiple of
+the period, the end of the segment connects smoothly with the
+beginning, and DFT behaves well.
+
+\begin{verbatim}
+    duration = signal.period * 30
+    wave = signal.make_wave(duration)
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Figure~\ref{fig.windowing1} (left) shows the result.  As expected,
+there is a single peak at 440 Hz.
+
+But if the duration is not a multiple of the period, bad things
+happen.  With {\tt duration = signal.period * 30.25}, the signal
+starts at 0 and ends at 1.
+
+Figure~\ref{fig.windowing1} (middle) shows
+the spectrum of this segment.  Again, the peak is at 440 Hz, but now
+there are additional components spread out from 240 to 640 Hz.  This
+spread is called ``spectral leakage'', because some of the energy that
+is actually at the fundamental frequency leaks into other frequencies.
+
+In this example, leakage happens because we are using DFT on a segment
+that becomes discontinuous when we treat it as periodic.
+
+
+\section{Windowing}
+
+\begin{figure}
+% chirp.py
+\centerline{\includegraphics[height=3.5in]{figs/windowing2.pdf}}
+\caption{Segment of a sinusoid (top), Hamming window (middle), product
+of the segment and the window (bottom).}
+\label{fig.windowing2}
+\end{figure}
+
+We can reduce leakage by smoothing out the discontinuity between
+the beginning and end of the segment, and one way to do that is
+{\bf windowing}.
+
+A ``window'' is a function designed to transform a non-periodic
+segment into something that can pass for periodic.
+Figure~\ref{fig.windowing2} (top) shows a segment where the end does not
+connect smoothly to the beginning.
+
+Figure~\ref{fig.windowing2} (middle) shows a ``Hamming window'', one of the
+more common window functions.  No window function is perfect, but some
+can be shown to be optimal for different applications, and Hamming
+is a good, all-purpose window.
+
+Figure~\ref{fig.windowing2} (bottom) shows the result of multiplying the
+window by the original signal.  Where the window is close to 1, the
+signal is unchanged.  Where the window is close to 0, the signal is
+attenuated.  Because the window tapers at both ends, the end of the
+segment connects smoothly to the beginning.
+
+Figure~\ref{fig.windowing1} (right) shows the spectrum of the windowed
+signal.  Windowing has reduced leakage substantially, but not
+completely.
+
+Here's what the code looks like.  {\tt Wave} provides {\tt hamming},
+which applies a Hamming window:
+
+\begin{verbatim}
+#class Wave:
+    def hamming(self):
+        self.ys *= np.hamming(len(self.ys))
+\end{verbatim}
+
+{\tt np.hamming} computes the Hamming window with the given number
+of elements.  NumPy provides functions to compute other window
+functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
+and {\tt kaiser}.  One of the exercises at the end of this chapter
+asks you to experiment with these other windows.
+
+
 \section{Implementing spectrograms}
 
 \begin{figure}
@@ -1708,43 +1845,57 @@ limitation of this kind of time-frequency analysis.
 \label{fig.windowing3}
 \end{figure}
 
-Here is the {\tt Wave} method that computes spectrograms:
+Now that we understand windowing, we can understand the
+implementation of spectrogram.
+Here is the {\tt Wave} method that computes spectrograms
+(leaving out some details):
 
 \begin{verbatim}
+#class Wave:
     def make_spectrogram(self, seg_length):
-        n = len(self.ys)
         window = np.hamming(seg_length)
+        i, j = 0, seg_length
+        step = seg_length / 2
 
-        start, end, step = 0, seg_length, seg_length / 2
         spec_map = {}
 
-        while end < n:
-            ys = self.ys[start:end] * window
-            hs = np.fft.rfft(ys)
+        while j < len(self.ys):
+            segment = self.slice(i, j)
+            segment.window(window)
 
-            t = (start + end) / 2.0 / self.framerate
-            spec_map[t] = Spectrum(hs, self.framerate)
+            t = (segment.start + segment.end) / 2
+            spec_map[t] = segment.make_spectrum()
 
-            start += step
-            end += step
+            i += step
+            j += step
 
         return Spectrogram(spec_map, seg_length)
 \end{verbatim}
 
+This is the longest function in the book, so if you can handle
+this, you can handle anything.
+
+The parameter, {\tt self}, is a Wave object.
 \verb"seg_length" is the number of samples in each segment.
-{\tt n} is the number of samples in the wave.  {\tt window}
-is a Hamming window with the same length as the segments.
 
-{\tt start} and {\tt end} are the slice indices that select
-segments from the wave.  {\tt step} is the offset between
-segments.  Since {\tt step} is half of \verb"seg_length", the
-segments overlap by half.  Figure~\ref{fig.windowing3} shows what
-these overlapping windows look like.
+{\tt window} is a Hamming window with the same length as the segments.
 
-Inside the while loop, we select a slice from the wave, multiply
-by the window, and compute the FFT.  Then we construct a Spectrum
-object and add it to \verb"spec_map" which is a map from the
-midpoint of the segment in time to the Spectrum object.
+{\tt i} and {\tt j} are the slice indices that select segments from
+the wave.  {\tt step} is the offset between segments.  Since {\tt
+  step} is half of \verb"seg_length", the segments overlap by half.
+Figure~\ref{fig.windowing3} shows what these overlapping windows look
+like.
+
+\verb"spec_map" is a dictionary that maps from a timestamp to
+a Spectrum.
+
+Inside the while loop, we select a slice from the wave and multiply
+by the window; then we construct a Spectrum
+object and add it to \verb"spec_map".  The nominal time of
+each segment is the midpoint.
+
+Then we advance {\tt i} and {\tt j}, and continue as long as {\tt j}
+doesn't go past the end of the Wave.
 
 Finally, the method constructs and returns a Spectrogram.  Here
 is the definition of Spectrogram:
@@ -1761,41 +1912,15 @@ Like many \verb"__init__" methods, this one just stores the
 parameters as attributes.
 
 {\tt Spectrogram} provides {\tt plot}, which generates a
-pseudocolor plot:
-
-\begin{verbatim}
-    def plot(self, low=0, high=None):
-        ts = self.times()
-        fs = self.frequencies()[low:high]
-
-        # initialize the array of results
-        size = len(fs), len(ts)
-        array = np.zeros(size, dtype=np.float)
-
-        # copy each spectrum into a column of the array
-        for i, t in enumerate(ts):
-            spectrum = self.spec_map[t]
-            array[:,i] = spectrum.amps[low:high]
-
-        thinkplot.pcolor(ts, fs, array)
-\end{verbatim}
-
-{\tt plot} uses {\tt times}, which returns the midpoint of each
-time segment in a sorted sequence, and {\tt frequencies}, which returns
-the frequencies of the components in the spectrums.
-
-{\tt array} is a numpy array that holds the amplitudes from the
-spectrums, with one column for each point in time and one row
-for each frequency.  The {\tt for} loop iterates through the {\tt ts}
-and copies the amplitudes from each spectrum into a column of the array.
-
-Finally {\tt thinkplot.pcolor} is a wrapper around {\tt pyplot.pcolor},
-which generates the pseudocolor plot.
+pseudocolor plot with time along the x-axis and frequency along
+the y-axis.
 
 And that's how Spectrograms are implemented.
 
 
 \section{Exercises}
+
+Solutions to these exercises are in {\tt chap03soln.ipynb}.
 
 \begin{exercise}
 Run and listen to the examples in {\tt chap03.ipynb}, which is
@@ -1807,6 +1932,7 @@ the other windows provided by NumPy, and see what effect they have on
 leakage.  See
 \url{http://docs.scipy.org/doc/numpy/reference/routines.window.html}
 \end{exercise}
+
 
 \begin{exercise}
 Write a class called {\tt SawtoothChirp} that extends {\tt Chirp}
@@ -1824,21 +1950,8 @@ visually apparent, and if you listen carefully, you can hear it.
 
 \begin{exercise}
 In musical terminology, a ``glissando'' is a note that slides from one
-pitch to another, so it is similar to a chirp.  A trombone player can
-play a glissando by extending the trombone slide while blowing
-continuously.  As the slide extends, the total length of the tube gets
-longer, and the resulting pitch is inversely proportional to length.
+pitch to another, so it is similar to a chirp.
 
-Assuming that the player moves the slide at a constant speed, how
-does frequency vary with time?  Is a trombone glissando more like
-a linear or exponential chirp?
-
-Write a function that simulates a trombone glissando from C3 up to F3
-and back down to C3.  C3 is 262 Hz; F3 is 349 Hz.
-\end{exercise}
-
-
-\begin{exercise}
 Find or make a recording of a glissando and plot a spectrogram of the
 first few seconds.  One suggestion: George Gershwin's {\it Rhapsody in
   Blue} starts with a famous clarinet glissando, which you can download
@@ -1847,10 +1960,28 @@ from \url{http://archive.org/details/rhapblue11924}.
 
 
 \begin{exercise}
+A trombone player can play a glissando by extending the trombone
+slide while blowing continuously.  As the slide extends, the total
+length of the tube gets longer, and the resulting pitch is inversely
+proportional to length.
+
+Assuming that the player moves the slide at a constant speed, how
+does frequency vary with time?  
+
+Write a class called {\tt TromboneGliss} that extends {\tt Chirp} and
+provides {\tt evaluate}.  Make a wave that simulates a trombone
+glissando from C3 up to F3 and back down to C3.  C3 is 262 Hz; F3 is
+349 Hz.
+
+Plot a spectrogram of the resulting wave.  Is a trombone glissando
+more like a linear or exponential chirp?
+\end{exercise}
+
+
+\begin{exercise}
 Make or find a recording of a series of vowel sounds and look at the
 spectrogram.  Can you identify different vowels?
 \end{exercise}
-
 
 
 \chapter{Noise}
@@ -2120,7 +2251,8 @@ and frequency on a log-log scale.  Here's the code:
                    yscale='log')
 \end{verbatim}
 
-The result is in Figure~\ref{fig.redline}.  The relationship between
+%TODO: check this figure reference
+The result is in Figure~\ref{fig.rednoise3}.  The relationship between
 power and frequency is noisy, but nearly linear.  
 The slope of the line is approximately -2 (we'll see why in
 Chapter~\ref{systems}), so we can write this relationship:
@@ -2372,6 +2504,7 @@ the result, and confirm that it has the desired relationship
 between power and frequency.
 \end{exercise}
 
+Solutions to these exercises are in {\tt chap04soln.ipynb}.
 
 
 \chapter{Autocorrelation}
@@ -2868,6 +3001,7 @@ To see how well it works, try superimposing your pitch estimates on a
 spectrogram of the recording.
 \end{exercise}
 
+Solutions to these exercises are in {\tt chap05soln.ipynb}.
 
 
 \chapter{Discrete cosine transform}
@@ -3381,6 +3515,7 @@ read about at
 \url{http://docs.scipy.org/doc/scipy/reference/sparse.html}.
 \end{exercise}
 
+Solutions to these exercises are in {\tt chap06soln.ipynb}.
 
 
 \chapter{Discrete Fourier Transform}
@@ -4057,13 +4192,16 @@ as a recursive function; don't worry about ``data reordering, bit
 reversal, and in-place algorithms''.
 \end{exercise}
 
+Solutions to these exercises are in {\tt chap07soln.ipynb}.
+
 
 \chapter{Filtering and Convolution}
 
 In this chapter I present one of the most important and useful
 ideas related to signal processing: the Convolution Theorem.
 But before we can understand the Convolution Theorem, we have to understand
-convolution.  I'll start with one of the simplest examples: smoothing.
+convolution.  I'll start with a simple example, smoothing, and
+we'll go from there.
 
 The code for this chapter is in {\tt convolution.py}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -4099,7 +4237,7 @@ extreme changes and makes it easier to see long-term trends.
 
 Smoothing operations also apply to sound signals.  As an example, I'll
 start with a square wave at 440 Hz.  As we saw in
-Section~\ref{harmonics}, the harmonics of a square wave drop off
+Section~\ref{square}, the harmonics of a square wave drop off
 slowly, so it contains many high-frequency components.
 
 \begin{verbatim}
@@ -4130,6 +4268,8 @@ multiplying the window by the wave array:
 \begin{verbatim}
 >>> padded = zero_pad(window, len(segment))
 >>> prod = padded * segment.ys
+>>> sum(prod)
+-1
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
@@ -4137,13 +4277,13 @@ the end so it has the same length as {\tt segment.ys}
 (\verb"zero_pad" is defined in {\tt convolution.py}).
 {\tt prod} is the product of the window and the wave array.
 
-The first 11 elements of this wave array are -1, so their
-average is -1, and (sure enough) that's the value of {\tt prod}.
+The sum of this product is the average of the first 11 elements
+of the array.  Since these elements are all -1, their average
+is -1.
 
 To compute the next element of the smoothed signal, we shift the
-window to the right and compute the average of the next
-11 elements of the wave
-array, starting with the second.
+window to the right and compute the average of the next 11 elements of
+the wave array, starting with the second.
 
 \begin{figure}
 % convolution2.py
@@ -4153,9 +4293,8 @@ moving average (darker).}
 \label{fig.convolution2}
 \end{figure}
 
-
-The following code computes the rolling average for the whole
-wave:
+To compute the moving average, we repeat this process and store
+the result in an array named {\tt smoothed}:
 
 \begin{verbatim}
 >>> smoothed = np.zeros_like(segment.ys)
@@ -4165,7 +4304,6 @@ wave:
         rolled = np.roll(rolled, 1)
 \end{verbatim}
 
-{\tt smoothed} is the wave array where I store the results.
 {\tt rolled} is a copy of {\tt padded} that gets shifted to
 the right by one element each time through the loop.  Inside
 the loop, we multiply the segment by {\tt rolled} to select
@@ -4204,25 +4342,25 @@ than that, the result is the same as in Figure~\ref{fig.convolution2}.
 Actually, there is one other difference.  The loop in the
 previous section actually computes {\bf cross-correlation}:
 %
-\[ (f \star g)[j] = \sum_{k=0}^{N-1} f[k] g[k-j]  \]
+\[ (f \star g)[n] = \sum_{m=0}^{N-1} f[m] g[n+m]  \]
 %
 where $f$ is a wave array with length $N$, $g$ is the window,
 and $\star$ is the symbol for cross-correlation.  To
-compute the $j$th element of the result, we shift $g$ to
-the right, which is why the index is $k-j$.
+compute the $n$th element of the result, we shift $g$ to
+the right, which is why the index is $n+m$.
 
 The mathematical definition of convolution is slightly different:
 %
-\[ (f \conv g)[j] = \sum_{k=0}^{N-1} f[k] g[j-k]  \]
+\[ (f \conv g)[n] = \sum_{m=0}^{N-1} f[m] g[n-m]  \]
 %
-The symbol $\conv$ represents convolution.  The difference is
-that the index of $g$ has been negated, which has the same
-effect as reversing the elements of $g$ (assuming that negative
-indices wrap around to the end of the array).
+The symbol $\conv$ represents convolution.  The difference is in the
+index of $g$: $m$ has been negated, so the summation iterates the
+elements of $g$ backward (assuming that negative indices wrap around
+to the end of the array).
 
-Because the moving average window is symmetric, cross-correlation and
-convolution yield the same result.  When we use other windows, we will
-have to be more careful.
+Because the window we used in this example is symmetric,
+cross-correlation and convolution yield the same result.  When we use
+other windows, we will have to be more careful.
 
 You might wonder why convolution is defined the way it is.  There
 are two reasons:
@@ -4266,6 +4404,9 @@ Then the smoothed wave:
 >>> spectrum2 = smooth.make_spectrum()
 >>> spectrum2.plot()
 \end{verbatim}
+
+The mode flag {\tt same} indicates that the result should have the
+same length as the input.
 
 Figure~\ref{fig.convolution4} shows the result.  The fundamental
 frequency is almost unchanged; the first few harmonics are
@@ -4314,9 +4455,12 @@ What's up with that?
 \label{fig.convolution6}
 \end{figure}
 
+\newcommand{\DFT}{\mathrm{DFT}}
+\newcommand{\IDFT}{\mathrm{IDFT}}
+
 The answer is the convolution theorem.  Stated mathematically:
 %
-\[ DFT(f \conv g) = DFT(f) \cdot DFT(g) \]
+\[ \DFT(f \conv g) = \DFT(f) \cdot \DFT(g) \]
 %
 where $f$ is a wave array and $g$ is a window.  In words,
 the convolution theorem says that if we convolve $f$ and $g$,
@@ -4346,14 +4490,13 @@ Figure~\ref{fig.convolution6} shows the result, along with the
 ratios we computed in the previous section.  The ratios are
 exactly the amplitudes in \verb"dft_window".  Mathematically:
 %
-\[ \abs(DFT(f \conv g)) / \abs(DFT(f)) = \abs(DFT(g)) \]
+\[ \abs(\DFT(f \conv g)) / \abs(\DFT(f)) = \abs(\DFT(g)) \]
 %
 In this context, the DFT of a window is called a {\bf filter}.
 For any convolution window in the time domain, there is a
 corresponding filter in the frequency domain.  And for any
 filter than can be expressed by element-wise multiplication in
 the frequency domain, there is a corresponding window.
-
 
 
 \section{Gaussian filter}
@@ -4365,18 +4508,17 @@ the frequency domain, there is a corresponding window.
 \label{fig.convolution7}
 \end{figure}
 
-The moving average window we used in the previous section is
-a low-pass filter, but it is not a very good one.
-The DFT drops off steeply at
-first, but then it bounces around.  Those bounces are
-called {\bf sidelobes}, and they are there because the moving
-average window is like a square wave, so its spectrum contains
-high-frequency harmonics that drop off proportionally to
-$1/f$, which is relatively slow.  
+The moving average window we used in the previous section is a
+low-pass filter, but it is not a very good one.  The DFT drops off
+steeply at first, but then it bounces around.  Those bounces are
+called {\bf sidelobes}, and they are there because the moving average
+window is like a square wave, so its spectrum contains high-frequency
+harmonics that drop off proportionally to $1/f$, which is relatively
+slow.
 
-We can do better with a Gaussian window.
-SciPy provides functions that compute many common convolution windows,
-including {\tt gaussian}:
+We can do better with a Gaussian window.  SciPy provides functions
+that compute many common convolution windows, including {\tt
+  gaussian}:
 
 \begin{verbatim}
     gaussian = scipy.signal.gaussian(M=11, std=2)
@@ -4384,7 +4526,7 @@ including {\tt gaussian}:
 \end{verbatim}
 
 {\tt M} is the number of elements in the window; {\tt std}
-is the standard deviation of the Gaussian expression used to
+is the standard deviation of the Gaussian distribution used to
 compute it.  Figure~\ref{fig.convolution7} shows the shape
 of the window.  It is a discrete approximation of the Gaussian
 ``bell curve''.  The figure also shows the moving average window
@@ -4405,12 +4547,12 @@ which shows the ratio of the spectrums before and after
 smoothing, along with the DFT of the Gaussian window. 
 
 As a low-pass filter, Gaussian smoothing is better than a simple
-moving average.  After the ratio drops off, it
-stays low, with almost none of the sidelobes we saw with the boxcar
-window.  So it does a better job of cutting off the higher frequencies.
+moving average.  After the ratio drops off, it stays low, with almost
+none of the sidelobes we saw with the boxcar window.  So it does a
+better job of cutting off the higher frequencies.
 
 The reason it does so well is that the DFT of a Gaussian curve is also a
-Gaussian curve.  So the ratio drops off in proportion to $\exp(-x^2)$,
+Gaussian curve.  So the ratio drops off in proportion to $\exp(-f^2)$,
 which is much faster than $1/f$.
 
 
@@ -4423,11 +4565,11 @@ way to compute convolution, cross-correlation, and autocorrelation.
 
 Again, the Convolution Theorem states
 %
-\[ DFT(f \conv g) = DFT(f) \cdot DFT(g) \]
+\[ \DFT(f \conv g) = \DFT(f) \cdot \DFT(g) \]
 %
 So one way to compute a convolution is:
 %
-\[ f \conv g = IDFT(DFT(f) \cdot DFT(g)) \]
+\[ f \conv g = \IDFT(\DFT(f) \cdot \DFT(g)) \]
 %
 where $IDFT$ is the inverse DFT.  A simple implementation of
 convolution takes time proportional to $N^2$; this algorithm,
@@ -4462,17 +4604,15 @@ Next I'll create a Gaussian window and convolve it with {\tt ys}:
     smoothed = np.convolve(ys, window, mode='valid')
 \end{verbatim}
 
-With {\tt mode='valid'}, {\tt np.convolve} returns values
-only where the window and the signal overlap completely, avoiding
-bogus values at the beginning and end.
-
 \verb"fft_convolve" computes the same thing using FFT:
 
 \begin{verbatim}
+from np.fft import fft, ifft
+
 def fft_convolve(signal, window):
-    fft_signal = np.fft.fft(signal)
-    fft_window = np.fft.fft(window)
-    return np.fft.ifft(fft_signal * fft_window)
+    fft_signal = fft(signal)
+    fft_window = fft(window)
+    return ifft(fft_signal * fft_window)
 \end{verbatim}
 
 We can test it by padding the window to the same length
@@ -4483,10 +4623,9 @@ as {\tt ys} and then computing the convolution:
     smoothed2 = fft_convolve(ys, padded)
 \end{verbatim}
 
-The result has $M-1$ bogus values at the beginning, where
-$M$ is the length of the window.  If we slice off the bogus
-values, we get the same result as before, with about 12 digits
-of precision.
+The result has $M-1$ bogus values at the beginning, where $M$ is the
+length of the window.  If we slice off the bogus values, the result
+agrees with \verb"fft_convolve" with about 12 digits of precision.
 
 \begin{verbatim}
     M = len(window)
@@ -4573,28 +4712,58 @@ large numbers; we could normalize them (between -1 and 1) as shown
 in Section~\ref{correlate}.
 
 The strategy we used here for auto-correlation also works for
-cross-correlation.  Again, you have to prepare the signals
-by flipping one and padding both, and then you have to trim
-the invalid parts of the result.  This packing and unpacking is
-a nuisance, but that's why libraries like
-NumPy provide functions to do it for you.
+cross-correlation.  Again, you have to prepare the signals by flipping
+one and padding both, and then you have to trim the invalid parts of
+the result.  This packing and unpacking is a nuisance, but that's why
+libraries like NumPy provide functions to do it for you.
 
 
 \section{Exercises}
 
 \begin{exercise}
-Experiment with the parameters of the Gaussian window to see
+The notebook for this chapter is {\tt chap08.ipynb}.
+Read through it and run the code.
+
+It contains an interactive widget that lets you
+experiment with the parameters of the Gaussian window to see
 what effect they have on the cutoff frequency.
+
+What goes wrong when you increase the width of the Gaussian,
+{\tt std}, without increasing the number of elements in the window,
+{\tt M}?  The problem might be more apparent if you plot the
+window.
 \end{exercise}
 
 
+\begin{exercise}
+In this chapter I claimed that the Fourier transform of a Gaussian
+curve is also a Gaussian curve.  For discrete Fourier transforms,
+this relationship is approximately true.
 
-\chapter{Signals and Systems}
-\label{systems}
+Try it out for a few examples.  What happens to the Fourier transform
+as you vary {\tt std}?
+\end{exercise}
 
-The code for this chapter is in {\tt systems.py}, which is in the
+% TODO: more exercises!
+%\begin{exercise}
+%\end{exercise}
+
+Solutions to these exercises are in {\tt chap08soln.ipynb}.
+
+
+
+\chapter{Differentiation and Integration}
+\label{diffint}
+
+NOTE: THIS CHAPTER IS NOT READY FOR PRIME TIME!
+
+This chapter picks up where the previous chapter left off,
+looking at the relationship between windows in the time domain
+and filters in the frequency domain.
+
+The code for this chapter is in {\tt chap09.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
-
+% TODO: tinyurl link, too
 
 \section{Finite differences}
 
@@ -4603,7 +4772,7 @@ the historical price of BitCoin, and we found that a smoothing
 window in the time domain corresponds to a low-pass filter in
 the frequency domain.
 
-In this section, we'll look at daily price changes, and we'll
+In this section, we'll look at daily price changes and
 see that computing the difference between successive elements,
 in the time domain, corresponds to a high-pass filter.
 
@@ -4619,18 +4788,19 @@ spectrum.
     spectrum = wave.make_spectrum()
 \end{verbatim}
 
-The framerate is 1 sample per day.  Figure~\ref{fig.systems1} shows
+The framerate is 1 sample per day.  Figure~\ref{fig.diff_int1} shows
 the time series and its spectrum plotted on a log-log scale.
 Visually, the time series resembles Brownian noise (see
 Section~\ref{brownian}).  The estimated slope of the spectrum is -1.8,
 which is consistent with Brownian noise.
 
+%TODO: replace the figures in this chapter
 \begin{figure}
-% systems1.py
+% diff_int.py
 \centerline{\includegraphics[height=2.5in]{figs/systems1.pdf}}
 \caption{Daily closing price of BitCoin and the spectrum of this time
   series.}
-\label{fig.systems1}
+\label{fig.diff_int1}
 \end{figure}
 
 Now let's compute the daily price change using {\tt np.diff}:
@@ -4640,7 +4810,7 @@ Now let's compute the daily price change using {\tt np.diff}:
     wave2 = thinkdsp.Wave(diff, framerate=1)
 \end{verbatim}
 
-Figure~\ref{fig.systems2} shows the resulting wave and its
+Figure~\ref{fig.diff_int2} shows the resulting wave and its
 spectrum.  The daily changes and their spectrum resemble white noise,
 and the estimated parameter, -0.023, is near zero, which is what
 we expect for white noise.
@@ -4649,10 +4819,10 @@ we expect for white noise.
 \section{The frequency domain}
 
 \begin{figure}
-% systems2.py
+% diff_int2.py
 \centerline{\includegraphics[height=2.5in]{figs/systems2.pdf}}
 \caption{Daily price changes of BitCoin and their spectrum.}
-\label{fig.systems2}
+\label{fig.diff_int2}
 \end{figure}
 
 To see the effect of this operation in the frequency domain,
@@ -4682,16 +4852,16 @@ If the order of the elements in the window seems backward,
 remember that convolution reverses the window before applying it
 to the signal.
 
-Figure~\ref{fig.systems3} shows the computed ratio and the DFT of the
+Figure~\ref{fig.diff_int3} shows the computed ratio and the DFT of the
 window, which is the filter.  The computed ratio is noisy, but
 generally follows the shape of the filter.
 
 \begin{figure}
-% systems.py
+% diff_int.py
 \centerline{\includegraphics[height=2.5in]{figs/systems3.pdf}}
 \caption{Ratio of amplitudes before and after filtering, and
 the filter corresponding to the {\tt diff} operation.}
-\label{fig.systems3}
+\label{fig.diff_int3}
 \end{figure}
 
 The filter increases with frequency, linearly for low frequencies,
@@ -4719,11 +4889,11 @@ which we can rewrite as
 \[ \frac{d}{dt} E_f(t) = 2 \pi i f E_f(t) \]
 %
 In other words, taking the derivative of $E_f$ is the same
-as multiplying by $2 \pi i f$, which is a complex scalar
-(more specifically, an imaginary scalar).
+as multiplying by $2 \pi i f$, which is an imaginary number
+with magnitude proportional to $f$.
 
 As we saw in Section~\ref{synthmat}, multiplying a complex sinusoid
-by a complex scalar has two effects: it multiplies
+by a complex number has two effects: it multiplies
 the amplitude, in this case by $2 \pi f$, and shifts the phase
 offset, in this case by $\pi/2$ (because that's the angle of
 a positive imaginary number).
@@ -4774,11 +4944,11 @@ to the algorithm for convolution in Section~\ref{effconv}: compute
 the DFT, multiply by a filter, and compute the inverse DFT.
 
 \begin{figure}
-% systems.py
+% diff_int.py
 \centerline{\includegraphics[height=2.5in]{figs/systems4.pdf}}
 \caption{Comparison of daily price changes computed by
 {\tt np.diff} and by filtering in the frequency domain.}
-\label{fig.systems4}
+\label{fig.diff_int4}
 \end{figure}
 
 {\tt Spectrum} provides a method that applies the differentiation
@@ -4809,7 +4979,7 @@ using {\tt np.diff}, {\tt wave3}:
     wave3.plot(label='derivative')
 \end{verbatim}
 
-Figure~\ref{fig.systems4} shows the results.  They are similar except
+Figure~\ref{fig.diff_int4} shows the results.  They are similar except
 where the changes are most abrupt.  They also differ at the
 boundaries, because the DFT-based derivative is based on the
 assumption that the signal is periodic.  It wraps around from the end
@@ -4833,577 +5003,13 @@ solving differential equations (see
 \url{http://en.wikipedia.org/wiki/Spectral_method}).
 
 In particular, it is useful for the analysis of linear, time-invariant
-systems, which is the next topic.
+systems, which is coming up in Chapter~\ref{systems}.
 
 
-\section{LTI systems}
+\section{Integration}
 
-In the context of signal processing, a {\bf system} is an abstract
-representation of anything that takes a signal as input and produces
-a signal as output.
-
-For example, an electronic amplifier is a circuit that takes an
-electrical signal as input and produces a (louder) signal as output.
-
-As another example, for one of the exercises in Chapter~\ref{signal},
-we computed the sound of a violin as heard through a kilometer of sea
-water.  In that case, we model the sea water as a system that takes
-the original recording as input and produces a filtered version as
-output.
-
-A {\bf linear, time-invariant system}\footnote{My presentation here
-  follows \url{http://en.wikipedia.org/wiki/LTI_system_theory}.} is a
-system with these additional properties:
-
-\begin{enumerate}
-
-\item Linearity: If the input $x_1$ produces output $y_1$ and input
-  $x_2$ produces $y_2$, then $a x_1 + b x_2$ produces $a y_1 + b y_2$,
-  where $a$ and $b$ are scalars.  In other words, if you put two
-  inputs into the system at the same time, the result is the sum of
-  their outputs.  
-
-\item Time invariance: If $x_1$ and $x_2$ differ by a shift in time,
-  $y_1$ and $y_2$ differ by the same shift.  In other words, the
-  effect of the system doesn't vary over time, or depend on the state
-  of the system.
-
-\end{enumerate}
-
-Many physical systems have these properties, at least approximately.
-
-\begin{itemize}
-
-\item Circuits that contain only resistors, capacitors and inductors are
-LTI, to the degree that the components behave like their idealized
-models.
-
-\item Mechanical systems that contain springs, masses and
-dashpots are also LTI, assuming linear springs (force proportional
-to displacement) and dashpots (force proportional to velocity).
-
-\item Also, and most relevant to applications in this book,
-the media that transmit sounds (including air, water
-and solids) are well-modeled by LTI systems.
-
-\end{itemize}
-
-LTI systems are described by linear differential equations, and
-the solutions of those equations are complex sinusoids (see
-\url{http://en.wikipedia.org/wiki/Linear_differential_equation}).
-
-This result provides an algorithm for computing the effect of
-an LTI system on an input signal:
-
-\begin{enumerate}
-
-\item Express the signal as the sum of complex sinusoids.
-
-\item For each input component, compute the corresponding output component.
-
-\item Add up the output components.
-
-\end{enumerate}
-
-At this point, I hope this algorithm sounds familiar.  It's the
-same algorithm we used for convolution in Section~\ref{effconv}, and
-for differentiation in Section~\ref{effdiff}.  This process
-is called {\bf spectral decomposition} because we ``decompose''
-the input signal into its spectral components.
-
-In order to apply this process to an LTI system, we have to {\bf
-  characterize} the system by finding its effect on each component
-of the input signal.  For mechanical systems, it turns out that there
-is a simple and efficient way to do that: you kick it and measure
-the output.
-
-Technically, the ``kick'' is called an {\bf impulse} and the
-output is called the {\bf impulse response}.  You might wonder
-how a single impulse can completely characterize a system.  You
-can see the answer by computing the DFT of an impulse.  Here's
-a wave array with an impulse at $t=0$:
-
-\begin{verbatim}
->>> impulse = np.zeros(8)
->>> impulse[0] = 1
->>> print(impulse)
-[ 1.  0.  0.  0.  0.  0.  0.  0.]
-\end{verbatim}
-
-And here's its spectrum:
-
-\begin{verbatim}
->>> spectrum = np.fft.fft(impulse)
->>> print(spectrum)
-[ 1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j]
-\end{verbatim}
-
-That's right: an impulse is the sum of components with
-equal magnitudes at all frequencies (and a phase offset of 0).
-
-What that means is that when you test a system by inputting
-an impulse, you are testing the response of the 
-system at all frequencies.  And you can test them all at the same
-time because the system is linear, so simultaneous tests don't
-interfere with each other.
-
-
-\section{Transfer functions}
-
-For characterizing the acoustic response of a room or open space, a
-simple and effective way to generate an impulse is to fire a gun (or a
-starter pistol).  The gunshot puts an impulse into the system; the
-sound you hear is the impulse response.
-
-\begin{figure}
-% systems.py
-\centerline{\includegraphics[height=2.5in]{figs/systems6.pdf}}
-\caption{Waveform of a gunshot.}
-\label{fig.systems6}
-\end{figure}
-
-As an example, I'll use a recording of a gunshot to characterize
-the room where the gun was fired, then use the impulse response
-to simulate the effect of that room on a violin recording.
-
-This
-example is in {\tt chap09.ipynb}, which is in the repository
-for this book; you can also view it, and listen to the examples,
-at \url{http://tinyurl.com/thinkdsp09}.
-
-Here's the gunshot:
-
-\begin{verbatim}
-    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
-    response = response.segment(start=0.26, duration=5.0)
-    response.normalize()
-    response.plot()
-\end{verbatim}
-
-I select a segment starting at 0.26 seconds to remove the silence
-before the gunshot.  Figure~\ref{fig.system6} (left) shows the
-waveform of the gunshot.  Next we compute the DFT of {\tt response}:
-
-\begin{verbatim}
-    transfer = response.make_spectrum()
-    transfer.plot()
-\end{verbatim}
-
-Figure~\ref{fig.system6} (right) shows the result.  This spectrum
-encodes the response of the room; for each frequency, the spectrum
-contains a complex number that represents an amplitude multiplier and
-a phase shift.  This spectrum is called a {\bf transfer
-function} because it contains information about how the system transfers
-the input to the output.
-
-Now we can simulate the effect this room would have on the sound
-of a violin.  Here is the violin recording we used in Chapter~\ref{signals}
-
-\begin{verbatim}
-    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
-    wave.ys = wave.ys[:len(response)]
-    wave.normalize()
-\end{verbatim}
-
-The violin and gunshot waves were sampled at the same framerate,
-44,100 Hz.  And coincidentally, the duration of both is about 5
-seconds.  I trimmed the violin wave to the same length as the
-gunshot.
-
-Next I'll compute the DFT of the violin wave:
-
-\begin{verbatim}
-    spectrum = wave.make_spectrum()
-\end{verbatim}
-
-Now I know the magnitude and phase of each component in the
-input, and I know the transfer function of the system.  Their
-product is the DFT of the output:
-
-\begin{verbatim}
-    output = (spectrum * transfer).make_wave()
-    output.normalize()
-    output.plot()
-\end{verbatim}
-
-Figure~\ref{fig.system7} shows the output of the system superimposed
-on the input.  The overall shape is similar, but there are substantial
-differences.  And those differences are clearly audible.  Load
-{\tt chap09.ipynb} and listen to them.  One thing I find striking
-about this example is that you can get a sense of what the room
-was like; to me, it sounds like a long, narrow room with hard floors
-and ceilings.  That is, a firing range.
-
-There's one things I glossed over in this example that I'll mention
-in case it bothers anyone.  The violin recording I started with
-has already been transformed by one system: the room where it was
-recorded.  So what I really computed in my example is the sound
-of the violin after two transformations.  To really simulate
-the sound of a violin in a different room, I should have characterized
-the room where the violin was recorded and applied the inverse
-of that transfer function first.
-
-
-\section{Systems and convolution}
-
-\begin{figure}
-% systems.py
-\centerline{\includegraphics[height=2.5in]{figs/systems8.pdf}}
-\caption{Sum of a gunshot waveform with a shifted, scaled version of
-itself.}
-\label{fig.systems8}
-\end{figure}
-
-If you think the previous example is black magic,
-you are not alone.  I've been thinking about it for a while and it
-still makes my head hurt.
-
-In the previous section, I suggested one way to think about it:
-
-\begin{itemize}
-
-\item An impulse is made up of components with amplitude 1 at all
-  frequencies.
-
-\item The impulse response contains sum of the responses of the
-  system to all of these components.
-
-\item The transfer function, which is the DFT of the impulse response,
-  encodes effect of the system on each frequency component in the form
-  of an amplitude multiplier and a phase shift.
-
-\item For any input, we can compute the response of the system
-  by breaking the input into components, computing the response to
-  each component, and adding them up.
-
-\end{itemize}
-
-But if you don't like that, there's another way to think about
-it altogether: convolution!
-
-Suppose that instead of firing one gun, you fire two guns:
-a big one with amplitude 1 at $t=0$ and a smaller one with
-amplitude 0.5 at $t=1$.
-
-We can compute the response of the system by adding up
-the original impulse response and a scaled, shifted version of itself.
-Here's a function that makes a shifted, scaled version of
-a wave:
-
-\begin{verbatim}
-def shifted_scaled(wave, shift, factor):
-    res = wave.copy()
-    res.shift(shift)
-    res.scale(factor)
-    return res
-\end{verbatim}
-
-Here's how we use it to compute the response to a two-gun salute:
-
-\begin{verbatim}
-dt = 1
-shift = dt * response.framerate
-factor = 0.5
-response2 = response + shifted_scaled(response, shift, factor)
-\end{verbatim}
-
-Figure~\ref{fig.systems8} shows the result.  You can hear what
-it sounds like in {\tt chap09.ipynb}, which you can view
-at \url{http://tinyurl.com/thinkdsp09}.  Not surprisingly, it
-sounds like two gunshots, the first one louder than the second.
-
-Now suppose instead of two guns, you add up 100 guns, with
-a shift of 100 between them.  This loop computes the result:
-
-\begin{verbatim}
-    total = 0
-    for j in range(100):
-        total += shifted_scaled(response, j*100, 1.0)
-\end{verbatim}
-
-At a framerate of 44,100 Hz, there are 441 gunshots per second,
-so you don't hear the individual shots.  Instead, it sounds
-like a periodic signal at 441 Hz.  If you play this example, it
-sounds like a car horn in a garage.
-
-And that brings us to a key insight: you can think of any wave as a
-series of samples, where each sample is an impulse with a different
-magnitude.
-
-As a example, I'll generate a sawtooth signal at 410 Hz:
-
-\begin{verbatim}
-    signal = thinkdsp.SawtoothSignal(freq=410)
-    wave = signal.make_wave(duration=0.1,
-                            framerate=response.framerate)
-\end{verbatim}
-
-Now I'll loop through the series of impulses that make up the
-sawtooth, and add up the impulse responses:
-
-\begin{verbatim}
-    total = 0
-    for j, y in enumerate(wave.ys):
-        total += shifted_scaled(response, j, y)
-\end{verbatim}
-
-The result is what it would sound like to play a sawtooth wave in a
-firing range.  Again, you can listen to it in {\tt chap09.ipynb}.
-
-\begin{figure}
-\input{diagram2}
-\caption{Diagram of the sum of scaled and shifted copies of $g$.}
-\label{fig.convolution}
-\end{figure}
-
-Figure~\ref{fig.convolution} shows a diagram of this computation,
-where $f$ is the sawtooth, $g$ is the impulse response, and $h$
-is the sum of the shifted, scaled copies of $g$.
-
-For the example shown:
-
-\[ h[2] = f[0]g[2] + f[1]g[1] + f[2]g[0]  \]
-
-And more generally,
-
-\[ h[i] = \sum_{j=0}^{N-1} f[j] g[i-j]  \]
-
-You might recognize this equation from Section~\ref{convolution}.  It
-is the convolution of $f$ and $g$.
-
-In summary, there are two ways to think about the effect of a system
-on a signal:
-
-\begin{enumerate}
-
-\item The input is a sequence of impulses, so the output is the sum of
-  scaled, shifted copies of the impulse response, which is the
-  convolution of the input and the impulse response.
-
-\item The DFT of the impulse response is a transfer function that
-  encodes the effect of the system on each frequency component as a
-  magnitude and phase offset.  The DFT of the input encodes the
-  magnitude and phase offset of the frequency components it contains.
-  Multiplying the DFT of the input by the transfer function yields
-  the DFT of the output.
-
-\end{enumerate}
-
-The equivalence of these two descriptions should not be a surprise;
-it is basically a statement of the Convolution Theorem:
-convolution in the time
-domain corresponds to multiplication in the frequency domain.
-
-
-\section{Proof of the Convolution Theorem}
-
-Well, I've put it off long enough.  It's time to prove the Convolution
-Theorem (CT), which states:
-
-\[ DFT(f \conv g) = DFT(f) DFT(g) \]
-
-where $f$ and $g$ are vectors with the same length, $N$.
-
-I'll proceed in two steps:
-
-\begin{enumerate}
-
-\item I'll show that in the special case where $f$ is a complex
-exponential, convolution with $g$ has the effect of multiplying
-$f$ by a scalar.  
-
-\item In the more general case where $f$ is not a complex exponential,
-we can use the DFT to express it as a sum of exponential components,
-compute the convolution of each component (by multiplication) and
-then add up the results.
-
-\end{enumerate}
-
-The second step demonstrates the Convolution Theorem.
-
-First, let's assemble the pieces we'll need.
-The DFT of $g$, which I'll call $G$, is:
-%
-\[ G[n] = \sum_k g[k] \exp(-2 \pi i n k / N) \]
-%
-where $N$ is the length of $g$, and $n$ is an index that runs from 0
-to $N-1$.  So $G$ is a vector of complex numbers, with length $N$.
-
-And here's the definition of convolution:
-%
-\[ (f \conv g)[j] = \sum_k f[k] g[j-k] \]
-%
-This is the definition we saw in Section~\ref{convolution}, except
-that I've changed the names of the index variables.
-
-Convolution is commutative, so I could equivalently write:
-%
-\[ (f \conv g)[j] = \sum_k f[j-k] g[k] \]
-%
-Now let's consider the special case where $f$ is a complex
-exponential; specifically,
-%
-\[ f_n[\kappa] = \exp(2 \pi i n \kappa / N) \]
-%
-where $N$ is the length of $f$ and $g$, and
-$n$ is one of the integers from 0 to $N-1$.  I'm using
-$\kappa$ here as a placekeeper to avoid confusion because
-very soon I will need to substitute $j-k$ for $\kappa$.
-
-Plugging $f_n$ into the second definition of convolution yields
-%
-\[ (f_n \conv g)[j] = \sum_k \exp(2 \pi i n (j-k) / N) g[k]  \]
-%
-We can split the first term into a product:
-%
-\[ (f_n \conv g)[j] = \sum_k \exp(2 \pi i n j / N) \exp(-2 \pi i n k / N) g[k]  \]
-%
-The first half does not depend on $k$, so we can pull it out of the
-summation:
-%
-\[ (f_n \conv g)[j] = \exp(2 \pi i n j / N) \sum_k \exp(-2 \pi i n k / N) g[k]  \]
-%
-Now we recognize the first term is $f_n$ (with $j$ substituted for
-$\kappa$), and the summation is $G[n]$.  So we can write:
-%
-\[ (f_n \conv g)[j] = f_n[j] G[n] \]
-%
-which shows that for each complex exponential, $f_n$, convolution
-with $g$ has the effect of multiplying $f_n$ by $G[n]$.  In other
-words, each $f_n$ is an eigenvector of this operation, and
-$G[n]$ is the corresponding eigenvalue.
-
-
-
-\section{Exercises}
-
-\begin{exercise}
-Are kazoos nonlinear?
-
-Also see \url{http://www.google.com/patents/US20140256218}
-
-And \url{http://designingsound.org/2014/07/spectral-analysis-interview-with-rob-blake/}
-\end{exercise}
-
-
-
-\chapter{Fourier analysis of images}
-
-
-\appendix
-
-\chapter{Linear Algebra}
-
-Dot product
-
-In the special case where $y$ has length 1, we have 
-%
-\[ x \cdot \hat{y} = \norm(x) \cos \theta \]
-%
-which is the {\bf scalar projection} of $x$ onto $\hat{y}$;
-that is, it is the length of the component of $x$ that points
-in the direction of $\hat{y}$.
-
-I mention this now because it will come in handy when we talk
-about transforms.
-
-In the context of computation, it is common to think of a vector as a
-sequence of numbers, and people often use ``vector'' and ``array''
-interchangeably.  But it is more correct to think of a vector as an
-abstract mathematical concept, with an array as one way to represent
-one.
-
-From a mathematical point of view, a vector is a sequence of
-coordinates relative to a {\bf basis}.  Most vectors are implicitly
-defined relative to the ``standard basis'', which is a sequence
-of unit vectors.
-
-For example, in a 3-D Euclidean space, the standard basis is the
-sequence of vectors:
-%
-\begin{eqnarray}
-e_x &=& (1, 0, 0) \\
-e_y &=& (0, 1, 0) \\
-e_z &=& (0, 0, 1) \\
-\end{eqnarray}
-%
-Relative to this basis, the vector $(1, 2, 3)$ is understood to
-mean $1 e_x + 2 e_y + 3 e_z$.  This is similar to the way we
-understand that the number $123$ means $100 + 20 + 3$, provided
-that it is in base 10.
-
-But just as we can write numbers in other bases, we can define vectors
-relative to other bases.  A basis is a sequence of vectors that
-are linearly-independent, which means that no vector in the set
-can be written as a weighted sum of the others.
-
-
-
-
-
-One note on linear algebra vocabulary: I am using ``matrix'' to refer
-to a two-dimensional array, and ``vector'' for a one-dimensional array
-or sequence.  To be pedantic, it would be more correct to think
-of matrices and vectors as abstract mathematical concepts, and NumPy
-arrays as one way (and not the only way) to represent them.
-
-
-This chapter explores the relationship between the synthesis problem
-and the analysis problem.  By writing the synthesis problem in the
-form of matrix operations, we derive an efficient algorithm for computing
-the DCT.
-
-That's useful for analysis and synthesis, but it also provides
-an alternative way to think about these operations: in the vocabulary
-of linear algebra, they are linear transformations, or {\bf transforms}.
-
-To understand transforms, we have to start with bases.  A {\bf basis}
-is a set of linearly-independent vectors, which means that no
-vector in the set can be written as a weighted sum of the others.
-
-In this context, a vector is a sequence of coordinates defined
-relative to a basis.  
-
-
-
-This algorithm is based on a matrix, $M$, that is orthogonal and
-symmetric, so it has the unusual property that the inverse of $M$ is
-$M$ (within a factor of two, anyway).  As a result, the function we
-wrote to compute DCT-IV also computes the inverse DCT.
-
-From 
-
-
-For the analysis problem, we started with a solution that
-takes time proportional to $n^3$ and improved it to take time
-proportional to $n^2$.  It turns out that there is another optimization
-that gets the run time down to $n \log n$.  We'll see how that works
-in Chapter~\ref{dft}.
-
-
-
-\end{document}
-
-
-
-Case study ideas:
-
-\begin{itemize}
-
-\item Pitch tracking in Rock Band
-
-\item Auto-Tune
-
-\item JPEG compression
-
-\item Image recognition in Fourier space (money)
-
-\item Application of cepstrum?
-
-\item Application of z transform -- digital control systems
-
-\item tilt shift effect on a photo
-
+% TODO
+This section is not done.
 
 Integrating a noise signal attenuates high frequency components.
 Specifically, it attenuates the power at each frequency, $f$, in
@@ -5454,6 +5060,571 @@ result from {\tt scipy.stats.linregress} which is a tuple that
 contains the estimated slope and intercept, coefficient of
 determination ($R^2$), p-value, and standard error.  For now,
 we only need the slope, which for this example is -1.8.
+
+
+
+
+\chapter{LTI systems}
+\label{systems}
+
+This chapter presents the theory of signals and systems, using
+musical acoustics as an example.  And it explains an
+important application of the Convolution Theorem, characterization
+of linear, time-invariant systems (which I'll define soon).
+
+The code for this chapter is in {\tt systems.py}, which is in the
+repository for this book (see Section~\ref{code}).
+
+
+\section{Signals and systems}
+
+In the context of signal processing, a {\bf system} is an abstract
+representation of anything that takes a signal as input and produces
+a signal as output.
+
+For example, an electronic amplifier is a circuit that takes an
+electrical signal as input and produces a (louder) signal as output.
+
+As another example, when you listen to a musical performance, you
+can think of the room as a system that takes the sound of the
+performance at the location where it is produced and produces a
+somewhat different sound at the location where you hear it.
+
+A {\bf linear, time-invariant system}\footnote{My presentation here
+  follows \url{http://en.wikipedia.org/wiki/LTI_system_theory}.} is a
+system with these additional properties:
+
+\begin{enumerate}
+
+\item Linearity: If you put two inputs into the system at the same
+  time, the result is the sum of their outputs.  Mathematically, if an
+  input $x_1$ produces output $y_1$ and another input $x_2$ produces
+  $y_2$, then $a x_1 + b x_2$ produces $a y_1 + b y_2$, where $a$ and
+  $b$ are scalars.
+
+\item Time invariance: The
+  effect of the system doesn't vary over time, or depend on the state
+  of the system.  So if inputs $x_1$ and $x_2$ differ by a shift in time,
+  their outputs $y_1$ and $y_2$ differ by the same shift, but are otherwise
+  identical.
+
+\end{enumerate}
+
+Many physical systems have these properties, at least approximately.
+
+\begin{itemize}
+
+\item Circuits that contain only resistors, capacitors and inductors are
+LTI, to the degree that the components behave like their idealized
+models.
+
+\item Mechanical systems that contain springs, masses and
+dashpots are also LTI, assuming linear springs (force proportional
+to displacement) and dashpots (force proportional to velocity).
+
+\item Also, and most relevant to applications in this book,
+the media that transmit sounds (including air, water
+and solids) are well-modeled by LTI systems.
+
+\end{itemize}
+
+LTI systems are described by linear differential equations, and
+the solutions of those equations are complex sinusoids (see
+\url{http://en.wikipedia.org/wiki/Linear_differential_equation}).
+
+This result provides an algorithm for computing the effect of
+an LTI system on an input signal:
+
+\begin{enumerate}
+
+\item Express the signal as the sum of complex sinusoid components.
+
+\item For each input component, compute the corresponding output component.
+
+\item Add up the output components.
+
+\end{enumerate}
+
+At this point, I hope this algorithm sounds familiar.  It's the
+same algorithm we used for convolution in Section~\ref{effconv}, and
+for differentiation in Section~\ref{effdiff}.  This process
+is called {\bf spectral decomposition} because we ``decompose''
+the input signal into its spectral components.
+
+In order to apply this process to an LTI system, we have to {\bf
+  characterize} the system by finding its effect on each component
+of the input signal.  For mechanical systems, it turns out that there
+is a simple and efficient way to do that: you kick it and record
+the output.
+
+Technically, the ``kick'' is called an {\bf impulse} and the
+output is called the {\bf impulse response}.  You might wonder
+how a single impulse can completely characterize a system.  You
+can see the answer by computing the DFT of an impulse.  Here's
+a wave array with an impulse at $t=0$:
+
+\begin{verbatim}
+>>> impulse = np.zeros(8)
+>>> impulse[0] = 1
+>>> impulse
+[ 1.  0.  0.  0.  0.  0.  0.  0.]
+\end{verbatim}
+
+And here's its spectrum:
+
+\begin{verbatim}
+>>> spectrum = np.fft.fft(impulse)
+>>> spectrum
+[ 1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j]
+\end{verbatim}
+
+That's right: an impulse is the sum of components with equal
+magnitudes at all frequencies\footnote{Not to be confused with white
+  noise, which has the same average power at all frequencies, but
+  varies around that average.} (and a phase offset of 0).
+
+Therefore when you test a system by inputting
+an impulse, you are testing the response of the 
+system at all frequencies.  And you can test them all at the same
+time because the system is linear, so simultaneous tests don't
+interfere with each other.
+
+
+\section{Transfer functions}
+
+To characterize the acoustic response of a room or open space, a
+simple way to generate an impulse is to pop a balloon or
+fire a gun.  A gunshot puts an impulse into
+the system; the sound you hear is the impulse response.
+
+%TODO: update the numbers for the figures in this chapter
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems6.pdf}}
+\caption{Waveform of a gunshot.}
+\label{fig.systems6}
+\end{figure}
+
+As an example, I'll use a recording of a gunshot to characterize
+the room where the gun was fired, then use the impulse response
+to simulate the effect of that room on a violin recording.
+
+This example is in {\tt chap10.ipynb}, which is in the repository
+for this book; you can also view it, and listen to the examples,
+at \url{http://tinyurl.com/thinkdsp10}.
+
+Here's the gunshot:
+
+\begin{verbatim}
+    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = response.segment(start=0.26, duration=5.0)
+    response.normalize()
+    response.plot()
+\end{verbatim}
+
+I select a segment starting at 0.26 seconds to remove the silence
+before the gunshot.  Figure~\ref{fig.systems6} (left) shows the
+waveform of the gunshot.  Next we compute the DFT of {\tt response}:
+
+\begin{verbatim}
+    transfer = response.make_spectrum()
+    transfer.plot()
+\end{verbatim}
+
+Figure~\ref{fig.systems6} (right) shows the result.  This spectrum
+encodes the response of the room; for each frequency, the spectrum
+contains a complex number that represents an amplitude multiplier and
+a phase shift.  This spectrum is called a {\bf transfer
+function} because it contains information about how the system transfers
+the input to the output.
+
+Now we can simulate the effect this room would have on the sound
+of a violin.  Here is the violin recording we used in Section~\ref{violin}
+
+\begin{verbatim}
+    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
+    wave.ys = wave.ys[:len(response)]
+    wave.normalize()
+\end{verbatim}
+
+The violin and gunshot waves were sampled at the same framerate,
+44,100 Hz.  And coincidentally, the duration of both is about the
+same.  I trimmed the violin wave to the same length as the gunshot.
+
+Next I compute the DFT of the violin wave:
+
+\begin{verbatim}
+    spectrum = wave.make_spectrum()
+\end{verbatim}
+
+Now I know the magnitude and phase of each component in the
+input, and I know the transfer function of the system.  Their
+product is the DFT of the output, which we can use to compute the
+output wave:
+
+\begin{verbatim}
+    output = (spectrum * transfer).make_wave()
+    output.normalize()
+    output.plot()
+\end{verbatim}
+
+%TODO: Am I missing a figure here?
+Figure~\ref{fig.systems7} shows the output of the system superimposed
+on the input.  The overall shape is similar, but there are substantial
+differences.  And those differences are clearly audible.  Load
+{\tt chap10.ipynb} and listen to them.  One thing I find striking
+about this example is that you can get a sense of what the room
+was like; to me, it sounds like a long, narrow room with hard floors
+and ceilings.  That is, like a firing range.
+
+There's one things I glossed over in this example that I'll mention
+in case it bothers anyone.  The violin recording I started with
+has already been transformed by one system: the room where it was
+recorded.  So what I really computed in my example is the sound
+of the violin after two transformations.  To properly simulate
+the sound of a violin in a different room, I should have characterized
+the room where the violin was recorded and applied the inverse
+of that transfer function first.
+
+
+\section{Systems and convolution}
+
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems8.pdf}}
+\caption{Sum of a gunshot waveform with a shifted, scaled version of
+itself.}
+\label{fig.systems8}
+\end{figure}
+
+If you think the previous example is black magic,
+you are not alone.  I've been thinking about it for a while and it
+still makes my head hurt.
+
+In the previous section, I suggested one way to think about it:
+
+\begin{itemize}
+
+\item An impulse is made up of components with amplitude 1 at all
+  frequencies.
+
+\item The impulse response contains the sum of the responses of the
+  system to all of these components.
+
+\item The transfer function, which is the DFT of the impulse response,
+  encodes the effect of the system on each frequency component in the form
+  of an amplitude multiplier and a phase shift.
+
+\item For any input, we can compute the response of the system
+  by breaking the input into components, computing the response to
+  each component, and adding them up.
+
+\end{itemize}
+
+But if you don't like that, there's another way to think about
+it altogether: convolution!
+
+Suppose that instead of firing one gun, you fire two guns:
+a big one with amplitude 1 at $t=0$ and a smaller one with
+amplitude 0.5 at $t=1$.
+
+We can compute the response of the system by adding up
+the original impulse response and a scaled, shifted version of itself.
+Here's a function that makes a shifted, scaled version of
+a wave:
+
+\begin{verbatim}
+def shifted_scaled(wave, shift, factor):
+    res = wave.copy()
+    res.shift(shift)
+    res.scale(factor)
+    return res
+\end{verbatim}
+
+Here's how we use it to compute the response to a two-gun salute:
+
+\begin{verbatim}
+dt = 1
+shift = dt * response.framerate
+factor = 0.5
+response2 = response + shifted_scaled(response, shift, factor)
+\end{verbatim}
+
+Figure~\ref{fig.systems8} shows the result.  You can hear what
+it sounds like in {\tt chap10.ipynb}.  Not surprisingly, it
+sounds like two gunshots, the first one louder than the second.
+
+Now suppose instead of two guns, you add up 100 guns, with
+a shift of 100 between them.  This loop computes the result:
+
+\begin{verbatim}
+    total = 0
+    for j in range(100):
+        total += shifted_scaled(response, j*100, 1.0)
+\end{verbatim}
+
+At a framerate of 44,100 Hz, there are 441 gunshots per second,
+so you don't hear the individual shots.  Instead, it sounds
+like a periodic signal at 441 Hz.  If you play this example, it
+sounds like a car horn in a garage.
+
+And that brings us to a key insight: you can think of any wave as a
+series of samples, where each sample is an impulse with a different
+magnitude.
+
+As a example, I'll generate a sawtooth signal at 410 Hz:
+
+\begin{verbatim}
+    signal = thinkdsp.SawtoothSignal(freq=410)
+    wave = signal.make_wave(duration=0.1,
+                            framerate=response.framerate)
+\end{verbatim}
+
+Now I'll loop through the series of impulses that make up the
+sawtooth, and add up the impulse responses:
+
+\begin{verbatim}
+    total = 0
+    for j, y in enumerate(wave.ys):
+        total += shifted_scaled(response, j, y)
+\end{verbatim}
+
+The result is what it would sound like to play a sawtooth wave in a
+firing range.  Again, you can listen to it in {\tt chap10.ipynb}.
+
+\begin{figure}
+\input{diagram2}
+\caption{Diagram of the sum of scaled and shifted copies of $g$.}
+\label{fig.convolution}
+\end{figure}
+
+Figure~\ref{fig.convolution} shows a diagram of this computation,
+where $f$ is the sawtooth, $g$ is the impulse response, and $h$
+is the sum of the shifted, scaled copies of $g$.
+
+For the example shown:
+
+\[ h[2] = f[0]g[2] + f[1]g[1] + f[2]g[0]  \]
+
+And more generally,
+
+\[ h[n] = \sum_{m=0}^{N-1} f[m] g[n-m]  \]
+
+You might recognize this equation from Section~\ref{convolution}.  It
+is the convolution of $f$ and $g$.  This shows that if the input is $f$
+and the impulse response of the system is $g$, the output is the
+convolution of $f$ and $g$.
+
+In summary, there are two ways to think about the effect of a system
+on a signal:
+
+\begin{enumerate}
+
+\item The input is a sequence of impulses, so the output is the sum of
+  scaled, shifted copies of the impulse response; that sum is the
+  convolution of the input and the impulse response.
+
+\item The DFT of the impulse response is a transfer function that
+  encodes the effect of the system on each frequency component as a
+  magnitude and phase offset.  The DFT of the input encodes the
+  magnitude and phase offset of the frequency components it contains.
+  Multiplying the DFT of the input by the transfer function yields
+  the DFT of the output.
+
+\end{enumerate}
+
+The equivalence of these two descriptions should not be a surprise;
+it is basically a statement of the Convolution Theorem:
+convolution of $f$ and $g$ in the time
+domain corresponds to multiplication in the frequency domain.
+And if you wondered why convolution is defined as it is, which
+seemed backwards when we talked about smoothing and difference
+windows, now you know the reason: the definition of convolution
+appears naturally in the response of an LTI system to a signal.
+
+
+\section{Proof of the Convolution Theorem}
+
+Well, I've put it off long enough.  It's time to prove the Convolution
+Theorem (CT), which states:
+
+\[ \DFT(f \conv g) = \DFT(f) \DFT(g) \]
+
+where $f$ and $g$ are vectors with the same length, $N$.
+
+I'll proceed in two steps:
+
+\begin{enumerate}
+
+\item I'll show that in the special case where $f$ is a complex
+exponential, convolution with $g$ has the effect of multiplying
+$f$ by a scalar.  
+
+\item In the more general case where $f$ is not a complex exponential,
+we can use the DFT to express it as a sum of exponential components,
+compute the convolution of each component (by multiplication) and
+then add up the results.
+
+\end{enumerate}
+
+Together these steps prove the Convolution Theorem.  But first, let's
+assemble the pieces we'll need.  The DFT of $g$ is:
+%
+\[ DFT(g) = G[k] = \sum_n g[n] \exp(-2 \pi i n k / N) \]
+%
+where $k$ is an index of frequency from
+0 to $N-1$ and $n$ is an index of time from 0 to $N-1$.
+The result, $G$, is a vector of $N$ complex numbers.
+
+The inverse DFT of $F$, which I'll call $f$, is:
+%
+\[ IDFT(F) = f[n] = \sum_k F[k] \exp(2 \pi i n k / N) \]
+%
+And here's the definition of convolution:
+%
+\[ (f \conv g)[n] = \sum_m f[m] g[n-m] \]
+%
+where $m$ is another index of time from 0 to $N-1$.
+Convolution is commutative, so I could equivalently write:
+%
+\[ (f \conv g)[n] = \sum_m f[n-m] g[m] \]
+%
+Now let's consider the special case where $f$ is a complex
+exponential with frequency $k$, which I'll call $e_k$:
+%
+\[ f[n] = e_k[n] = \exp(2 \pi i n k / N) \]
+%
+where $k$ is an index of frequency and $n$ is an index of time.
+
+Plugging $e_k$ into the second definition of convolution yields
+%
+\[ (e_k \conv g)[n] = \sum_m \exp(2 \pi i (n-m) k / N) g[m]  \]
+%
+We can split the first term into a product:
+%
+\[ (e_k \conv g)[n] = \sum_m \exp(2 \pi i n k / N) \exp(-2 \pi i m k / N) g[m]  \]
+%
+The first half does not depend on $m$, so we can pull it out of the
+summation:
+%
+\[ (e_k \conv g)[n] = \exp(2 \pi i n k / N) \sum_m \exp(-2 \pi i m k / N) g[m]  \]
+%
+Now we recognize that the first term is $e_k$, and the summation is
+$G[k]$ (using $m$ as the index of time).  So we can write:
+%
+\[ (e_k \conv g)[n] = e_k[n] G[k] \]
+%
+which shows that for each complex exponential, $e_k$, convolution
+with $g$ has the effect of multiplying $e_k$ by $G[k]$.  In mathematical
+terms, each $e_k$ is an eigenvector of this operation, and
+$G[k]$ is the corresponding eigenvalue.
+
+Now for the second part of the proof.  If the input signal, $f$, doesn't
+happen to be a complex exponential, we can express it as a sum of
+complex exponentials by computing its DFT, $F$.
+For each value of $k$ from 0 to $N-1$, $F[k]$ is the complex
+magnitude of the component with frequency $k$.
+
+Each input component is a complex exponential with magnitude
+$F[k]$, so each output component is a complex
+exponential with magnitude $F[k]G[k]$, based on the first part of
+the proof.
+
+Because the system is linear, the output is just the sum of the
+output components:
+%
+\[ (f \conv g)[n] = \sum_k F[k] G[k] e_k[n] \]
+%
+Plugging in the definition of $e_k$ yields
+%
+\[ (f \conv g)[n] = \sum_k F[k] G[k] \exp(2 \pi i n k / N) \]
+%
+The right hand side is the inverse DFT of the product $F G$.  Thus:
+%
+\[ (f \conv g) = \IDFT( F G ) \]
+%
+Substituting $F = \DFT(f)$ and $G = \DFT(g)$:
+%
+\[ (f \conv g) = \IDFT( \DFT(f) \DFT(g) ) \]
+%
+Finally, taking the DFT of both sides yields the Convolution Theorem:
+%
+\[ \DFT(f \conv g) = \DFT(f) \DFT(g) \]
+%
+QED
+
+
+\section{Exercises}
+
+% TODO: make exercises
+\begin{exercise}
+\end{exercise}
+
+\begin{exercise}
+\end{exercise}
+
+Solutions to these exercises are in {\tt chap10soln.ipynb}.
+
+
+\chapter{Modulation and sampling}
+
+In Section~\ref{aliasing} I defined the folding frequency, also called
+the Nyquist frequency, and I claimed that ???
+
+This chapter presents the theory of signals and systems, using
+musical acoustics as an example.  And it explains an
+important application of the Convolution Theorem, characterization
+of linear, time-invariant systems (which I'll define soon).
+
+The code for this chapter is in {\tt sampling.py}, which is in the
+repository for this book (see Section~\ref{code}).
+
+You can listen to the examples in an IPython notebook, {\tt chap11.ipynb}, 
+which is also in the repository, and you can view it at
+at \url{http://tinyurl.com/thinkdsp11}.
+
+
+
+\section{Convolution with impulses}
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=2.5in]{figs/sampling1.pdf}}
+\caption{.}
+\label{fig.sampling1}
+\end{figure}
+
+Figure~\ref{fig.sampling1} shows 
+
+
+\chapter{Controls}
+
+
+
+
+
+\end{document}
+
+
+
+Case study ideas:
+
+\begin{itemize}
+
+\item Pitch tracking in Rock Band
+
+\item Auto-Tune
+
+\item JPEG compression
+
+\item Image recognition in Fourier space (money)
+
+\item Application of cepstrum?
+
+\item Application of z transform -- digital control systems
+
+\item tilt shift effect on a photo
+
 
 
 \end{itemize}
