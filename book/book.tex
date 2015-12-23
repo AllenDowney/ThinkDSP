@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.10.0}
+\newcommand{\theversion}{0.10.1}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -989,7 +989,7 @@ violin recording, yield DFTs with many peaks.  In this section we
 investigate the relationship between waveforms and their spectrums.
 
 \begin{figure}
-% example2.py
+% aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/triangle-200-1.pdf}}
 \caption{Segment of a triangle signal at 200 Hz.}
 \label{fig.triangle.200.1}
@@ -1048,7 +1048,7 @@ signal.plot()
 \end{verbatim}
 
 \begin{figure}
-% example2.py
+% aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/triangle-200-2.pdf}}
 \caption{Spectrum of a triangle signal at 200 Hz.}
 \label{fig.triangle.200.2}
@@ -1087,7 +1087,7 @@ approximately $1.7^2 = 2.9$.  This relationship is called the
 \label{square}
 
 \begin{figure}
-% example2.py
+% aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/square-100-1.pdf}}
 \caption{Segment of a square signal at 100 Hz.}
 \label{fig.square.100.1}
@@ -1120,7 +1120,7 @@ positive values to 1.  Multiplying by {\tt amp} yields a square
 wave that jumps between {\tt -amp} and {\tt amp}.
 
 \begin{figure}
-% example2.py
+% aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/square-100-2.pdf}}
 \caption{Spectrum of a square signal at 100 Hz.}
 \label{fig.square.100.2}
@@ -1144,7 +1144,7 @@ explore other waveforms and other harmonic structures.
 \label{aliasing}
 
 \begin{figure}
-% example2.py
+% aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/triangle-1100-2.pdf}}
 \caption{Spectrum of a triangle signal at 1100 Hz sampled at
 10,000 frames per second.}
@@ -1190,14 +1190,14 @@ and sample them at 10,000 frames per second:
 \end{verbatim}
 
 \begin{figure}
-% example2.py
-\centerline{\includegraphics[height=2.5in]{figs/aliasing-3.pdf}}
+% aliasing.py
+\centerline{\includegraphics[height=2.5in]{figs/aliasing1.pdf}}
 \caption{Cosine signals at 4500 and 5500 Hz, sampled at 10,000 frames
 per second.  They are identical.}
-\label{fig.aliasing-3}
+\label{fig.aliasing1}
 \end{figure}
 
-Figure~\ref{fig.aliasing-3} shows the result.  I plotted the
+Figure~\ref{fig.aliasing1} shows the result.  I plotted the
 samples using vertical lines, to make it easier to compare the
 two Waves, and I offset them slightly in time.  The problem
 should be clear: the
@@ -1537,13 +1537,26 @@ phases = np.insert(phases, 0, 0)
 
 {\tt np.cumsum} computes the cumulative sum, which is almost
 what we want, but it doesn't start at 0.  So I use {\tt np.insert}
-to add a 0 at the beginnign.
+to add a 0 at the beginning.
 
 The result is a NumPy array where the {\tt i}th element contains the
 sum of the first {\tt i} terms from {\tt dphis}; that is, the total
 phase at the end of the {\tt i}th interval.  Finally, {\tt np.cos}
 computes the amplitude of the wave as a function of phase (remember
 that phase is expressed in radians).
+
+If you know calculus, you might notice that the limit as
+$\Delta t$ gets small is
+%
+\[ d\phi = 2 \pi f(t) dt \]
+%
+Dividing through by $dt$ yields
+%
+\[ \frac{d\phi}{dt} = 2 \pi f(t) \]
+%
+In other words, frequency is the derivative of phase.  Conversely,
+phase is the integral of frequency.  When we used {\tt cumsum}
+to go from frequency to phase, we were approximating integration.
 
 
 \section{Exponential chirp}
@@ -1595,8 +1608,8 @@ that makes one:
     wave = signal.make_wave(duration=1)
 \end{verbatim}
 
-You can listen to these examples in {\tt chap03.ipynb}.  If you have a
-musical ear, it might sound more like music than the linear chirp.
+You can listen to these examples in {\tt chap03.ipynb} and compare
+the linear and exponential chirps.  
 
 
 \section{Spectrum of a chirp}
@@ -1736,14 +1749,14 @@ limitation of this kind of time-frequency analysis.
 \end{figure}
 
 In order to explain how \verb"make_spectrogram" works, I have
-to explain windowing, and in order to explain windowing, I have to
+to explain windowing; and in order to explain windowing, I have to
 show you the problem it is meant to address, which is leakage.
 
 The Discrete Fourier Transform (DFT), which we use to compute
 Spectrums, treats waves as if they are periodic; that is, it assumes
 that the finite segment it operates on is a complete period from an
 infinite signal that repeats over all time.  In practice, this
-assumption is often not true, which creates problems.
+assumption is often false, which creates problems.
 
 One common problem is discontinuity at the beginning and end of the
 segment.  Because DFT assumes that the signal is periodic, it
@@ -1820,17 +1833,24 @@ Figure~\ref{fig.windowing1} (right) shows the spectrum of the windowed
 signal.  Windowing has reduced leakage substantially, but not
 completely.
 
-Here's what the code looks like.  {\tt Wave} provides {\tt hamming},
+Here's what the code looks like.  {\tt Wave} provides {\tt window},
 which applies a Hamming window:
 
 \begin{verbatim}
 #class Wave:
-    def hamming(self):
-        self.ys *= np.hamming(len(self.ys))
+    def window(self, window):
+        self.ys *= window
 \end{verbatim}
 
-{\tt np.hamming} computes the Hamming window with the given number
-of elements.  NumPy provides functions to compute other window
+And NumPy provides {\tt hamming}, which computes a Hamming window
+with a given length:
+
+\begin{verbatim}
+window = np.hamming(len(wave))
+wave.window(window)
+\end{verbatim}
+
+NumPy provides functions to compute other window
 functions, including {\tt bartlett}, {\tt blackman}, {\tt hanning},
 and {\tt kaiser}.  One of the exercises at the end of this chapter
 asks you to experiment with these other windows.
@@ -1847,8 +1867,7 @@ asks you to experiment with these other windows.
 
 Now that we understand windowing, we can understand the
 implementation of spectrogram.
-Here is the {\tt Wave} method that computes spectrograms
-(leaving out some details):
+Here is the {\tt Wave} method that computes spectrograms:
 
 \begin{verbatim}
 #class Wave:
@@ -1889,10 +1908,10 @@ like.
 \verb"spec_map" is a dictionary that maps from a timestamp to
 a Spectrum.
 
-Inside the while loop, we select a slice from the wave and multiply
-by the window; then we construct a Spectrum
+Inside the while loop, we select a slice from the wave and apply
+the window; then we construct a Spectrum
 object and add it to \verb"spec_map".  The nominal time of
-each segment is the midpoint.
+each segment, {\tt t}, is the midpoint.
 
 Then we advance {\tt i} and {\tt j}, and continue as long as {\tt j}
 doesn't go past the end of the Wave.
@@ -1902,13 +1921,12 @@ is the definition of Spectrogram:
 
 \begin{verbatim}
 class Spectrogram(object):
-
     def __init__(self, spec_map, seg_length):
         self.spec_map = spec_map
         self.seg_length = seg_length
 \end{verbatim}
 
-Like many \verb"__init__" methods, this one just stores the
+Like many init methods, this one just stores the
 parameters as attributes.
 
 {\tt Spectrogram} provides {\tt plot}, which generates a
@@ -1945,6 +1963,14 @@ Hint: combine the evaluate functions from {\tt Chirp} and
 Draw a sketch of what you think the spectrogram of this signal
 looks like, and then plot it.  The effect of aliasing should be
 visually apparent, and if you listen carefully, you can hear it.
+\end{exercise}
+
+
+\begin{exercise}
+Make a sawtooth chirp that sweeps from 2500 to 3000 Hz, then use it to
+make a wave with duration 1 s and framerate 20 kHz.  Draw a sketch of
+what you think the spectrum will look like.  Then plot the
+spectrum and see if you got it right.
 \end{exercise}
 
 

@@ -7,10 +7,6 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 from __future__ import print_function, division
 
-import math
-import numpy
-import scipy.fftpack
-
 import thinkdsp
 import thinkplot
 
@@ -27,15 +23,14 @@ def triangle_example(freq):
     segment = signal.make_wave(duration, framerate=framerate)
     segment.plot()
     thinkplot.save(root='triangle-%d-1' % freq,
-                   xlabel='time (s)',
+                   xlabel='Time (s)',
                    axis=[0, duration, -1.05, 1.05])
 
     wave = signal.make_wave(duration=0.5, framerate=framerate)
     spectrum = wave.make_spectrum()
     spectrum.plot()
     thinkplot.save(root='triangle-%d-2' % freq,
-                   xlabel='frequency (Hz)',
-                   ylabel='amplitude')
+                   xlabel='Frequency (Hz)')
 
 
 def square_example(freq):
@@ -50,18 +45,17 @@ def square_example(freq):
     segment = signal.make_wave(duration, framerate=framerate)
     segment.plot()
     thinkplot.save(root='square-%d-1' % freq,
-                   xlabel='time (s)',
+                   xlabel='Time (s)',
                    axis=[0, duration, -1.05, 1.05])
 
     wave = signal.make_wave(duration=0.5, framerate=framerate)
     spectrum = wave.make_spectrum()
     spectrum.plot()
     thinkplot.save(root='square-%d-2' % freq,
-                   xlabel='frequency (Hz)',
-                   ylabel='amplitude')
+                   xlabel='Frequency (Hz)')
 
 
-def aliasing_example():
+def aliasing_example(offset=0.000003):
     """Makes a figure showing the effect of aliasing.
     """
     framerate = 10000
@@ -71,24 +65,28 @@ def aliasing_example():
     signal = thinkdsp.CosSignal(freq1)
     duration = signal.period*5
     segment = signal.make_wave(duration, framerate=framerate)
-    segment.plot(label=freq1)
+    thinkplot.Hlines(0, 0, duration, color='gray')
+
+    segment.shift(-offset)
+    segment.plot_vlines(label=freq1, linewidth=3)
 
     freq2 = 5500
     signal = thinkdsp.CosSignal(freq2)
     segment = signal.make_wave(duration, framerate=framerate)
-    segment.plot(label=freq2)
+    segment.shift(+offset)
+    segment.plot_vlines(label=freq2, linewidth=3)
 
-    thinkplot.save(root='aliasing-3',
-                   xlabel='time (s)',
-                   axis=[0, duration, -1.05, 1.05]
+    thinkplot.save(root='aliasing1',
+                   xlabel='Time (s)',
+                   axis=[-0.00002, duration, -1.05, 1.05]
                    )
 
 
 def main():
-    square_example(freq=100)
+    #triangle_example(freq=200)
+    #triangle_example(freq=1100)
+    #square_example(freq=100)
     aliasing_example()
-    triangle_example(freq=200)
-    triangle_example(freq=1100)
 
 
 if __name__ == '__main__':
