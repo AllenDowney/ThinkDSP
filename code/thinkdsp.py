@@ -519,7 +519,7 @@ class Spectrogram:
 
         returns: sequence of float times in seconds
         """
-        ts = sorted(self.spec_map.iterkeys())
+        ts = sorted(iter(self.spec_map))
         return ts
 
     def frequencies(self):
