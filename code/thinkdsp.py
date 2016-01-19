@@ -812,7 +812,12 @@ class Wave:
 
         returns: Wave
         """
-        i = 0 if start is None else self.find_index(start)
+        if start is None:
+            start = self.ts[0]
+            i = 0
+        else:
+            i = self.find_index(start)
+
         j = None if duration is None else self.find_index(start + duration)
         return self.slice(i, j)
 
