@@ -26,8 +26,7 @@ def process_noise(signal, root='white'):
     segment = wave.segment(duration=0.1)
     segment.plot(linewidth=1, alpha=0.5)
     thinkplot.save(root=root+'noise0',
-                   xlabel='time (s)',
-                   ylabel='amplitude',
+                   xlabel='Time (s)',
                    ylim=[-1.05, 1.05])
 
     spectrum = wave.make_spectrum()
@@ -35,9 +34,9 @@ def process_noise(signal, root='white'):
     # 1: spectrum
     spectrum.plot_power(linewidth=1, alpha=0.5)
     thinkplot.save(root=root+'noise1',
-                   xlabel='frequency (Hz)',
-                   ylabel='power density',
-                   xlim=[0, framerate/2])
+                   xlabel='Frequency (Hz)',
+                   ylabel='Power',
+                   xlim=[0, spectrum.fs[-1]])
 
     slope, _, _, _, _ = spectrum.estimate_slope()
     print('estimated slope', slope)
@@ -46,36 +45,19 @@ def process_noise(signal, root='white'):
     integ = spectrum.make_integrated_spectrum()
     integ.plot_power()
     thinkplot.save(root=root+'noise2',
-                   xlabel='frequency (Hz)',
-                   ylabel='cumulative fraction of total power',
+                   xlabel='Frequency (Hz)',
+                   ylabel='Cumulative fraction of total power',
                    xlim=[0, framerate/2])
 
-    # 3: log-log spectral density
-    spectrum.plot_power(low=1, linewidth=1, alpha=0.5)
+    # 3: log-log power spectrum
+    spectrum.fs[0] = 0
+    spectrum.plot_power(linewidth=1, alpha=0.5)
     thinkplot.save(root=root+'noise3',
-                   xlabel='frequency (Hz)',
-                   ylabel='power density',
+                   xlabel='Frequency (Hz)',
+                   ylabel='Power',
                    xscale='log',
                    yscale='log',
                    xlim=[0, framerate/2])
-
-
-def plot_power_density(root, spectrum):
-    """
-    """
-    # 4: CDF of power density
-    cdf = thinkstats2.MakeCdfFromList(spectrum.power)
-    thinkplot.cdf(cdf)
-    thinkplot.save(root=root+'noise4',
-                   xlabel='power density',
-                   ylabel='CDF')
-
-    # 5: CCDF of power density, log-y
-    thinkplot.cdf(cdf, complement=True)
-    thinkplot.save(root=root+'noise5',
-                   xlabel='power density',
-                   ylabel='log(CCDF)',
-                   yscale='log')
 
 
 def plot_gaussian_noise():
@@ -88,14 +70,14 @@ def plot_gaussian_noise():
 
     thinkplot.preplot(2, cols=2)
     thinkstats2.NormalProbabilityPlot(spectrum.real, label='real')
-    thinkplot.config(xlabel='normal sample',
-                     ylabel='power density',
+    thinkplot.config(xlabel='Normal sample',
+                     ylabel='Power',
                      ylim=[-250, 250],
                      loc='lower right')
 
     thinkplot.subplot(2)
     thinkstats2.NormalProbabilityPlot(spectrum.imag, label='imag')
-    thinkplot.config(xlabel='normal sample',
+    thinkplot.config(xlabel='Normal sample',
                      ylim=[-250, 250],
                      loc='lower right')
 
@@ -110,31 +92,38 @@ def plot_pink_noise():
     duration = 1.0
     framerate = 512
 
+    def make_spectrum(signal):
+        wave = signal.make_wave(duration=duration, framerate=framerate)
+        spectrum = wave.make_spectrum()
+        spectrum.hs[0] = 0
+        return spectrum
+
     signal = thinkdsp.UncorrelatedUniformNoise()
-    wave = signal.make_wave(duration=duration, framerate=framerate)
-    white = wave.make_spectrum()
+    white = make_spectrum(signal)
 
     signal = thinkdsp.PinkNoise()
-    wave = signal.make_wave(duration=duration, framerate=framerate)
-    pink = wave.make_spectrum()
+    pink = make_spectrum(signal)
 
     signal = thinkdsp.BrownianNoise()
-    wave = signal.make_wave(duration=duration, framerate=framerate)
-    red = wave.make_spectrum()
+    red = make_spectrum(signal)
 
-    linewidth = 1
-    white.plot_power(low=1, label='white', color='gray', linewidth=linewidth)
-    pink.plot_power(low=1, label='pink', color='pink', linewidth=linewidth)
-    red.plot_power(low=1, label='red', color='red', linewidth=linewidth)
+    linewidth = 2
+    white.plot_power(label='white', color='#9ecae1', linewidth=linewidth)
+    pink.plot_power(label='pink', color='#4292c6', linewidth=linewidth)
+    red.plot_power(label='red', color='#2171b5', linewidth=linewidth)
     thinkplot.save(root='noise-triple',
-                   xlabel='frequency (Hz)',
-                   ylabel='power',
+                   xlabel='Frequency (Hz)',
+                   ylabel='Power',
                    xscale='log',
                    yscale='log',
-                   axis=[1, 300, 1e-4, 1e5])
+                   xlim=[1, red.fs[-1]])
 
 
 def main():
+    thinkdsp.random_seed(17)
+    plot_pink_noise()
+
+    thinkdsp.random_seed(17)
     plot_gaussian_noise()
 
     thinkdsp.random_seed(20)
@@ -148,8 +137,6 @@ def main():
     thinkdsp.random_seed(17)
     signal = thinkdsp.BrownianNoise()
     process_noise(signal, root='red')
-
-    plot_pink_noise()
 
 
 if __name__ == '__main__':
