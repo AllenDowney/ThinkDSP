@@ -7,12 +7,12 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 from __future__ import print_function, division
 
-import math
-import numpy
+import numpy as np
 
 import thinkdsp
 import thinkplot
-PI2 = math.pi * 2
+
+PI2 = np.pi * 2
 
 
 def synthesize1(amps, freqs, ts):
@@ -41,9 +41,9 @@ def synthesize2(amps, freqs, ts):
 
     returns: wave array
     """
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    ys = numpy.dot(M, amps)
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    ys = np.dot(M, amps)
     return ys
 
 
@@ -58,9 +58,9 @@ def analyze1(ys, freqs, ts):
 
     returns: vector of amplitudes
     """
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.linalg.solve(M, ys)
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.linalg.solve(M, ys)
     return amps
 
 
@@ -75,9 +75,9 @@ def analyze2(ys, freqs, ts):
 
     returns: vector of amplitudes
     """
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.dot(M, ys) / 2
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.dot(M, ys) / 2
     return amps
 
 
@@ -89,22 +89,22 @@ def dct_iv(ys):
     returns: vector of amplitudes
     """
     N = len(ys)
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
-    amps = numpy.dot(M, ys) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
+    amps = np.dot(M, ys) / 2
     return amps
 
 
 def synthesize_example():
     """Synthesizes a sum of sinusoids and plays it.
     """
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     freqs = [100, 200, 300, 400]
 
     framerate = 11025
-    ts = numpy.linspace(0, 1, 11025)
+    ts = np.linspace(0, 1, 11025)
     ys = synthesize2(amps, freqs, ts)
     wave = thinkdsp.Wave(ys, framerate)
     wave.normalize()
@@ -118,24 +118,24 @@ def synthesize_example():
 
 
 def test1():
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
     time_unit = 0.001
-    ts = numpy.arange(N) / N * time_unit
+    ts = np.arange(N) / N * time_unit
     max_freq = N / time_unit / 2
-    freqs = numpy.arange(N) / N * max_freq
-    args = numpy.outer(ts, freqs)
-    M = numpy.cos(PI2 * args)
+    freqs = np.arange(N) / N * max_freq
+    args = np.outer(ts, freqs)
+    M = np.cos(PI2 * args)
     return M
 
 
 def test2():
     """
     """
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
     print('amps', amps)
     print('ts', ts)
     print('freqs', freqs)
@@ -148,10 +148,10 @@ def test2():
 def test_dct():
     """
     """
-    amps = numpy.array([0.6, 0.25, 0.1, 0.05])
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
-    ts = (0.5 + numpy.arange(N)) / N
-    freqs = (0.5 + numpy.arange(N)) / 2
+    ts = (0.5 + np.arange(N)) / N
+    freqs = (0.5 + np.arange(N)) / 2
     ys = synthesize2(amps, freqs, ts)
 
     amps2 = dct_iv(ys)
@@ -160,7 +160,7 @@ def test_dct():
 
 
 def main():
-    numpy.set_printoptions(precision=3, suppress=True)
+    np.set_printoptions(precision=3, suppress=True)
 
     test1()
     test2()
