@@ -1,9 +1,3 @@
-FILES = thinkdsp.py violin.py example1.py example2.py example3.py \
-thinkplot.py rednoise.py noise.py
-
-DATA = 92002__jcveliz__violin-origional.wav \
-18871__zippi1__sound-bell-440hz.wav
-
 DOCS = thinkdsp.html thinkplot.html
 
 DOCPY = thinkdsp.py thinkplot.py
@@ -70,21 +64,10 @@ sampling6.pdf sampling6.eps \
 sampling7.pdf sampling7.eps \
 sampling8.pdf sampling8.eps \
 
-all_figs:
-	python violin.py
-	python sampling.py
-
 FIGDEST = ../book/figs
 
 %.html: %.py
 	pydoc -w $<
-
-code:
-	zip -r thinkstats.code.zip $(FILES)
-	rsync -a thinkstats.code.zip $(FILES) $(DATA) $(DEST)
-	rsync -a $(DOCS) $(DEST)
-	chmod -R o+r $(DEST)/*
-	cd /home/downey/public_html/greent; sh back
 
 figs:
 	rsync -a $(FIGS) $(FIGDEST)
