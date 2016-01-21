@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.10.1}
+\newcommand{\theversion}{0.10.3}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -580,11 +580,11 @@ play back.
 
 {\tt offset} is a {\bf phase offset} in radians.  Phase offset
 determines where in the period the signal starts.  For example, a
-cosine signal with {\tt offset=0} starts at $\cos 0$, which is 1.
-With {\tt offset=pi/2} it starts at $\cos \pi/2$, which is 0.  A sine
+sine signal with {\tt offset=0} starts at $\sin 0$, which is 0.
+With {\tt offset=pi/2} it starts at $\sin \pi/2$, which is 1.  A cosine
 signal with {\tt offset=0} also starts at 0.  In fact, a cosine signal
-with {\tt offset=pi/2} is identical to a sine signal with {\tt
-  offset=0}.
+with {\tt offset=0} is identical to a sine signal with {\tt
+  offset=pi/2}.
 
 Signals have an \verb"__add__" method, so you can use the {\tt +}
 operator to add them:
@@ -2070,7 +2070,7 @@ signal should be evaluated.  It uses
 uniform distribution.  In this example, the values are in
 the range between {\tt -amp} to {\tt amp}.
 
-The following example makes generates UU noise with duration 0.5
+The following example generates UU noise with duration 0.5
 seconds at 11,025 samples per second.
 
 \begin{verbatim}
@@ -2085,7 +2085,7 @@ waveform looks like.  As expected, it looks pretty random.
 \begin{figure}
 % noise.py
 \centerline{\includegraphics[height=2.5in]{figs/whitenoise1.pdf}}
-\caption{Spectrum of uncorrelated uniform noise.}
+\caption{Power spectrum of uncorrelated uniform noise.}
 \label{fig.whitenoise1}
 \end{figure}
 
@@ -2097,13 +2097,13 @@ spectrum.plot_power()
 \end{verbatim}
 
 \verb"Spectrum.plot_power" is similar to \verb"Spectrum.plot",
-except that it plots power density instead of amplitude.  Power 
-density is the square of amplitude, expressed in units of power per Hz.
+except that it plots power instead of amplitude.
+Power is the square of amplitude.
 I am switching from amplitude to power in this chapter because
 it is more conventional in the context of noise.
 
 Figure~\ref{fig.whitenoise1} shows the result.  Like the signal, the
-spectrum looks pretty random.  In fact, it is random, but we have to
+spectrum looks pretty random.  In fact, it {\em is} random, but we have to
 be more precise about the word ``random''.  There are at least three
 things we might like to know about a noise signal or its spectrum:
 
@@ -2180,8 +2180,6 @@ we can compute and plot the integrated spectrum like this:
 \begin{verbatim}
     integ = spectrum.make_integrated_spectrum()
     integ.plot_power()
-    thinkplot.show(xlabel='frequency (Hz)',
-                   ylabel='cumulative power')
 \end{verbatim}
 
 The result, shown in Figure~\ref{fig.whitenoise2}, is a straight line,
@@ -2190,7 +2188,6 @@ Noise with equal power at all frequencies is called {\bf white noise}
 by analogy with light, because an equal mixture of light at all
 visible frequencies is white.
 
-% TODO: logical quotation marks
 
 
 \section{Brownian noise}
@@ -2265,16 +2262,13 @@ If you plot the spectrum of Brownian noise, it doesn't look like
 much.  Nearly all of the power is at the lowest frequencies; on a
 linear scale, the higher frequency components are not visible.
 
-To see the shape of the spectrum more clearly, we can plot power density
+To see the shape of the spectrum more clearly, we can plot power
 and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
     spectrum = wave.make_spectrum()
     spectrum.plot_power(low=1, linewidth=1, alpha=0.5)
-    thinkplot.show(xlabel='frequency (Hz)',
-                   ylabel='power density',
-                   xscale='log',
-                   yscale='log')
+    thinkplot.config(xscale='log', yscale='log')
 \end{verbatim}
 
 %TODO: check this figure reference
@@ -2286,21 +2280,23 @@ Chapter~\ref{systems}), so we can write this relationship:
 \[ \log P = k -2 \log f \]
 %
 where $P$ is power, $f$ is frequency, and $k$ is the intercept
-of the line, which is not relevant for our purposes.
+of the line, which is not important for our purposes.
 Exponentiating both sides yields:
 %
 \[ P = K / f^{2} \]
 %
-where $K$ is $e^k$, but still not relevant.  More important is
+where $K$ is $e^k$, but still not important.  More relevant is
 that power is proportional to $1/f^2$, which is characteristic
 of Brownian noise.
 
 Brownian noise is also called {\bf red noise}, for the same reason that
 white noise is called ``white''.  If you combine visible light with
-the same relationship between frequency and power, most of the power
+power proportional to $1/f^2$, most of the power
 would be at the low-frequency end of the spectrum, which is red.
 Brownian noise is also sometimes called ``brown noise'', but I think
 that's confusing, so I won't use it.
+
+%TODO: refer back to this in the diff/int chapter
 
 
 \section{Pink Noise}
@@ -2362,7 +2358,7 @@ class PinkNoise(_Noise):
 
 {\tt duration} is the length of the wave in seconds.  {\tt start} is
 the start time of the wave; it is included so that \verb"make_wave"
-has the same interface for all types of noise, but for random noises,
+has the same interface for all types of signal, but for random noise,
 start time is irrelevant.  And {\tt framerate} is the number of
 samples per second.
 
@@ -2391,7 +2387,7 @@ the wave.
 $f^{\beta/2}$.  Since power is the square of amplitude, this
 operation divides the power at
 each component by $f^\beta$.  It treats the component
-at $f=0$ as a special case, partly to avoid dividing by 0, partly
+at $f=0$ as a special case, partly to avoid dividing by 0, and partly
 because this element represents the bias of the signal,
 which we are going to set to 0 anyway. 
 
@@ -2484,6 +2480,8 @@ samples is large.
 
 \section{Exercises}
 
+Solutions to these exercises are in {\tt chap04soln.ipynb}.
+
 \begin{exercise}
 ``A Soft Murmur'' is a web site that plays a mixture of natural
 noise sources, including rain, waves, wind, etc.  At
@@ -2502,13 +2500,13 @@ In the long run, we expect the power at all frequencies to be equal,
 but in any sample, the power at each frequency is random.
 
 To estimate the long-term average power at each frequency, we can
-break a long signal into segments, compute the power spectral
-density for each segment, and then compute the average across
+break a long signal into segments, compute the power spectrum
+for each segment, and then compute the average across
 the segments.  You can read more about this algorithm at
 \url{http://en.wikipedia.org/wiki/Bartlett's_method}.
 
 Implement Bartlett's method and use it to estimate the power
-spectral density for a noise wave.  Hint: look at the implementation
+spectrum for a noise wave.  Hint: look at the implementation
 of \verb"make_spectrogram".
 \end{exercise}
 
@@ -2522,6 +2520,30 @@ Does it resemble white, pink, or Brownian noise?
 
 
 \begin{exercise}
+A Geiger counter is a device that detects radiation.
+When an ionizing particle strikes the detector, it outputs a surge of
+current.  The total output at a point in time can be modeled as 
+uncorrelated Poisson (UP) noise, where each sample is
+a random quantity from a Poisson distribution, which corresponds to the
+number of particles detected during an interval.
+
+Write a class called {\tt UncorrelatedPoissonNoise} that inherits
+from \verb"thinkdsp._Noise" and provides {\tt evaluate}.  It should
+use {\tt np.random.poisson} to generate random values from a Poisson
+distribution.  The parameter of this function, {\tt lam}, is the
+average number of particles during each interval.  You can use the
+attribute {\tt amp} to specify {\tt lam}.  For example, if the
+framerate is 10 kHz and {\tt amp} is 0.001, we expect about 10
+``clicks'' per second.
+
+Generate about a second of UP noise and listen to it.  For low values
+of {\tt amp}, like 0.001, it should sound like a Geiger counter.  For
+higher values it should sound like white noise.  Compute and plot the
+power spectrum to see whether it looks like white noise.
+\end{exercise}
+
+
+\begin{exercise}
 The algorithm in this chapter for generating pink noise is
 conceptually simple but computationally expensive.  There are
 more efficient alternatives, like the Voss-McCartney algorithm.
@@ -2529,8 +2551,6 @@ Research this method, implement it, compute the spectrum of
 the result, and confirm that it has the desired relationship
 between power and frequency.
 \end{exercise}
-
-Solutions to these exercises are in {\tt chap04soln.ipynb}.
 
 
 \chapter{Autocorrelation}
@@ -2541,8 +2561,6 @@ noise as ``correlated'', because each value depends on the preceding
 value.  In this chapter I define these terms more precisely and
 present the {\bf autocorrelation function}, which is a useful tool
 for signal analysis.
-
-But before we get to autocorrelation, we'll start with correlation.
 
 The code for this chapter is in {\tt autocorr.py}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -2570,10 +2588,11 @@ when one variable is high, the other tends to be low.
 The magnitude of $\rho$ indicates the strength of the correlation.  If
 $\rho$ is 1 or -1, the variables are perfectly correlated, which means
 that if you know one, you can make a perfect prediction about the
-other.
+other.  If $\rho$ is near zero, the correlation is probably weak, so
+if you know one, it doesn't tell you much about the others,
 
-If $\rho$ is near zero, the correlation might be weak, or there might
-be a nonlinear relationship that is not captured by this coefficient
+I say ``probably weak'' because it is also possible that there is
+a nonlinear relationship that is not captured by the coefficient
 of correlation.  Nonlinear relationships are often important in
 statistics, but less often relevant for signal processing, so I
 won't say more about them here.
@@ -2595,7 +2614,7 @@ I'll present an example with only two variables.  First, I define
 a function that constructs sine waves with different phase offsets:
 
 \begin{verbatim}
-def make_wave(offset):
+def make_sine(offset):
     signal = thinkdsp.SinSignal(freq=440, offset=offset)
     wave = signal.make_wave(duration=0.5, framerate=10000)
     return wave
@@ -2604,8 +2623,8 @@ def make_wave(offset):
 Next I instantiate two waves with different offsets:
 
 \begin{verbatim}
-wave1 = make_wave(offset=0)
-wave2 = make_wave(offset=1)
+wave1 = make_sine(offset=0)
+wave2 = make_sine(offset=1)
 \end{verbatim}
 
 Figure~\ref{fig.autocorr1} shows what the first few periods of these
@@ -2618,8 +2637,8 @@ expect them to be correlated.
  [ 0.54  1.  ]]
 \end{verbatim}
 
-The option {\tt ddof=0} indicates that {\tt corrcoef} should
-divide by $N$ rather than the default, $N-1$.
+The option {\tt ddof=0} indicates that {\tt corrcoef} should divide by
+$N$, as in the equation above, rather than use the default, $N-1$.
 
 The result is a correlation matrix:
 the first element is the correlation of {\tt wave1}
@@ -2669,19 +2688,13 @@ To compute serial correlation, we can shift a signal and then compute
 the correlation of the shifted version with the original.
 
 \begin{verbatim}
-def corrcoef(xs, ys):
-    return np.corrcoef(xs, ys, ddof=0)[0, 1]
-
 def serial_corr(wave, lag=1):
     n = len(wave)
     y1 = wave.ys[lag:]
     y2 = wave.ys[:n-lag]
-    corr = corrcoef(y1, y2)
+    corr = np.corrcoef(y1, y2, ddof=0)[0, 1]
     return corr
 \end{verbatim}
-
-{\tt corrcoef} is a convenience function that simplifies
-the interface to {\tt np.corrcoef}.
 
 \verb"serial_corr" takes a Wave object and
 {\tt lag}, which is the integer number of places to shift the wave.
@@ -2816,7 +2829,7 @@ a short segment from the wave and plot its spectrum:
     duration = 0.01
     segment = wave.segment(start=0.2, duration=duration)
     spectrum = segment.make_spectrum()
-    spectrum.plot(high=15)
+    spectrum.plot(high=1000)
 \end{verbatim}
 
 This segment starts at 0.2 seconds and lasts 0.01 seconds.
@@ -2849,20 +2862,24 @@ To show why that works, I'll plot two segments from the same
 recording.
 
 \begin{verbatim}
-def plot_shifted(wave, shift=0.0023, start=0.2):
+def plot_shifted(wave, offset=0.001, start=0.2):
     thinkplot.preplot(2)
     segment1 = wave.segment(start=start, duration=0.01)
     segment1.plot(linewidth=2, alpha=0.8)
 
-    segment2 = wave.segment(start=start-shift, duration=0.01)
+    segment2 = wave.segment(start=start-offset, duration=0.01)
+    segment2.shift(offset)
     segment2.plot(linewidth=2, alpha=0.4)
 
-    thinkplot.config(xlabel='time (s)', ylim=[-1, 1])
+    corr = segment1.corr(segment2)
+    text = r'$\rho =$ %.2g' % corr
+    thinkplot.text(segment1.start+0.0005, -0.8, text)
+    thinkplot.config(xlabel='Time (s)')
 \end{verbatim} 
 
 One segment starts at 0.2 seconds; the other starts 0.0023 seconds
 later.  Figure~\ref{fig.autocorr7} shows the result.  The segments
-are similar, and their correlation is 0.94.  This result suggests
+are similar, and their correlation is 0.99.  This result suggests
 that the period is near 0.0023 seconds, which corresponds to a frequency
 of 435 Hz.
 
@@ -2901,7 +2918,7 @@ expected error is about 30 cents (a third of a semitone).
 
 \section{Correlation as dot product}
 
-I started this chapter with this definition of Pearson's
+I started the chapter with this definition of Pearson's
 correlation coefficient:
 %
 \[ \rho = \frac{ \sum_i (x_i - \mu_x) (y_i - \mu_y)}{N \sigma_x \sigma_y} \]
@@ -2997,7 +3014,7 @@ Finally, we can standardize the results so the correlation with
 
 With these adjustments, the results computed by {\tt autocorr} and
 {\tt np.correlate} are nearly the same.  They still differ by
-1-2\%.  The reason not important, but if you are curious: {\tt autocorr}
+1-2\%.  The reason is not important, but if you are curious: {\tt autocorr}
 standardizes the correlations independently for each lag; for
 {\tt np.correlate}, we standardized them all at the end.
 
@@ -3006,16 +3023,17 @@ use it to estimate the fundamental period of a signal, and two
 ways to compute it.
 
 
-
 \section{Exercises}
 
+Solutions to these exercises are in {\tt chap05soln.ipynb}.
+
 \begin{exercise}
-If you did the exercises in the previous chapter, you downloaded
-the historical price of BitCoins and estimated the power spectrum
-of the price changes.  Using the same data, compute the autocorrelation
-of BitCoin prices.  Does the autocorrelation function drop off quickly?
-Is there evidence of periodic behavior?
+The IPython notebook for this chapter, {\tt chap05.ipynb}, includes
+an interaction that lets you compute autocorrelations for different
+lags.  Use this interaction to estimate the pitch of the vocal chirp
+for a few different start times.
 \end{exercise}
+
 
 \begin{exercise}
 The example code in \verb"chap05.ipynb" shows how to use autocorrelation
@@ -3027,7 +3045,25 @@ To see how well it works, try superimposing your pitch estimates on a
 spectrogram of the recording.
 \end{exercise}
 
-Solutions to these exercises are in {\tt chap05soln.ipynb}.
+
+\begin{exercise}
+One of the sample sounds in the repository for this book,
+\verb"100475__iluppai__saxophone-weep.wav", is a recording of a
+saxophone.  Select a short segment from this recording and plot
+the spectrum.  What is the fundamental frequency?  What is the dominant
+frequency?
+
+TODO: finish this.
+\end{exercise}
+
+
+\begin{exercise}
+If you did the exercises in the previous chapter, you downloaded
+the historical price of BitCoins and estimated the power spectrum
+of the price changes.  Using the same data, compute the autocorrelation
+of BitCoin prices.  Does the autocorrelation function drop off quickly?
+Is there evidence of periodic behavior?
+\end{exercise}
 
 
 \chapter{Discrete cosine transform}
