@@ -419,6 +419,7 @@ But we start with simple one-dimensional sound.
 
 The code for this chapter is in {\tt chap01.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp01}.
 
 
 \section{Periodic signals}
@@ -978,6 +979,7 @@ the Spectrum class works.
 
 The code for this chapter is in {\tt chap02.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp02}.
 
 
 \section{Triangle waves}
@@ -1430,6 +1432,7 @@ non-periodic signals.
 
 The code for this chapter is in {\tt chap03.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp03}.
 
 
 \section{Linear chirp}
@@ -2029,10 +2032,9 @@ signals we saw in previous chapters.
 
 This chapter is about the second kind.
 
-The code for this chapter is in {\tt noise.py}, which is in the
-repository for this book (see Section~\ref{code}).  You can listen
-to the examples in {\tt chap04.ipynb}, which you can view at
-\url{http://tinyurl.com/thinkdsp04}.
+The code for this chapter is in {\tt chap04.ipynb}, which is in the
+repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp04}.
 
 
 \section{Uncorrelated noise}
@@ -2562,8 +2564,9 @@ value.  In this chapter I define these terms more precisely and
 present the {\bf autocorrelation function}, which is a useful tool
 for signal analysis.
 
-The code for this chapter is in {\tt autocorr.py}, which is in the
+The code for this chapter is in {\tt chap05.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp05}.
 
 
 \section{Correlation}
@@ -3047,17 +3050,6 @@ spectrogram of the recording.
 
 
 \begin{exercise}
-One of the sample sounds in the repository for this book,
-\verb"100475__iluppai__saxophone-weep.wav", is a recording of a
-saxophone.  Select a short segment from this recording and plot
-the spectrum.  What is the fundamental frequency?  What is the dominant
-frequency?
-
-TODO: finish this.
-\end{exercise}
-
-
-\begin{exercise}
 If you did the exercises in the previous chapter, you downloaded
 the historical price of BitCoins and estimated the power spectrum
 of the price changes.  Using the same data, compute the autocorrelation
@@ -3066,24 +3058,34 @@ Is there evidence of periodic behavior?
 \end{exercise}
 
 
+\begin{exercise}
+In the repository for this book you will find an IPython notebook
+called \verb"saxophone.ipynb" that explores autocorrelation,
+pitch perception, and a phenomenon called the ``missing fundamental''.
+Read through this notebook and run the examples.  Try selecting
+a different segment of the recording and running the examples again.
+\end{exercise}
+
+
+
 \chapter{Discrete cosine transform}
 \label{dct}
 
 The topic of this chapter is the {\bf Discrete Cosine
   Transform} (DCT), which is used in MP3 and related formats for
-compressing music, JPEG and similar formats for images, and the MPEG
+compressing music; JPEG and similar formats for images; and the MPEG
 family of formats for video.
 
 DCT is similar in many ways to the Discrete Fourier Transform (DFT),
 which we have been using for spectral analysis.
 Once we learn how DCT works, it will be easier to explain DFT.
 
-Here are the steps we'll follow to get there:
+Here are the steps to get there:
 
 \begin{enumerate}
 
 \item We'll start with the synthesis problem: given a set of frequency
-  components and their amplitudes, how can we construct a waveform?
+  components and their amplitudes, how can we construct a wave?
 
 \item Next we'll rewrite the synthesis problem using NumPy arrays.
   This move is good for performance, and also provides insight
@@ -3096,12 +3098,14 @@ Here are the steps we'll follow to get there:
 
 \item Finally, we'll use some principles from linear algebra to find a
   more efficient algorithm.  If you already know linear algebra,
-  that's great, but I will explain what you need as we go.
+  that's great, but I'll explain what you need as we go.
 
 \end{enumerate}
 
-The code for this chapter is in {\tt dct.py}, which is in the
-repository for this book (see Section~\ref{code}).
+The code for this chapter is in {\tt
+  chap06.ipynb} which is in the repository for this book (see
+Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp06}.
 
 
 \section{Synthesis}
@@ -3113,16 +3117,16 @@ components.  Using objects in the {\tt thinkdsp} module, there is
 a simple way to perform this operation, which is called {\bf synthesis}:
 
 \begin{verbatim}
-def synthesize1(amps, freqs, ts):
+def synthesize1(amps, fs, ts):
     components = [thinkdsp.CosSignal(freq, amp)
-                  for amp, freq in zip(amps, freqs)]
+                  for amp, freq in zip(amps, fs)]
     signal = thinkdsp.SumSignal(*components)
 
     ys = signal.evaluate(ts)
     return ys
 \end{verbatim}
 
-{\tt amps} is a list of amplitudes, {\tt freqs} is the list
+{\tt amps} is a list of amplitudes, {\tt fs} is the list
 of frequencies, and {\tt ts} is the sequence
 of times where the signal should be evaluated.
 
@@ -3137,19 +3141,18 @@ We can test this function like this:
 
 \begin{verbatim}
     amps = np.array([0.6, 0.25, 0.1, 0.05])
-    freqs = [100, 200, 300, 400]
+    fs = [100, 200, 300, 400]
     framerate = 11025
 
     ts = np.linspace(0, 1, framerate)
-    ys = synthesize1(amps, freqs, ts)
+    ys = synthesize1(amps, fs, ts)
     wave = thinkdsp.Wave(ys, framerate)
-    wave.play()
 \end{verbatim}
 
 This example makes a signal that contains a fundamental frequency at
 100 Hz and three harmonics (100 Hz is a sharp G2).  It renders the
-signal for one second at 11,025 frames per second and plays the
-resulting wave.
+signal for one second at 11,025 frames per second and puts the results
+into a Wave object.
 
 Conceptually, synthesis is pretty simple.  But in this form it doesn't
 help much with {\bf analysis}, which is the inverse problem: given the
@@ -3168,8 +3171,8 @@ wave, how do we identify the frequency components and their amplitudes?
 Here's another way to write {\tt synthesize}:
 
 \begin{verbatim}
-def synthesize2(amps, freqs, ts):
-    args = np.outer(ts, freqs)
+def synthesize2(amps, fs, ts):
+    args = np.outer(ts, fs)
     M = np.cos(PI2 * args)
     ys = np.dot(M, amps)
     return ys
@@ -3181,8 +3184,8 @@ Let's see how it works:
 \begin{enumerate}
 
 \item {\tt np.outer} computes the outer product of {\tt ts} and
-  {\tt freqs}.  The result is an array with one row for each element
-  of {\tt ts} and one column for each element of {\tt freqs}.  Each
+  {\tt fs}.  The result is an array with one row for each element
+  of {\tt ts} and one column for each element of {\tt fs}.  Each
   element in the array is the product of a frequency and a time, $f
   t$.
 
@@ -3194,7 +3197,8 @@ Let's see how it works:
 \item {\tt np.dot} multiplies each row of {\tt M} by {\tt amps},
   element-wise, and then adds up the products.  In terms of linear
   algebra, we are multiplying a matrix, {\tt M}, by a vector, {\tt
-    amps}.
+    amps}.  In terms of signals, we are computing the weighted sum
+  of frequency components.
 
 \end{enumerate}
 
@@ -3216,13 +3220,14 @@ of products:
 And likewise with the other elements of {\tt ys}.  So each element
 of {\tt y} is the sum of four frequency components, evaluated at
 a point in time, and multiplied by the corresponding amplitudes.
-And that's exactly what we wanted.  We can use the code from
-the previous section to
-check that the two versions of {\tt synthesize} produce the same results.
+And that's exactly what we wanted.
+
+We can use the code from the previous section to check that the two
+versions of {\tt synthesize} produce the same results.
 
 \begin{verbatim}
-ys1 = synthesize1(amps, freqs, ts)
-ys2 = synthesize2(amps, freqs, ts)
+ys1 = synthesize1(amps, fs, ts)
+ys2 = synthesize2(amps, fs, ts)
 max(abs(ys1 - ys2))
 \end{verbatim}
 
@@ -3230,7 +3235,7 @@ The biggest difference between {\tt ys1} and {\tt ys2} is about {\tt
   1e-13}, which is what we expect due to floating-point errors.
 
 Writing this computation in terms of linear algebra makes the code
-smaller and faster.  Another benefit of linear algebra is that it
+smaller and faster.  Linear algebra
 provides concise notation for operations on matrices and vectors.  For
 example, we could write {\tt synthesize} like this:
 %
@@ -3250,7 +3255,7 @@ $\otimes$ is the symbol for the outer product of two vectors.
 Now we are ready to solve the analysis problem.  Suppose I give you
 a wave and tell you that it is the sum of cosines with a given set
 of frequencies.  How would you find the amplitude for each frequency
-component?  In other words, given {\tt ys}, {\tt ts} and {\tt freqs},
+component?  In other words, given {\tt ys}, {\tt ts} and {\tt fs},
 can you recover {\tt amps}?
 
 In terms of linear algebra, the first step is the same as for
@@ -3262,14 +3267,14 @@ exactly that.
 Here's what the code looks like:
 
 \begin{verbatim}
-def analyze1(ys, freqs, ts):
-    args = np.outer(ts, freqs)
+def analyze1(ys, fs, ts):
+    args = np.outer(ts, fs)
     M = np.cos(PI2 * args)
     amps = np.linalg.solve(M, ys)
     return amps
 \end{verbatim}
 
-The first two lines use {\tt ts} and {\tt freqs} to build the
+The first two lines use {\tt ts} and {\tt fs} to build the
 matrix, {\tt M}.  Then {\tt np.linalg.solve} computes {\tt amps}.
 
 But there's a hitch.  In general we can only solve a system of linear
@@ -3287,14 +3292,13 @@ But in this case, we know that the {\tt ys} were actually generated by
 adding only 4 frequency components, so we can use any 4 values from
 the wave array to recover {\tt amps}.
 
-For simplicity, I'll use the first 4 samples from
-the signal.
-Using the values of {\tt ys}, {\tt freqs} and {\tt ts} from
+For simplicity, I'll use the first 4 samples from the signal.
+Using the values of {\tt ys}, {\tt fs} and {\tt ts} from
 the previous section, we can run {\tt analyze1} like this:
 
 \begin{verbatim}
-n = len(freqs)
-amps2 = analyze1(ys[:n], freqs, ts[:n])
+n = len(fs)
+amps2 = analyze1(ys[:n], fs, ts[:n])
 \end{verbatim}
 
 And sure enough, {\tt amps2} is
@@ -3354,8 +3358,8 @@ def test1():
     time_unit = 0.001
     ts = np.arange(N) / N * time_unit
     max_freq = N / time_unit / 2
-    freqs = np.arange(N) / N * max_freq
-    ys = synthesize2(amps, freqs, ts)
+    fs = np.arange(N) / N * max_freq
+    ys = synthesize2(amps, fs, ts)
 \end{verbatim}
 
 {\tt amps} is the same vector of amplitudes we saw before.
@@ -3369,10 +3373,10 @@ of the computation anyway.
 
 Since the frame rate is $N$ samples per time unit, the Nyquist
 frequency is \verb"N / time_unit / 2", which is 2000 Hz in this
-example.  So {\tt freqs} is a vector of equally spaced frequencies
+example.  So {\tt fs} is a vector of equally spaced frequencies
 between 0 and 2000 Hz.
 
-With these values of {\tt ts} and {\tt freqs}, the matrix, $M$, is:
+With these values of {\tt ts} and {\tt fs}, the matrix, $M$, is:
 
 \begin{verbatim}
 [[ 1.     1.     1.     1.   ]
@@ -3401,11 +3405,11 @@ And that's not the identity matrix.
 
 \section{DCT-IV}
 
-But if we choose {\tt ts} and {\tt freqs} carefully,
+But if we choose {\tt ts} and {\tt fs} carefully,
 we can make $M$ orthogonal.  There are several ways to do it, which
 is why there are several versions of the discrete cosine transform (DCT).
 
-One simple option is to shift {\tt ts} and {\tt freqs} by a half unit.
+One simple option is to shift {\tt ts} and {\tt fs} by a half unit.
 This version is called DCT-IV, where ``IV'' is a roman numeral
 indicating that this is the fourth of eight versions of the DCT.
 
@@ -3416,14 +3420,14 @@ def test2():
     amps = np.array([0.6, 0.25, 0.1, 0.05])
     N = 4.0
     ts = (0.5 + np.arange(N)) / N
-    freqs = (0.5 + np.arange(N)) / 2
-    ys = synthesize2(amps, freqs, ts)
+    fs = (0.5 + np.arange(N)) / 2
+    ys = synthesize2(amps, fs, ts)
 \end{verbatim}
 
 If you compare this to the previous version, you'll notice
-two changes.  First, I added 0.5 to {\tt ts} and {\tt freqs}.
+two changes.  First, I added 0.5 to {\tt ts} and {\tt fs}.
 Second, I cancelled out \verb"time_units", which simplifies
-the expression for {\tt freqs}.
+the expression for {\tt fs}.
 
 With these values, $M$ is
 
@@ -3454,8 +3458,8 @@ is just $M/2$.  Now we can write a more efficient version of {\tt
   analyze}:
 
 \begin{verbatim}
-def analyze2(ys, freqs, ts):
-    args = np.outer(ts, freqs)
+def analyze2(ys, fs, ts):
+    args = np.outer(ts, fs)
     M = np.cos(PI2 * args)
     amps = np.dot(M, ys) / 2
     return amps
@@ -3471,15 +3475,15 @@ implementation of DCT-IV:
 def dct_iv(ys):
     N = len(ys)
     ts = (0.5 + np.arange(N)) / N
-    freqs = (0.5 + np.arange(N)) / 2
-    args = np.outer(ts, freqs)
+    fs = (0.5 + np.arange(N)) / 2
+    args = np.outer(ts, fs)
     M = np.cos(PI2 * args)
     amps = np.dot(M, ys) / 2
     return amps
 \end{verbatim}
 
 Again, {\tt ys} is the wave array.  We don't have to pass
-{\tt ts} and {\tt freqs} as parameters; \verb"dct_iv" can
+{\tt ts} and {\tt fs} as parameters; \verb"dct_iv" can
 figure them out based on {\tt N}, the length of {\tt ys}.
 
 If we've got it right, this function should solve the analysis
@@ -3490,8 +3494,8 @@ problem; that is, given {\tt ys} it should be able to recover
 amps = np.array([0.6, 0.25, 0.1, 0.05])
 N = 4.0
 ts = (0.5 + np.arange(N)) / N
-freqs = (0.5 + np.arange(N)) / 2
-ys = synthesize2(amps, freqs, ts)
+fs = (0.5 + np.arange(N)) / 2
+ys = synthesize2(amps, fs, ts)
 amps2 = dct_iv(ys)
 max(abs(amps - amps2))
 \end{verbatim}
@@ -3529,7 +3533,80 @@ max(abs(amps - amps2))
 Again, the biggest difference is about {\tt 1e-16}.
 
 
+\section{The Dct class}
+
+\begin{figure}
+% dct.py
+\centerline{\includegraphics[height=2.5in]{figs/dct1.pdf}}
+\caption{DCT of a triangle signal at 400 Hz, sampled at 10 kHz.}
+\label{fig.dct1}
+\end{figure}
+
+{\tt thinkdsp} provides a Dct class that encapsulates the
+DCT in the same way the Spectrum class encapsulates the FFT.
+To make a Dct object, you can invoke \verb"make_dct" on a Wave.
+
+\begin{verbatim}
+signal = thinkdsp.TriangleSignal(freq=400)
+wave = signal.make_wave(duration=1.0, framerate=10000)
+dct = wave.make_dct()
+dct.plot()
+\end{verbatim}
+
+The result is the DCT of a triangle wave at 400 Hz, shown in
+Figure~\ref{dct1}.  The values of the DCT can be positive or negative;
+a negative value in the DCT corresponds to a negated cosine or,
+equivalently, to a cosine shifted by 180 degrees.
+
+\verb"make_dct" uses DCT-II, which is the most common type of DCT,
+provided by {\tt scipy.fftpack}.
+
+\begin{verbatim}
+import scipy.fftpack
+
+# class Wave:
+    def make_dct(self):
+        N = len(self.ys)
+        hs = scipy.fftpack.dct(self.ys, type=2)
+        fs = (0.5 + np.arange(N)) / 2
+        return Dct(hs, fs, self.framerate)
+\end{verbatim}
+
+The results from {\tt dct} are stored in {\tt hs}.  The corresponding
+frequencies, computed as in Section~\ref{}, are stored in {\tt fs}.
+And then both are used to initialize the Dct object.
+
+Dct provides \verb"make_wave", which performs the inverse DCT.
+We can test it like this:
+
+\begin{verbatim}
+wave2 = dct.make_wave()
+max(abs(wave.ys-wave2.ys))
+\end{verbatim}
+
+The biggest difference between {\tt ys1} and {\tt ys2} is about {\tt
+  1e-16}, which is what we expect due to floating-point errors.
+
+\verb"make_wave" uses {\tt scipy.fftpack.idct}: 
+
+\begin{verbatim}
+# class Dct
+    def make_wave(self):
+        n = len(self.hs)
+        ys = scipy.fftpack.idct(self.hs, type=2) / 2 / n
+        return Wave(ys, framerate=self.framerate) 
+\end{verbatim}
+
+Be default, the inverse DCT doesn't normalize the result, so we have
+to divide through by $2N$.
+
+
 \section{Exercises}
+
+For the following exercises, I provide some starter code in
+{\tt chap06starter.ipynb}.
+Solutions are in {\tt chap06soln.ipynb}.
+%TODO: provide starter code
 
 \begin{exercise}
 In this chapter I claim that {\tt analyze1} takes time proportional
@@ -3543,6 +3620,7 @@ slope 2 for {\tt analyze2}.
 
 You also might want to test \verb"dct_iv"
 and {\tt scipy.fftpack.dct}.
+
 \end{exercise}
 
 
@@ -3577,7 +3655,6 @@ read about at
 \url{http://docs.scipy.org/doc/scipy/reference/sparse.html}.
 \end{exercise}
 
-Solutions to these exercises are in {\tt chap06soln.ipynb}.
 
 
 \chapter{Discrete Fourier Transform}
@@ -3612,8 +3689,9 @@ same progression as in Chapter~\ref{dct}:
 
 \end{enumerate}
 
-The code for this chapter is in {\tt dft.py}, which is in the
+The code for this chapter is in {\tt chap07.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp07}.
 
 
 \section{Complex exponentials}
@@ -3786,9 +3864,9 @@ The simplest solution is to instantiate {\tt ComplexSinusoid}
 objects and add them up.
 
 \begin{verbatim}
-def synthesize1(amps, freqs, ts):
+def synthesize1(amps, fs, ts):
     components = [thinkdsp.ComplexSinusoid(freq, amp)
-                  for amp, freq in zip(amps, freqs)]
+                  for amp, freq in zip(amps, fs)]
     signal = thinkdsp.SumSignal(*components)
     ys = signal.evaluate(ts)
     return ys
@@ -3802,10 +3880,10 @@ Here's an example:
 
 \begin{verbatim}
 >>> amps = np.array([0.6, 0.25, 0.1, 0.05])
->>> freqs = [100, 200, 300, 400]
+>>> fs = [100, 200, 300, 400]
 >>> framerate = 11025
 >>> ts = np.linspace(0, 1, framerate)
->>> ys = synthesize1(amps, freqs, ts)
+>>> ys = synthesize1(amps, fs, ts)
 >>> print(ys)
 [ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
   0.979 -1.803e-01j  0.995 -9.093e-02j  1.000 -5.081e-15j]
@@ -3866,8 +3944,8 @@ problem in terms of matrix multiplication:
 PI2 = 2 * math.pi
 i = complex(0, 1)
 
-def synthesize2(amps, freqs, ts):
-    args = np.outer(ts, freqs)
+def synthesize2(amps, fs, ts):
+    args = np.outer(ts, fs)
     M = np.exp(i * PI2 * args)
     ys = np.dot(M, amps)
     return ys
@@ -3876,12 +3954,12 @@ def synthesize2(amps, freqs, ts):
 Again, {\tt amps} is a NumPy array that contains a sequence of
 amplitudes.
 
-{\tt freqs} is a sequence containing the frequencies of the
+{\tt fs} is a sequence containing the frequencies of the
 components.  {\tt ts} contains the times where we will evaluate
 the signal.
 
-{\tt args} contains the outer product of {\tt ts} and {\tt freqs},
-with the {\tt ts} running down the rows and the {\tt freqs} running
+{\tt args} contains the outer product of {\tt ts} and {\tt fs},
+with the {\tt ts} running down the rows and the {\tt fs} running
 across the columns (you might want to refer back to
 Figure~\ref{fig.synthesis}).
 
@@ -3895,7 +3973,7 @@ several complex sinusoids, evaluated at a particular time.
 Here's the example from the previous section again:
 
 \begin{verbatim}
->>> ys = synthesize2(amps, freqs, ts)
+>>> ys = synthesize2(amps, fs, ts)
 >>> print(ys)
 [ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
   0.979 -1.803e-01j  0.995 -9.093e-02j  1.000 -5.081e-15j]
@@ -3930,7 +4008,7 @@ $\phi_0 = 1.5$ for all frequency components:
 
 \begin{verbatim}
     amps2 = amps * np.exp(1.5j)
-    ys2 = synthesize2(amps2, freqs, ts)
+    ys2 = synthesize2(amps2, fs, ts)
 
     thinkplot.plot(ts[:n], ys.real[:n])
     thinkplot.plot(ts[:n], ys2.real[:n])
@@ -3964,27 +4042,27 @@ the synthesis matrix, $M$, and solving the system of linear
 equations, $M a = y$ for $a$.
 
 \begin{verbatim}
-def analyze1(ys, freqs, ts):
-    args = np.outer(ts, freqs)
+def analyze1(ys, fs, ts):
+    args = np.outer(ts, fs)
     M = np.exp(i * PI2 * args)
     amps = np.linalg.solve(M, ys)
     return amps
 \end{verbatim}
 
 {\tt analyze1} takes a (possibly complex) wave array, {\tt ys}, a
-sequence of real frequencies, {\tt freqs}, and a sequence of real
+sequence of real frequencies, {\tt fs}, and a sequence of real
 times, {\tt ts}.  It returns a sequence of complex amplitudes, {\tt
   amps}.
 
 Continuing the previous example, we can confirm that {\tt analyze1}
 recovers the amplitudes we started with.  For the linear system
 solver to work, {\tt M} has to be square, so we need {\tt ys}, {\tt
-  freqs} and {\tt ts} to have the same length.  I'll insure that by
-slicing {\tt ys} and {\tt ts} down to the length of {\tt freqs}:
+  fs} and {\tt ts} to have the same length.  I'll insure that by
+slicing {\tt ys} and {\tt ts} down to the length of {\tt fs}:
 
 \begin{verbatim}
->>> n = len(freqs)
->>> amps2 = analyze1(ys[:n], freqs, ts[:n])
+>>> n = len(fs)
+>>> amps2 = analyze1(ys[:n], fs, ts[:n])
 >>> print(amps2)
 [ 0.60 +4.6e-13j  0.25 -1.4e-12j  0.10 +1.4e-12j  0.05 -4.6e-13j]
 \end{verbatim}
@@ -3997,7 +4075,7 @@ floating-point errors.
 \section{Efficient analysis}
 
 Unfortunately, solving a linear system of equations is slow.  For the
-DCT, we were able to speed things up by choosing {\tt freqs} and {\tt
+DCT, we were able to speed things up by choosing {\tt fs} and {\tt
   ts} so that {\tt M} is orthogonal.  That way, the inverse of {\tt M}
 is the transpose of {\tt M}, and we can compute both DCT and inverse
 DCT by matrix multiplication.
@@ -4015,8 +4093,8 @@ want.  Here's the code that computes {\tt M} for $N=4$ components:
 \begin{verbatim}
 >>> N = 4
 >>> ts = np.arange(N) / N
->>> freqs = np.arange(N)
->>> args = np.outer(ts, freqs)
+>>> fs = np.arange(N)
+>>> args = np.outer(ts, fs)
 >>> M = np.exp(i * PI2 * args)
 \end{verbatim}
 
@@ -4035,23 +4113,23 @@ similar to the extra factor of 2 we found with the DCT.
 We can use this result to write a faster version of {\tt analyze1}:
 
 \begin{verbatim}
-def analyze2(ys, freqs, ts):
-    args = np.outer(ts, freqs)
+def analyze2(ys, fs, ts):
+    args = np.outer(ts, fs)
     M = np.exp(i * PI2 * args)
     amps = M.conj().transpose().dot(ys) / N
     return amps
 \end{verbatim}
 
-And test it with appropriate values of {\tt freqs} and {\tt ts}:
+And test it with appropriate values of {\tt fs} and {\tt ts}:
 
 \begin{verbatim}
 >>> N = 4
 >>> amps = np.array([0.6, 0.25, 0.1, 0.05])
->>> freqs = np.arange(N)
+>>> fs = np.arange(N)
 >>> ts = np.arange(N) / N
->>> ys = synthesize2(amps, freqs, ts)
+>>> ys = synthesize2(amps, fs, ts)
 
->>> amps2 = analyze2(ys, freqs, ts)
+>>> amps2 = analyze2(ys, fs, ts)
 >>> print(amps2)
 [ 0.60 +2.1e-17j  0.25 +1.3e-17j  0.10 -3.9e-17j  0.05 -8.3e-17j]
 \end{verbatim}
@@ -4063,7 +4141,7 @@ arithmetic.
 \section{DFT}
 
 As a function, {\tt analyze2} would be hard to use because it
-only works if {\tt freqs} and {\tt ts} are chosen correctly.
+only works if {\tt fs} and {\tt ts} are chosen correctly.
 Instead, I will rewrite it to take just {\tt ys} and compute {\tt freq}
 and {\tt ts} itself.
 
@@ -4072,8 +4150,8 @@ First, I'll make a function to compute the synthesis matrix, $M$:
 \begin{verbatim}
 def synthesis_matrix(N):
     ts = np.arange(N) / N
-    freqs = np.arange(N)
-    args = np.outer(ts, freqs)
+    fs = np.arange(N)
+    args = np.outer(ts, fs)
     M = np.exp(i * PI2 * args)
     return M
 \end{verbatim}
@@ -4265,8 +4343,9 @@ But before we can understand the Convolution Theorem, we have to understand
 convolution.  I'll start with a simple example, smoothing, and
 we'll go from there.
 
-The code for this chapter is in {\tt convolution.py}, which is in the
+The code for this chapter is in {\tt chap08.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp08}.
 
 
 \section{Smoothing}
@@ -4825,7 +4904,8 @@ and filters in the frequency domain.
 
 The code for this chapter is in {\tt chap09.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
-% TODO: tinyurl link, too
+You can also view it at \url{http://tinyurl.com/thinkdsp09}.
+
 
 \section{Finite differences}
 
@@ -5134,8 +5214,10 @@ musical acoustics as an example.  And it explains an
 important application of the Convolution Theorem, characterization
 of linear, time-invariant systems (which I'll define soon).
 
-The code for this chapter is in {\tt systems.py}, which is in the
+The code for this chapter is in {\tt chap10.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
+You can also view it at \url{http://tinyurl.com/thinkdsp10}.
+
 
 
 \section{Signals and systems}
@@ -5638,13 +5720,9 @@ musical acoustics as an example.  And it explains an
 important application of the Convolution Theorem, characterization
 of linear, time-invariant systems (which I'll define soon).
 
-The code for this chapter is in {\tt sampling.py}, which is in the
+The code for this chapter is in {\tt chap11.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
-
-You can listen to the examples in an IPython notebook, {\tt chap11.ipynb}, 
-which is also in the repository, and you can view it at
-at \url{http://tinyurl.com/thinkdsp11}.
-
+You can also view it at \url{http://tinyurl.com/thinkdsp11}.
 
 
 \section{Convolution with impulses}
@@ -5659,7 +5737,6 @@ at \url{http://tinyurl.com/thinkdsp11}.
 Figure~\ref{fig.sampling1} shows 
 
 
-\chapter{Controls}
 
 
 
