@@ -123,8 +123,8 @@ def read_wave(filename='sound.wav'):
     if nchannels == 2:
         ys = ys[::2]
 
-    ts = np.arange(len(ys)) / framerate
-    wave = Wave(ys, ts, framerate)
+    #ts = np.arange(len(ys)) / framerate
+    wave = Wave(ys, framerate=framerate)
     wave.normalize()
     return wave
 
@@ -152,6 +152,32 @@ def find_index(x, xs):
 class _SpectrumParent:
     """Contains code common to Spectrum and DCT.
     """
+
+    def __init__(self, hs, fs, framerate, full=False):
+        """Initializes a spectrum.
+
+        hs: NumPy array of complex
+        framerate: frames per second
+        """
+        self.hs = hs
+        self.fs = fs
+        self.framerate = framerate
+        self.full = full
+
+    @property
+    def max_freq(self):
+        """Returns the Nyquist frequency for this spectrum."""
+        return self.framerate / 2
+
+    @property
+    def amps(self):
+        """Returns a sequence of amplitudes (read-only property)."""
+        return np.absolute(self.hs)
+
+    @property
+    def power(self):
+        """Returns a sequence of powers (read-only property)."""
+        return self.amps ** 2
 
     def copy(self):
         """Makes a copy.
@@ -198,8 +224,8 @@ class _SpectrumParent:
         amps = np.abs(hs)
         fs = np.fft.fftshift(self.fs)
         i = 0 if high is None else find_index(-high, fs)
-        j = None if high is None else find_index(high, fs)
-        return fs[i:j+1], amps[i:j+1]
+        j = None if high is None else find_index(high, fs) + 1
+        return fs[i:j], amps[i:j]
 
     def plot(self, high=None, **options):
         """Plots amplitude vs frequency.
@@ -249,17 +275,6 @@ class _SpectrumParent:
 
 class Spectrum(_SpectrumParent):
     """Represents the spectrum of a signal."""
-
-    def __init__(self, hs, fs, framerate, full=False):
-        """Initializes a spectrum.
-
-        hs: NumPy array of complex
-        framerate: frames per second
-        """
-        self.hs = hs
-        self.fs = fs
-        self.framerate = framerate
-        self.full = full
 
     def __len__(self):
         """Length of the spectrum."""
@@ -322,19 +337,9 @@ class Spectrum(_SpectrumParent):
         return np.imag(self.hs)
 
     @property
-    def amps(self):
-        """Returns a sequence of amplitudes (read-only property)."""
-        return np.absolute(self.hs)
-
-    @property
     def angles(self):
         """Returns a sequence of angles (read-only property)."""
         return np.angle(self.hs)
-
-    @property
-    def power(self):
-        """Returns a sequence of powers (read-only property)."""
-        return self.amps ** 2
 
     def scale(self, factor):
         """Multiplies all elements by the given factor.
@@ -383,8 +388,7 @@ class Spectrum(_SpectrumParent):
     def differentiate(self):
         """Apply the differentiation filter.
         """
-        i = complex(0, 1)
-        filtr = PI2 * i * self.fs
+        filtr = PI2 * 1j * self.fs
         self.hs *= filtr
 
     def make_integrated_spectrum(self):
@@ -405,9 +409,10 @@ class Spectrum(_SpectrumParent):
             ys = np.fft.irfft(self.hs)
 
         #NOTE: whatever the start time was, we lose it when
-        # we transform back
-        ts = np.arange(len(ys)) / self.framerate
-        return Wave(ys, ts, self.framerate)
+        # we transform back; we could fix that by saving start
+        # time in the Spectrum
+        # ts = self.start + np.arange(len(ys)) / self.framerate
+        return Wave(ys, framerate=self.framerate)
 
 
 class IntegratedSpectrum:
@@ -452,11 +457,16 @@ class IntegratedSpectrum:
 class Dct(_SpectrumParent):
     """Represents the spectrum of a signal using discrete cosine transform."""
 
-    def __init__(self, amps, framerate):
-        self.amps = amps
+    def __init__(self, hs, fs, framerate, full=False):
+        self.hs = hs
+        self.fs = fs
         self.framerate = framerate
-        n = len(amps)
-        self.fs = np.fft.fftfreq(n, 1/framerate)
+        self.full = full
+
+    @property
+    def amps(self):
+        """Returns a sequence of amplitudes (read-only property)."""
+        return self.hs
 
     def __add__(self, other):
         """Adds two DCTs elementwise.
@@ -469,8 +479,8 @@ class Dct(_SpectrumParent):
             return self
 
         assert self.framerate == other.framerate
-        amps = self.amps + other.amps
-        return Dct(amps, self.framerate)
+        hs = self.hs + other.hs
+        return Dct(hs, self.fs, self.framerate)
 
     __radd__ = __add__
         
@@ -479,11 +489,12 @@ class Dct(_SpectrumParent):
 
         returns: Wave
         """
-        ys = scipy.fftpack.dct(self.amps, type=3) / 2
+        N = len(self.hs)
+        ys = scipy.fftpack.idct(self.hs, type=2) / 2 / N
         #NOTE: whatever the start time was, we lose it when
         # we transform back
-        ts = np.arange(len(ys)) / self.framerate
-        return Wave(ys, ts, self.framerate)
+        #ts = self.start + np.arange(len(ys)) / self.framerate
+        return Wave(ys, framerate=self.framerate)
 
 
 class Spectrogram:
@@ -556,7 +567,6 @@ class Spectrogram:
 
         returns: Wave
         """
-        # TODO: test this function
         res = []
         for t, spectrum in sorted(self.spec_map.iteritems()):
             wave = spectrum.make_wave()
@@ -565,9 +575,8 @@ class Spectrogram:
             window = 1 / np.hamming(n)
             wave.window(window)
 
-            # TODO: clean this up
-            i = int(round(t * wave.framerate))
-            start = i - n / 2
+            i = wave.find_index(t)
+            start = i - n // 2
             end = start + n
             res.append((start, end, wave))
 
@@ -579,8 +588,8 @@ class Spectrogram:
         for start, end, wave in res:
             ys[start:end] = wave.ys
 
-        ts = np.arange(len(ys)) / self.framerate
-        return Wave(ys, ts, wave.framerate)
+        # ts = np.arange(len(ys)) / self.framerate
+        return Wave(ys, framerate=wave.framerate)
 
 
 class Wave:
@@ -591,15 +600,19 @@ class Wave:
     start: optional start time in seconds
 
     """
-    def __init__(self, ys, ts, framerate):
+    def __init__(self, ys, ts=None, framerate=None):
         """Initializes the wave.
 
         ys: wave array
         framerate: samples per second
         """
         self.ys = ys
-        self.ts = ts
-        self.framerate = framerate
+        self.framerate = framerate if framerate is not None else 11025
+
+        if ts is None:
+            self.ts = np.arange(len(ys)) / self.framerate
+        else:
+            self.ts = ts 
 
     def copy(self):
         """Makes a copy.
@@ -665,8 +678,8 @@ class Wave:
             raise ValueError('Wave.__or__: framerates do not agree')
 
         ys = np.concatenate((self.ys, other.ys))
-        ts = np.arange(len(ys)) / self.framerate
-        return Wave(ys, ts, self.framerate)
+        # ts = np.arange(len(ys)) / self.framerate
+        return Wave(ys, framerate=self.framerate)
 
     def __mul__(self, other):
         """Multiplies two waves elementwise.
@@ -702,8 +715,8 @@ class Wave:
             window = other
 
         ys = np.convolve(self.ys, window, mode='full')
-        ts = np.arange(len(ys)) / self.framerate
-        return Wave(ys, ts, self.framerate)
+        #ts = np.arange(len(ys)) / self.framerate
+        return Wave(ys, framerate=self.framerate)
 
     def diff(self):
         """Computes the difference between successive elements.
@@ -851,18 +864,21 @@ class Wave:
     def make_dct(self):
         """Computes the DCT of this wave.
         """
-        #TODO: make this interface consistent with Spectrum()
-        amps = scipy.fftpack.dct(self.ys, type=2)
-        return Dct(amps, self.framerate)
+        N = len(self.ys)
+        hs = scipy.fftpack.dct(self.ys, type=2)
+        fs = (0.5 + np.arange(N)) / 2
+        return Dct(hs, fs, self.framerate)
 
-    def make_spectrogram(self, seg_length):
+    def make_spectrogram(self, seg_length, win_flag=True):
         """Computes the spectrogram of the wave.
 
         seg_length: number of samples in each segment
+        win_flag: boolean, whether to apply hamming window to each segment
 
         returns: Spectrogram
         """
-        window = np.hamming(seg_length)
+        if win_flag:
+            window = np.hamming(seg_length)
         i, j = 0, seg_length
         step = seg_length / 2
 
@@ -871,7 +887,8 @@ class Wave:
 
         while j < len(self.ys):
             segment = self.slice(i, j)
-            segment.window(window)
+            if win_flag:
+                segment.window(window)
 
             # the nominal time for this segment is the midpoint
             t = (segment.start + segment.end) / 2
@@ -1265,9 +1282,8 @@ class ComplexSinusoid(Sinusoid):
         returns: float wave array
         """
         ts = np.asarray(ts)
-        i = complex(0, 1)
         phases = PI2 * self.freq * ts + self.offset
-        ys = self.amp * np.exp(i * phases)
+        ys = self.amp * np.exp(1j * phases)
         return ys
 
 
