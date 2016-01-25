@@ -3404,6 +3404,7 @@ And that's not the identity matrix.
 
 
 \section{DCT-IV}
+\label{dctiv}
 
 But if we choose {\tt ts} and {\tt fs} carefully,
 we can make $M$ orthogonal.  There are several ways to do it, which
@@ -3573,7 +3574,7 @@ import scipy.fftpack
 \end{verbatim}
 
 The results from {\tt dct} are stored in {\tt hs}.  The corresponding
-frequencies, computed as in Section~\ref{}, are stored in {\tt fs}.
+frequencies, computed as in Section~\ref{dctiv}, are stored in {\tt fs}.
 And then both are used to initialize the Dct object.
 
 Dct provides \verb"make_wave", which performs the inverse DCT.
