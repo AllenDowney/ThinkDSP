@@ -2920,6 +2920,7 @@ expected error is about 30 cents (a third of a semitone).
 
 
 \section{Correlation as dot product}
+\label{dotproduct}
 
 I started the chapter with this definition of Pearson's
 correlation coefficient:
@@ -3204,15 +3205,15 @@ Let's see how it works:
 
 Figure~\ref{fig.synthesis} shows the structure of this computation.
 Each row of the matrix, {\tt M}, corresponds to a time 
-from 0.0 to 1.0 seconds; $t_k$ is the time of the $k$th row.
+from 0.0 to 1.0 seconds; $t_n$ is the time of the $n$th row.
 Each column corresponds to a frequency from
-100 to 400 Hz; $f_j$ is the frequency of the $j$th column.
+100 to 400 Hz; $f_k$ is the frequency of the $k$th column.
 
-I labeled the $k$th row with the letters $a$ through $d$; as an
-example, the value of $a$ is $\cos [2 \pi (100) t_k]$.
+I labeled the $n$th row with the letters $a$ through $d$; as an
+example, the value of $a$ is $\cos [2 \pi (100) t_n]$.
 
 The result of the dot product, {\tt ys}, is a vector with one element
-for each row of {\tt M}.  The $k$th element, labeled $e$, is the sum
+for each row of {\tt M}.  The $n$th element, labeled $e$, is the sum
 of products:
 %
 \[ e = 0.6 a + 0.25 b + 0.1 c + 0.05 d \]
@@ -3607,7 +3608,6 @@ to divide through by $2N$.
 For the following exercises, I provide some starter code in
 {\tt chap06starter.ipynb}.
 Solutions are in {\tt chap06soln.ipynb}.
-%TODO: provide starter code
 
 \begin{exercise}
 In this chapter I claim that {\tt analyze1} takes time proportional
@@ -3655,6 +3655,18 @@ NumPy provides several implementations of sparse arrays, which you can
 read about at
 \url{http://docs.scipy.org/doc/scipy/reference/sparse.html}.
 \end{exercise}
+
+
+\begin{exercise}
+In the repository for this book you will find an IPython notebook
+called \verb"phase.ipynb" that the effect of phase on sound
+perception.
+Read through this notebook and run the examples.  
+Choose another segment of sound and run the same experiments.
+Can you find any general relationships between the phase structure
+of a sound and how we perceive it?
+\end{exercise}
+
 
 
 
@@ -3716,13 +3728,13 @@ mathematics, the complex exponential function.
 
 The natural definition of exponentiation is repeated multiplication.
 For example, $\phi^3 = \phi \cdot \phi \cdot \phi$.  But this
-definition doesn't apply to non-integers, including complex numbers.
+definition doesn't apply to non-integer exponents.
 
 However, exponentiation can also be expressed as a power series:
 %
 \[ e^\phi = 1 + \phi + \phi^2/2! + \phi^3/3! + ... \]
 %
-This definition works with imaginary numbers and, by a simple
+This definition works with real numbers, imaginary numbers and, by a simple
 extension, with complex numbers.  Applying this definition
 to a pure imaginary number, $i\phi$, we get
 %
@@ -3741,7 +3753,7 @@ think of it as a point in the complex plane, it is always on the unit
 circle.  And if you think of it as a vector, the angle in radians
 between the vector and the positive x-axis is the argument, $\phi$.
 
-In the case where the argument is a complex number, we have:
+In the case where the exponent is a complex number, we have:
 %
 \[ e^{a + i\phi} = e^a e^{i\phi} = A e^{i\phi} \]
 %
@@ -3751,22 +3763,20 @@ $e^{i\phi}$ is a unit complex number that indicates angle.
 NumPy provides a version of {\tt exp} that works with complex numbers:
 
 \begin{verbatim}
->>> i = complex(0, 1)
 >>> phi = 1.5
->>> z = np.exp(i * phi)
+>>> z = np.exp(1j * phi)
 >>> z
 (0.0707+0.997j)
 \end{verbatim}
 
-{\tt complex} is a built-in function that takes the real and
-imaginary parts of a complex number and returns a Python
-complex object.
+Python uses {\tt j} to represent the imaginary unit, rather
+than {\tt i}.  A number ending in {\tt j} is considered imaginary,
+so {\tt 1j} is just $i$.
 
 When the argument to {\tt np.exp} is imaginary or complex, the
 result is a complex number; specifically, a {\tt np.complex128},
-which is represented by two 64-bit floating-point numbers.  The result
-is {\tt 0.0707+0.997j}.  Note that Python uses {\tt j} to represent
-the imaginary unit, rather than {\tt i}.
+which is represented by two 64-bit floating-point numbers.
+In this example, the result is {\tt 0.0707+0.997j}.  
 
 Complex numbers have attributes {\tt real} and {\tt imag}:
 
@@ -3809,7 +3819,7 @@ This function describes a quantity that varies in time, so it is
 a signal.  Specifically, it is a {\bf complex exponential signal}.
 
 In the special case where the frequency of the signal is constant,
-so $\phi(t) = 2 \pi f t$, the result is a {\bf complex sinusoid}:
+$\phi(t)$ is $2 \pi f t$ and the result is a {\bf complex sinusoid}:
 %
 \[ e^{i 2 \pi f t} = \cos 2 \pi f t + i \sin 2 \pi f t \]
 %
@@ -3825,16 +3835,15 @@ $\phi_0$, yielding
 class ComplexSinusoid(Sinusoid):
  
    def evaluate(self, ts):
-        i = complex(0, 1)
         phases = PI2 * self.freq * ts + self.offset
-        ys = self.amp * np.exp(i * phases)
+        ys = self.amp * np.exp(1j * phases)
         return ys
 \end{verbatim}
 
 {\tt ComplexSinusoid} inherits \verb"__init__" from
 {\tt Sinusoid}.  It provides a version of {\tt evaluate}
 that is almost identical to {\tt Sinusoid.evaluate}; the
-difference is that it uses {\tt np.exp} instead of
+only difference is that it uses {\tt np.exp} instead of
 {\tt np.sin}.
 
 The result is a NumPy array of complex numbers:
@@ -3861,8 +3870,8 @@ brings us to the complex version of the synthesis problem: given the
 frequency and amplitude of each complex component, how do we evaluate the
 signal?
 
-The simplest solution is to instantiate {\tt ComplexSinusoid}
-objects and add them up.
+The simplest solution is to create {\tt ComplexSinusoid} objects and
+add them up.
 
 \begin{verbatim}
 def synthesize1(amps, fs, ts):
@@ -3873,7 +3882,7 @@ def synthesize1(amps, fs, ts):
     return ys
 \end{verbatim}
 
-This solution is almost identical to {\tt synthesize1} in
+This function is almost identical to {\tt synthesize1} in
 Section~\ref{synth1}; the only difference is that I replaced
 {\tt CosSignal} with {\tt ComplexSinusoid}.
 
@@ -3903,18 +3912,19 @@ But nothing we measure in the world yields complex numbers.
 \label{fig.dft1}
 \end{figure}
 
-So what is a complex signal?  I don't have a good answer to this
+So what is a complex signal?  I don't have a satisfying answer to this
 question.  The best I can offer is two unsatisfying
 answers:
 
 \begin{enumerate}
 
-\item A complex signal is a mathematical abstraction that is
-useful for computation and analysis, but it does not correspond
-directly with anything in the real world.
+\item A complex signal is a mathematical abstraction that is useful
+  for computation and analysis, but it does not correspond directly
+  with anything in the real world.
 
-\item You can think of a complex signal as a sequence of complex
-numbers that contains two signals as its real and imaginary parts.
+\item If you like, you can think of a complex signal as a sequence of
+  complex numbers that contains two signals as its real and imaginary
+  parts.
 
 \end{enumerate}
 
@@ -3922,7 +3932,7 @@ Taking the second point of view, we can split the previous
 signal into its real and imaginary parts:
 
 \begin{verbatim}
-    n = framerate / 25
+    n = 500
     thinkplot.plot(ts[:n], ys[:n].real, label='real')
     thinkplot.plot(ts[:n], ys[:n].imag, label='imag')
 \end{verbatim}
@@ -3942,12 +3952,11 @@ As we saw in Section~\ref{synthesis}, we can also express the synthesis
 problem in terms of matrix multiplication: 
 
 \begin{verbatim}
-PI2 = 2 * math.pi
-i = complex(0, 1)
+PI2 = np.pi * 2
 
 def synthesize2(amps, fs, ts):
     args = np.outer(ts, fs)
-    M = np.exp(i * PI2 * args)
+    M = np.exp(1j * PI2 * args)
     ys = np.dot(M, amps)
     return ys
 \end{verbatim}
@@ -4008,16 +4017,17 @@ We can test that claim by running the previous example with
 $\phi_0 = 1.5$ for all frequency components:
 
 \begin{verbatim}
-    amps2 = amps * np.exp(1.5j)
+    phi = 1.5
+    amps2 = amps * np.exp(1j * phi)
     ys2 = synthesize2(amps2, fs, ts)
 
     thinkplot.plot(ts[:n], ys.real[:n])
     thinkplot.plot(ts[:n], ys2.real[:n])
 \end{verbatim}
 
-Python recognizes {\tt 1.5j} as a complex number.  Since {\tt amps}
-is an array of reals, multiplying by {\tt np.exp(1.5j)} yields
-an array of complex numbers with phase offset 1.5 radians, and
+Since {\tt amps}
+is an array of reals, multiplying by {\tt np.exp(1j * phi)} yields
+an array of complex numbers with phase offset {\tt phi} radians, and
 the same magnitudes as {\tt amps}.
 
 Figure~\ref{fig.dft2} shows the result.  The phase offset
@@ -4045,7 +4055,7 @@ equations, $M a = y$ for $a$.
 \begin{verbatim}
 def analyze1(ys, fs, ts):
     args = np.outer(ts, fs)
-    M = np.exp(i * PI2 * args)
+    M = np.exp(1j * PI2 * args)
     amps = np.linalg.solve(M, ys)
     return amps
 \end{verbatim}
@@ -4065,7 +4075,7 @@ slicing {\tt ys} and {\tt ts} down to the length of {\tt fs}:
 >>> n = len(fs)
 >>> amps2 = analyze1(ys[:n], fs, ts[:n])
 >>> print(amps2)
-[ 0.60 +4.6e-13j  0.25 -1.4e-12j  0.10 +1.4e-12j  0.05 -4.6e-13j]
+[ 0.60+0.j  0.25-0.j  0.10+0.j  0.05-0.j]
 \end{verbatim}
 
 These are approximately the amplitudes we started with, although
@@ -4096,7 +4106,7 @@ want.  Here's the code that computes {\tt M} for $N=4$ components:
 >>> ts = np.arange(N) / N
 >>> fs = np.arange(N)
 >>> args = np.outer(ts, fs)
->>> M = np.exp(i * PI2 * args)
+>>> M = np.exp(1j * PI2 * args)
 \end{verbatim}
 
 If $M$ is unitary, $M^*M = I$, where $M^*$ is the conjugate transpose
@@ -4116,7 +4126,7 @@ We can use this result to write a faster version of {\tt analyze1}:
 \begin{verbatim}
 def analyze2(ys, fs, ts):
     args = np.outer(ts, fs)
-    M = np.exp(i * PI2 * args)
+    M = np.exp(1j * PI2 * args)
     amps = M.conj().transpose().dot(ys) / N
     return amps
 \end{verbatim}
@@ -4130,9 +4140,9 @@ And test it with appropriate values of {\tt fs} and {\tt ts}:
 >>> ts = np.arange(N) / N
 >>> ys = synthesize2(amps, fs, ts)
 
->>> amps2 = analyze2(ys, fs, ts)
->>> print(amps2)
-[ 0.60 +2.1e-17j  0.25 +1.3e-17j  0.10 -3.9e-17j  0.05 -8.3e-17j]
+>>> amps23 = analyze2(ys, fs, ts)
+>>> print(amps3)
+[ 0.60+0.j  0.25+0.j  0.10-0.j  0.05-0.j]
 \end{verbatim}
 
 Again, the result is correct within the tolerance of floating-point
@@ -4140,6 +4150,7 @@ arithmetic.
 
 
 \section{DFT}
+\label{dftsection}
 
 As a function, {\tt analyze2} would be hard to use because it
 only works if {\tt fs} and {\tt ts} are chosen correctly.
@@ -4153,7 +4164,7 @@ def synthesis_matrix(N):
     ts = np.arange(N) / N
     fs = np.arange(N)
     args = np.outer(ts, fs)
-    M = np.exp(i * PI2 * args)
+    M = np.exp(1j * PI2 * args)
     return M
 \end{verbatim}
 
@@ -4168,8 +4179,8 @@ def analyze3(ys):
     return amps
 \end{verbatim}
 
-We are almost done.  This function computes something very
-close to the DFT, with one difference: the conventional definition
+We are almost done; {\tt analyze3} computes something very
+close to the DFT, with one difference.  The conventional definition
 of DFT does not divide by {\tt N}:
 
 \begin{verbatim}
@@ -4185,7 +4196,7 @@ FFT:
 
 \begin{verbatim}
 >>> dft(ys)
-[ 2.4 +8.3e-17j  1.0 +5.6e-17j  0.4 -1.6e-16j  0.2 -3.3e-16j]
+[ 2.4+0.j  1.0+0.j  0.4-0.j  0.2-0.j]
 \end{verbatim}
 
 The result is close to {\tt amps * N}.
@@ -4193,7 +4204,7 @@ And here's the version in {\tt np.fft}:
 
 \begin{verbatim}
 >>> np.fft.fft(ys)
-[ 2.4 +8.0e-17j  1.0 -2.5e-17j  0.4 -3.1e-17j  0.2 -2.5e-17j]
+[ 2.4+0.j  1.0+0.j  0.4-0.j  0.2-0.j]
 \end{verbatim}
 
 They are the same, within floating point error.
@@ -4214,7 +4225,7 @@ Finally, we can confirm that {\tt dft(idft(amps))} yields {\tt amps}.
 \begin{verbatim}
 >>> ys = idft(amps)
 >>> dft(ys)
-[ 0.60 +2.1e-17j  0.25 +1.4e-17j  0.10 -3.9e-17j  0.05 -8.3e-17j]
+[ 0.60+0.j  0.25+0.j  0.10-0.j  0.05-0.j]
 \end{verbatim}
 
 If I could go back in time, I might change the definition of
@@ -4226,12 +4237,63 @@ Or I might change the definition so that both operations divide
 through by $\sqrt{N}$.  Then the DFT and inverse DFT would be
 more symmetric.
 
-I can't go back in time (yet!), so we're stuck with a slightly
-weird convention.  But for practical purposes it doesn't really
+But I can't go back in time (yet!), so we're stuck with a slightly
+weird convention.  For practical purposes it doesn't really
 matter.
 
 
-\section{Just one more thing}
+\section{The DFT is periodic}
+
+In this chapter I presented the DFT in the form of matrix multiplication.
+We compute the synthesis matrix, $M$, and the analysis matrix, $M^*$.
+When we multiply $M^{*}$ by the wave array, $y$, each element of the
+result is the product of a row from $M^*$ and $y$, which we can
+write in the form of a summation:
+%
+\[ DFT(y)[k] = \sum_n y[n] \exp(-2 \pi i n k / N) \]
+%
+where $k$ is an index of frequency from
+$0$ to $N-1$ and $n$ is an index of time from $0$ to $N-1$.
+So $DFT(y)[k]$ is the $k$th element of the DFT of $y$.
+
+Normally we evaluate this summation for $N$ values of $k$, running from
+0 to $N-1$.  We {\em could} evaluate it for other values of $k$, but
+there is no point, because they start to repeat.  That is, the value at
+$k$ is the same as the value at $k+N$ or $k+2N$ or $k-N$, etc.
+
+We can see that mathematically by plugging $k+N$ into the summation:
+%
+\[ DFT(y)[k+N] = \sum_n y[n] \exp(-2 \pi i n (k+N) / N) \]
+%
+Since there is a sum in the exponent, we can break it into two parts:
+%
+\[ DFT(y)[k+N] = \sum_n y[n] \exp(-2 \pi i n k / N)  \exp(-2 \pi i n N / N) \]
+%
+In the second term, the exponent is always an integer multiple of
+$2 \pi$, so the result is always 1, and we can drop it:
+%
+\[ DFT(y)[k+N] = \sum_n y[n] \exp(-2 \pi i n k / N) \]
+%
+And we can see that this summation is equivalent to $ DFT(y)[k]$.
+So the DFT is periodic, with period $N$.  You will need this result
+for one of the exercises below, which asks you to implement the Fast Fourier
+Transform (FFT).
+
+As an aside, writing the DFT in the form of a summation provides an
+insight into how it works.  If you review the diagram in
+Section~\ref{synthesis}, you'll see that each column of the synthesis matrix
+is a signal evaluated at a sequence of times.  The analysis matrix is
+the (conjugate) transpose of the synthesis matrix, so each {\em row}
+is a signal evaluated at a sequence of times.
+
+Therefore, each summation is the correlation of $y$ with one of the
+signals in the array (see Section~\ref{dotproduct}).  That is, each
+element of the DFT is a correlation that quantifies the similarity of
+the wave array, $y$, and a complex exponential at a particular
+frequency.
+
+
+\section{DFT of real signals}
 
 \begin{figure}
 % dft.py
@@ -4242,16 +4304,15 @@ matter.
 
 The Spectrum class in {\tt thinkdsp} is based on {\tt np.ftt.rfft},
 which computes the ``real DFT''; that is, it works with real signals.
-The DFT is more general than the real DFT; it works with complex
-signals.
+But the DFT as presented in this chapter is more general than that; it
+works with complex signals.
 
-So what happens when we apply DFT to a real signal?  Let's look at
-an example:
+So what happens when we apply the ``full DFT'' to a real signal?
+Let's look at an example:
 
 \begin{verbatim}
->>> framerate = 10000
 >>> signal = thinkdsp.SawtoothSignal(freq=500)
->>> wave = signal.make_wave(duration=0.1, framerate=framerate)
+>>> wave = signal.make_wave(duration=0.1, framerate=10000)
 >>> hs = dft(wave.ys)
 >>> amps = np.absolute(hs)
 \end{verbatim}
@@ -4266,12 +4327,12 @@ body of {\tt dft}, we see:
 >>> fs = np.arange(N)
 \end{verbatim}
 
-So it's tempting to think that these values are the right frequencies.
-The problem is that {\tt dft} doesn't know the sampling rate.  The
-DFT assumes that the duration of the wave is 1 time unit, so the sampling
-rate is $N$ per time unit.  In order to interpret the frequencies,
-we have to convert from these arbitrary time units back to seconds,
-like this:
+It's tempting to think that these values are the right frequencies.
+The problem is that {\tt dft} doesn't know the sampling rate.  The DFT
+assumes that the duration of the wave is 1 time unit, so it thinks the
+sampling rate is $N$ per time unit.  In order to interpret the
+frequencies, we have to convert from these arbitrary time units back
+to seconds, like this:
 
 \begin{verbatim}
 >>> fs = np.arange(N) * framerate / N
@@ -4298,7 +4359,7 @@ What's going on?
 The answer: aliasing.  Remember that with framerate 10000 Hz, the
 folding frequency is 5000 Hz.  As we saw in Section~\ref{aliasing},
 a component at 5500 Hz is indistinguishable from a component
-at 4500 Hz.  So when we evaluate the DFT at 5500 Hz, we get the same
+at 4500 Hz.  When we evaluate the DFT at 5500 Hz, we get the same
 value as at 4500 Hz.  Similarly, the value at 6000 Hz is the same
 as the one at 4000 Hz, and so on.
 
@@ -4308,7 +4369,11 @@ save time by evaluating only the first half of the DFT,
 and that's exactly what {\tt np.fft.rfft} does.
 
 
+
 \section{Exercises}
+
+Solutions to these exercises are in {\tt chap07soln.ipynb}.
+
 
 \begin{exercise}
 The notebook for this chapter, {\tt chap07.ipynb}, contains
@@ -4321,19 +4386,53 @@ the code.
 In this chapter, I showed how we can express the DFT and inverse
 DFT as matrix multiplications.  These operations are relatively
 fast, taking time proportional to $N^2$, where $N$ is the length
-of the wave array.  That would be fast enough for many applications,
+of the wave array.  That is fast enough for many applications,
 but it turns out that there is a faster algorithm, the
 Fast Fourier Transform (FFT), which takes time proportional to 
 $N \log N$.
 
-Read about the FFT at
-\url{http://en.wikipedia.org/wiki/Cooley-Tukey_FFT_algorithm}, and
-write an implementation.  Hint: I suggest you write a simple version
-as a recursive function; don't worry about ``data reordering, bit
-reversal, and in-place algorithms''.
-\end{exercise}
+The key to the FFT is the Danielson-Lanczos lemma:
+%
+\[ DFT(y)[n] = DFT(e)[n] + exp(-2 \pi i n / N) DFT(o)[n] \]
+%
+Where $ DFT(y)[n]$ is the $n$th element of the DFT of $y$; $e$ is a
+wave array containing the even elements of $y$, and $o$ contains the
+odd elements of $y$.
 
-Solutions to these exercises are in {\tt chap07soln.ipynb}.
+This lemma suggests a recursive algorithm for the DFT:
+
+\begin{enumerate}
+
+\item Given a wave array, $y$, split it into its even elements, $e$,
+  and its odd elements, $o$.
+
+\item Compute the DFT of $e$ and $o$ by making a recursive call.
+
+\item Compute $DFT(y)$ for each value of $n$ using the
+  Danielson-Lanczos lemma.
+
+\end{enumerate}
+
+For the base case of this recursion, you could wait until the length
+of $y$ is 1.  In that case, $DFT(y) = y$.  Or when the length of $y$
+is sufficiently small, you could compute its DFT by matrix multiplication,
+possibly using a precomputed matrix.
+
+Hint: I suggest you implement this algorithm incrementally by starting
+with a version that is not truly recursive.  In Step 2, instead of
+making a recursive call, using {\tt dft}, as defined by
+Section~\ref{dftsection}, or {\tt np.fft.fft}.  Get Step 3 working,
+and confirm that the results are consistent with the other
+implementations.  Then add a base case and confirm that it works.
+Finally, replace Step 2 with recursive calls.
+
+One more hint: Remember that the DFT is periodic; you might find {\tt
+  np.tile} useful.
+
+You can read more about the FFT at
+\url{https://en.wikipedia.org/wiki/Fast_Fourier_transform}.
+
+\end{exercise}
 
 
 \chapter{Filtering and Convolution}
