@@ -4383,13 +4383,12 @@ the code.
 
 
 \begin{exercise}
-In this chapter, I showed how we can express the DFT and inverse
-DFT as matrix multiplications.  These operations are relatively
-fast, taking time proportional to $N^2$, where $N$ is the length
-of the wave array.  That is fast enough for many applications,
-but it turns out that there is a faster algorithm, the
-Fast Fourier Transform (FFT), which takes time proportional to 
-$N \log N$.
+In this chapter, I showed how we can express the DFT and inverse DFT
+as matrix multiplications.  These operations take time proportional to
+$N^2$, where $N$ is the length of the wave array.  That is fast enough
+for many applications, but there is a faster
+algorithm, the Fast Fourier Transform (FFT), which takes time
+proportional to $N \log N$.
 
 The key to the FFT is the Danielson-Lanczos lemma:
 %
@@ -4406,7 +4405,7 @@ This lemma suggests a recursive algorithm for the DFT:
 \item Given a wave array, $y$, split it into its even elements, $e$,
   and its odd elements, $o$.
 
-\item Compute the DFT of $e$ and $o$ by making a recursive call.
+\item Compute the DFT of $e$ and $o$ by making recursive calls.
 
 \item Compute $DFT(y)$ for each value of $n$ using the
   Danielson-Lanczos lemma.
@@ -4414,13 +4413,13 @@ This lemma suggests a recursive algorithm for the DFT:
 \end{enumerate}
 
 For the base case of this recursion, you could wait until the length
-of $y$ is 1.  In that case, $DFT(y) = y$.  Or when the length of $y$
+of $y$ is 1.  In that case, $DFT(y) = y$.  Or if the length of $y$
 is sufficiently small, you could compute its DFT by matrix multiplication,
 possibly using a precomputed matrix.
 
 Hint: I suggest you implement this algorithm incrementally by starting
 with a version that is not truly recursive.  In Step 2, instead of
-making a recursive call, using {\tt dft}, as defined by
+making a recursive call, use {\tt dft}, as defined by
 Section~\ref{dftsection}, or {\tt np.fft.fft}.  Get Step 3 working,
 and confirm that the results are consistent with the other
 implementations.  Then add a base case and confirm that it works.
@@ -4454,7 +4453,7 @@ You can also view it at \url{http://tinyurl.com/thinkdsp08}.
 \begin{figure}
 % convolution1.py
 \centerline{\includegraphics[height=2.5in]{figs/convolution1.pdf}}
-\caption{Daily closing price of BitCoin and a 30-day moving
+\caption{Daily closing price of Facebook stock and a 30-day moving
 average.}
 \label{fig.convolution1}
 \end{figure}
@@ -4469,11 +4468,10 @@ A common smoothing algorithm is a moving average, which computes
 the mean of the previous $n$ values, for some value of $n$.
 
 For example, Figure~\ref{fig.convolution1} shows the daily
-closing price of BitCoin from July 18, 2010 to December 28,
-2014 (downloaded from \url{http://www.coindesk.com}).  The gray line
+closing price of Facebook from May 17, 2012 to December 8,
+2015.  The gray line
 is the raw data, the darker line shows the 30-day moving average.
-In the short term, the price of BitCoin is quite volatile, often
-changing by more than 10\% in a day.  Smoothing removes the most
+Smoothing removes the most
 extreme changes and makes it easier to see long-term trends.
 
 Smoothing operations also apply to sound signals.  As an example, I'll
@@ -4490,10 +4488,6 @@ slowly, so it contains many high-frequency components.
 {\tt wave} is a 1-second segment of the signal; {\tt segment}
 is a shorter segment I'll use for plotting.
 
-You can try out this example, and listen to it, in
-{\tt chap08.ipynb}, which is in the repository for this
-book and also available at \url{http://tinyurl.com/thinkdsp08}.
-
 To compute the moving average of this signal, I'll create
 a window with 11 elements and normalize it so the elements
 add up to 1.
@@ -4507,41 +4501,49 @@ Now I can compute the average of the first 11 elements by
 multiplying the window by the wave array:
 
 \begin{verbatim}
->>> padded = zero_pad(window, len(segment))
->>> prod = padded * segment.ys
+>>> ys = segment.ys
+>>> N = len(ys)
+>>> padded = thinkdsp.zero_pad(window, N)
+>>> prod = padded * ys
 >>> sum(prod)
 -1
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
 the end so it has the same length as {\tt segment.ys}
-(\verb"zero_pad" is defined in {\tt convolution.py}).
 {\tt prod} is the product of the window and the wave array.
 
-The sum of this product is the average of the first 11 elements
-of the array.  Since these elements are all -1, their average
+The sum of the elementwise products is the average of the first 11
+elements of the array.  Since these elements are all -1, their average
 is -1.
-
-To compute the next element of the smoothed signal, we shift the
-window to the right and compute the average of the next 11 elements of
-the wave array, starting with the second.
 
 \begin{figure}
 % convolution2.py
 \centerline{\includegraphics[height=2.5in]{figs/convolution2.pdf}}
 \caption{A square signal at 400 Hz (gray) and an 11-element
-moving average (darker).}
+moving average.}
 \label{fig.convolution2}
 \end{figure}
+
+To compute the next element of the smoothed signal, we shift the
+window to the right and compute the average of the next 11 elements of
+the wave array, starting with the second.
+
+\begin{verbatim}
+>>> rolled = np.roll(rolled, 1)
+>>> prod = rolled * ys
+>>> sum(prod)
+-1
+\end{verbatim}
 
 To compute the moving average, we repeat this process and store
 the result in an array named {\tt smoothed}:
 
 \begin{verbatim}
->>> smoothed = np.zeros_like(segment.ys)
+>>> smoothed = np.zeros_like(ys)
 >>> rolled = padded
->>> for i in range(len(segment.ys)):
-        smoothed[i] = sum(rolled * segment.ys)
+>>> for i in range(N):
+        smoothed[i] = sum(rolled * ys)
         rolled = np.roll(rolled, 1)
 \end{verbatim}
 
@@ -4567,8 +4569,8 @@ and it is such a common operation that NumPy provides an
 implementation that is simpler and faster than my version:
 
 \begin{verbatim}
->>> ys = np.convolve(segment.ys, window, mode='valid')
->>> smooth2 = thinkdsp.Wave(ys, framerate=wave.framerate)
+>>> convolved = np.convolve(ys, window, mode='valid')
+>>> smooth2 = thinkdsp.Wave(convolved, framerate=wave.framerate)
 \end{verbatim}
 
 {\tt np.convolve} computes the convolution of the wave
@@ -4590,7 +4592,7 @@ and $\star$ is the symbol for cross-correlation.  To
 compute the $n$th element of the result, we shift $g$ to
 the right, which is why the index is $n+m$.
 
-The mathematical definition of convolution is slightly different:
+The definition of convolution is slightly different:
 %
 \[ (f \conv g)[n] = \sum_{m=0}^{N-1} f[m] g[n-m]  \]
 %
@@ -4608,11 +4610,11 @@ are two reasons:
 
 \begin{itemize}
 
-\item Convolution comes up naturally for several applications,
+\item This definition comes up naturally for several applications,
 especially analysis of signal-processing systems, which is
 the topic of Chapter~\ref{systems}.
 
-\item Also, convolution is the basis of the Convolution Theorem,
+\item Also, this definition is the basis of the Convolution Theorem,
 coming up very soon.
 
 \end{itemize}
@@ -4634,20 +4636,21 @@ of the original wave:
 
 \begin{verbatim}
 >>> spectrum = wave.make_spectrum()
->>> spectrum.plot(color='0.7')
+>>> spectrum.plot(color=GRAY)
 \end{verbatim}
 
 Then the smoothed wave:
 
 \begin{verbatim}
->>> ys = np.convolve(wave.ys, window, mode='same')
->>> smooth = thinkdsp.Wave(ys, framerate=wave.framerate)
+>>> convolved = np.convolve(wave.ys, window, mode='same')
+>>> smooth = thinkdsp.Wave(convolved, framerate=wave.framerate)
 >>> spectrum2 = smooth.make_spectrum()
 >>> spectrum2.plot()
 \end{verbatim}
 
 The mode flag {\tt same} indicates that the result should have the
-same length as the input.
+same length as the input.  In this example, it will include a few values
+that ``wrap around'', but that's ok for now.
 
 Figure~\ref{fig.convolution4} shows the result.  The fundamental
 frequency is almost unchanged; the first few harmonics are
@@ -4668,7 +4671,7 @@ compute the ratio of the two spectrums:
 
 {\tt ratio} is the ratio of the amplitude before and after 
 smoothing.  When {\tt amps} is small, this ratio can be big
-and noisy, so for simplicity I set the ratio to 0 except for
+and noisy, so for simplicity I set the ratio to 0 except
 where the harmonics are.
 
 \begin{figure}
@@ -4716,7 +4719,7 @@ the wave with the spectrum of the window.  To see how that works,
 we can compute the DFT of the window:
 
 \begin{verbatim}
-    padded = zero_pad(window, len(wave))
+    padded = zero_pad(window, N)
     dft_window = np.fft.rfft(padded)
     thinkplot.plot(abs(dft_window))
 \end{verbatim}
@@ -4860,7 +4863,7 @@ We can test it by padding the window to the same length
 as {\tt ys} and then computing the convolution:
 
 \begin{verbatim}
-    padded = zero_pad(window, len(ys))
+    padded = zero_pad(window, N)
     smoothed2 = fft_convolve(ys, padded)
 \end{verbatim}
 
@@ -4872,10 +4875,6 @@ agrees with \verb"fft_convolve" with about 12 digits of precision.
     M = len(window)
     smoothed2 = smoothed2[M-1:]
 \end{verbatim}
-
-You can run this example in
-{\tt chap08.ipynb}, which is in the repository for this
-book and also available at \url{http://tinyurl.com/thinkdsp08}.
 
 
 \section{Efficient autocorrelation}
@@ -4899,7 +4898,6 @@ Using the data from the previous section, we can compute the
 autocorrelation of BitCoin prices:
 
 \begin{verbatim}
-N = len(ys)
 corrs = np.correlate(ys, ys, mode='same')
 corrs = corrs[N//2:]
 \end{verbatim}
@@ -4919,6 +4917,8 @@ around from the end to the beginning.  With time-series data like
 this, that assumption is invalid.  Adding zeros, and then trimming 
 the results, removes the bogus values.
 
+% TODO: investigate using flipud to reverse the array
+
 \begin{verbatim}
 def fft_autocorr(signal):
     N = len(signal)
@@ -4927,7 +4927,7 @@ def fft_autocorr(signal):
     window = zero_pad(window, 2*N)
 
     corrs = fft_convolve(signal, window)
-    corrs = corrs[N//2: 3*N//2]
+    corrs = corrs[N//2-1: 3*N//2-1]
     return corrs
 \end{verbatim}
 
