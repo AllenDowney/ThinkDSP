@@ -1419,6 +1419,7 @@ modify it.
 
 
 \chapter{Non-periodic signals}
+\label{nonperiodic}
 
 The signals we have worked with so far are periodic, which means
 that they repeat forever.  It also means that the frequency
@@ -2754,6 +2755,7 @@ ranges from 0 to almost 1, as shown in Figure~\ref{fig.autocorr3}.
 
 
 \section{Autocorrelation}
+\label{autopink}
 
 In the previous section we computed the correlation between each
 value and the next, so we shifted the elements of the array by 1.
@@ -4895,58 +4897,54 @@ reversed.
 Now that we have an efficient algorithm for convolution, we
 can also use it to compute cross-correlations and autocorrelations.
 Using the data from the previous section, we can compute the
-autocorrelation of BitCoin prices:
+autocorrelation Facebook stock prices:
 
 \begin{verbatim}
-corrs = np.correlate(ys, ys, mode='same')
-corrs = corrs[N//2:]
+corrs = np.correlate(close, close, mode='same')
 \end{verbatim}
 
-With {\tt mode='same'}, the result has the same length as $ys$,
-corresponding to lags from $-N/2$ to $N/2-1$.  By selecting the
-second half, we get only the non-negative lags.
+With {\tt mode='same'}, the result has the same length as {\tt close},
+corresponding to lags from $-N/2$ to $N/2-1$.  
 The gray line in Figure~\ref{fig.convolution9} shows the result.
 Except at {\tt lag=0}, there are no peaks, so there is no apparent
-periodic behavior in this signal.
+periodic behavior in this signal.  However, the autocorrelation
+function drops off slowly, suggesting that this signal resembled
+pink noise, as we saw in Section~\ref{autopink}.
 
-To compute autocorrelation using convolution, we make a copy of
-the signal and reverse it.  Then we pad the copy and the original to
-double their length.  This trick is necessary because the FFT is based
+To compute autocorrelation using convolution, 
+have to zero-pad the signal to double the length. 
+This trick is necessary because the FFT is based
 on the assumption that the signal is periodic; that is, that it wraps
 around from the end to the beginning.  With time-series data like
 this, that assumption is invalid.  Adding zeros, and then trimming 
 the results, removes the bogus values.
 
-% TODO: investigate using flipud to reverse the array
+Also, remember that convolution reverse the direction of the window.
+In order to cancel that effect, we reverse the direction of the
+window before calling \verb"fft_convolve", using {\tt np.flipud},
+which flips a NumPy array.  The result is a view of the array,
+not a copy, so this operation is fast.
 
 \begin{verbatim}
 def fft_autocorr(signal):
     N = len(signal)
-    window = signal[::-1]
-    signal = zero_pad(signal, 2*N)
-    window = zero_pad(window, 2*N)
+    signal = thinkdsp.zero_pad(signal, 2*N)
+    window = np.flipud(signal)
 
     corrs = fft_convolve(signal, window)
-    corrs = corrs[N//2-1: 3*N//2-1]
+    corrs = np.roll(corrs, N//2+1)[:N]
     return corrs
 \end{verbatim}
 
-When \verb"fft_autocorr" calls \verb"fft_convolve", the result has
-length $2N$, corresponding to lags from $-N+1$ to $N$.  From these I
-slice out the middle half, corresponding to lags from $-N/2$ to
+The result from \verb"fft_convolve" has length $2N$.  Of those,
+the first and last $N/2$ are valid; the rest are the result of
+zero-padding.  To select the valid element, we roll the results
+and select the first $N$, corresponding to lags from $-N/2$ to
 $N/2-1$.
 
-Finally, we call \verb"fft_autocorr" and select the second half,
-which contains correlations with non-negative lags.
-
-\begin{verbatim}
-    corrs2 = fft_autocorr(ys)
-    corrs2 = corrs2[N//2:]
-\end{verbatim}
-
-The thin, dark line in Figure~\ref{fig.convolution9} shows the result,
-which is identical to the result from {\tt np.correlate}, with
-about 7 digits of precision.
+As shown in Figure~\ref{fig.convolution9} the results from
+\verb"fft_autocorr" and {\tt np.correlate} are identical (with
+about 9 digits of precision).
 
 Notice that the correlations in Figure~\ref{fig.convolution9} are
 large numbers; we could normalize them (between -1 and 1) as shown
@@ -4955,11 +4953,13 @@ in Section~\ref{correlate}.
 The strategy we used here for auto-correlation also works for
 cross-correlation.  Again, you have to prepare the signals by flipping
 one and padding both, and then you have to trim the invalid parts of
-the result.  This packing and unpacking is a nuisance, but that's why
+the result.  This padding and trimming is a nuisance, but that's why
 libraries like NumPy provide functions to do it for you.
 
 
 \section{Exercises}
+
+Solutions to these exercises are in {\tt chap08soln.ipynb}.
 
 \begin{exercise}
 The notebook for this chapter is {\tt chap08.ipynb}.
@@ -4971,8 +4971,7 @@ what effect they have on the cutoff frequency.
 
 What goes wrong when you increase the width of the Gaussian,
 {\tt std}, without increasing the number of elements in the window,
-{\tt M}?  The problem might be more apparent if you plot the
-window.
+{\tt M}?
 \end{exercise}
 
 
@@ -4985,22 +4984,33 @@ Try it out for a few examples.  What happens to the Fourier transform
 as you vary {\tt std}?
 \end{exercise}
 
-% TODO: more exercises!
-%\begin{exercise}
-%\end{exercise}
 
-Solutions to these exercises are in {\tt chap08soln.ipynb}.
+\begin{exercise}
+If you did the exercises in Chapter~\ref{nonperiodic}, you saw the
+effect of the Hamming window, and some of the other windows provided
+by NumPy, on spectral leakage.  We can get some insight into the
+effect of these windows by looking at their DFTs.
+
+In addition to the Gaussian window we used in this window, create a
+Hamming window with the same size.  Zero pad the windows and plot
+their DFTs.  Which window acts as a better low-pass filter?  You might
+find it useful to plot the DFTs on a log-$y$ scale.
+
+Experiment with a few different windows and a few different sizes.
+\end{exercise}
 
 
 
 \chapter{Differentiation and Integration}
 \label{diffint}
 
-NOTE: THIS CHAPTER IS NOT READY FOR PRIME TIME!
-
 This chapter picks up where the previous chapter left off,
 looking at the relationship between windows in the time domain
 and filters in the frequency domain.
+
+In particular, we'll look at the effect of a finite difference
+window, which approximates differentiation, and the cumulative
+sum operation, which approximates integration.
 
 The code for this chapter is in {\tt chap09.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -5009,8 +5019,8 @@ You can also view it at \url{http://tinyurl.com/thinkdsp09}.
 
 \section{Finite differences}
 
-In Section~\ref{smoothing}, I applied a smoothing window to
-the historical price of BitCoin, and we found that a smoothing
+In Section~\ref{smoothing}, we applied a smoothing window to
+the stock price of Facebook and found that a smoothing
 window in the time domain corresponds to a low-pass filter in
 the frequency domain.
 
@@ -5022,25 +5032,32 @@ Here's the code to read the data, store it as a wave, and compute its
 spectrum.
 
 \begin{verbatim}
-    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
-                         nrows=1625, 
-                         parse_dates=[0])
-    ys = df.Close.values
-    wave = thinkdsp.Wave(ys, framerate=1)
-    spectrum = wave.make_spectrum()
+import pandas as pd
+
+names = ['date', 'open', 'high', 'low', 'close', 'volume']
+df = pd.read_csv('fb.csv', header=0, names=names)
+ys = df.close.values[::-1]
+close = thinkdsp.Wave(ys, framerate=1)
+spectrum = wave.make_spectrum()
 \end{verbatim}
 
-The framerate is 1 sample per day.  Figure~\ref{fig.diff_int1} shows
-the time series and its spectrum plotted on a log-log scale.
+This example uses Pandas to read the CSV file; the
+result is a DataFrame, {\tt df}, with columns for the opening
+price, closing price, and high and low prices.  I select the closing
+prices and save them in a Wave object.
+The framerate is 1 sample per day.  
+
+Figure~\ref{fig.diff_int1} shows
+this time series and its spectrum.
 Visually, the time series resembles Brownian noise (see
-Section~\ref{brownian}).  The estimated slope of the spectrum is -1.8,
+Section~\ref{brownian}).  And the spectrum looks like a straight
+line, albeit a noisy one.  The estimated slope of the spectrum is -1.9,
 which is consistent with Brownian noise.
 
-%TODO: replace the figures in this chapter
 \begin{figure}
 % diff_int.py
-\centerline{\includegraphics[height=2.5in]{figs/systems1.pdf}}
-\caption{Daily closing price of BitCoin and the spectrum of this time
+\centerline{\includegraphics[height=2.5in]{figs/diff_int1.pdf}}
+\caption{Daily closing price of Facebook and the spectrum of this time
   series.}
 \label{fig.diff_int1}
 \end{figure}
@@ -5049,65 +5066,52 @@ Now let's compute the daily price change using {\tt np.diff}:
 
 \begin{verbatim}
     diff = np.diff(ys)
-    wave2 = thinkdsp.Wave(diff, framerate=1)
+    change = thinkdsp.Wave(diff, framerate=1)
 \end{verbatim}
 
 Figure~\ref{fig.diff_int2} shows the resulting wave and its
 spectrum.  The daily changes and their spectrum resemble white noise,
-and the estimated parameter, -0.023, is near zero, which is what
+and the estimated parameter, -0.06, is near zero, which is what
 we expect for white noise.
+
+\begin{figure}
+% diff_int2.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int2.pdf}}
+\caption{Daily price change of Facebook and the spectrum of this time series.}
+\label{fig.diff_int2}
+\end{figure}
 
 
 \section{The frequency domain}
 
-\begin{figure}
-% diff_int2.py
-\centerline{\includegraphics[height=2.5in]{figs/systems2.pdf}}
-\caption{Daily price changes of BitCoin and their spectrum.}
-\label{fig.diff_int2}
-\end{figure}
-
-To see the effect of this operation in the frequency domain,
-we can compute the ratio of amplitudes before and after:
-
-\begin{verbatim}
-    amps = spectrum.amps
-    amps2 = spectrum2.amps
-    n = min(len(amps), len(amps2))
-    ratio = amps2[:n] / amps[:n]
-    thinkplot.plot(ratio)
-\end{verbatim}
-
-We can also characterize the effect in the frequency domain
-by computing the DFT of the window.  Computing the difference
+Computing the difference
 between successive elements is the same as convolution with
 the window {\tt [1, -1]}.
-
-\begin{verbatim}
-    window = np.array([1.0, -1.0])
-    padded = zero_pad(window, len(wave))
-    fft_window = np.fft.rfft(padded)
-    thinkplot.plot(abs(fft_window), color='0.7')
-\end{verbatim}
-
-If the order of the elements in the window seems backward,
+If the order of those elements seems backward,
 remember that convolution reverses the window before applying it
 to the signal.
 
-Figure~\ref{fig.diff_int3} shows the computed ratio and the DFT of the
-window, which is the filter.  The computed ratio is noisy, but
-generally follows the shape of the filter.
+We can see the effect of this operation in the frequency domain
+by computing the DFT of the window.  
+
+\begin{verbatim}
+window = np.array([1.0, -1.0])
+padded = thinkdsp.zero_pad(window, len(close))
+window_wave = thinkdsp.Wave(padded, framerate=close.framerate)
+window_spectrum = window_wave.make_spectrum()
+\end{verbatim}
 
 \begin{figure}
 % diff_int.py
-\centerline{\includegraphics[height=2.5in]{figs/systems3.pdf}}
-\caption{Ratio of amplitudes before and after filtering, and
-the filter corresponding to the {\tt diff} operation.}
+\centerline{\includegraphics[height=2.5in]{figs/diff_int3.pdf}}
+\caption{The DFT of the finite difference window.}
 \label{fig.diff_int3}
 \end{figure}
 
-The filter increases with frequency, linearly for low frequencies,
-and then sublinearly after that.  In the next section, we'll see why.
+Figure~\ref{fig.diff_int3} shows the result.  The finite difference
+window corresponds to a high pass filter: its amplitude increases with
+frequency, linearly for low frequencies, and then sublinearly after
+that.  In the next section, we'll see why.
 
 
 \section{Differentiation}
@@ -5115,8 +5119,11 @@ and then sublinearly after that.  In the next section, we'll see why.
 
 The window we used in the previous section is a
 numerical approximation of the first derivative, so the filter
-approximates the effect of differentiation, which we can
-figure out mathematically.
+approximates the effect of differentiation.
+
+Differentiation in the time domain corresponds to a simple filter
+in the frequency domain; we can figure out what it is with a little
+math.
 
 Suppose we have a complex sinusoid with frequency $f$:
 %
@@ -5131,14 +5138,13 @@ which we can rewrite as
 \[ \frac{d}{dt} E_f(t) = 2 \pi i f E_f(t) \]
 %
 In other words, taking the derivative of $E_f$ is the same
-as multiplying by $2 \pi i f$, which is an imaginary number
-with magnitude proportional to $f$.
+as multiplying by $2 \pi i f$, which is a complex number
+with magnitude $2 \pi f$ and angle $\pi/2$.
 
 As we saw in Section~\ref{synthmat}, multiplying a complex sinusoid
 by a complex number has two effects: it multiplies
 the amplitude, in this case by $2 \pi f$, and shifts the phase
-offset, in this case by $\pi/2$ (because that's the angle of
-a positive imaginary number).
+offset, in this case by $\pi/2$.
 
 If you are familiar with the language of operators and eigenfunctions,
 each $E_f$ is an eigenfunction of the differentiation operator, with the
@@ -5167,8 +5173,10 @@ a corresponding eigenvalue.
 
 \end{itemize}
 
-For a complex signal with only one frequency component,
-differentiation is easy.  For signals with more than one component,
+Because complex sinusoids are eigenfunctions of the differentiation
+operator, they are easy to differentiate.  All we have to do is
+multiply by a complex scalar.
+For signals with more than one component,
 the process is only slightly harder:
 
 \begin{enumerate}
@@ -5184,14 +5192,6 @@ the process is only slightly harder:
 If that process sounds familiar, that's because it is identical
 to the algorithm for convolution in Section~\ref{effconv}: compute
 the DFT, multiply by a filter, and compute the inverse DFT.
-
-\begin{figure}
-% diff_int.py
-\centerline{\includegraphics[height=2.5in]{figs/systems4.pdf}}
-\caption{Comparison of daily price changes computed by
-{\tt np.diff} and by filtering in the frequency domain.}
-\label{fig.diff_int4}
-\end{figure}
 
 {\tt Spectrum} provides a method that applies the differentiation
 filter:
@@ -5220,6 +5220,14 @@ using {\tt np.diff}, {\tt wave3}:
     wave2.plot(color='0.7', label='diff')
     wave3.plot(label='derivative')
 \end{verbatim}
+
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int4.pdf}}
+\caption{Comparison of daily price changes computed by
+{\tt np.diff} and by filtering in the frequency domain.}
+\label{fig.diff_int4}
+\end{figure}
 
 Figure~\ref{fig.diff_int4} shows the results.  They are similar except
 where the changes are most abrupt.  They also differ at the
