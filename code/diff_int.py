@@ -13,6 +13,9 @@ import pandas as pd
 import thinkdsp
 import thinkplot
 
+PI2 = np.pi * 2
+GRAY = '0.7'
+
 
 def plot_wave_and_spectrum(wave, root):
     """Makes a plot showing a wave and its spectrum.
@@ -38,6 +41,23 @@ def plot_wave_and_spectrum(wave, root):
     thinkplot.save(root=root)
 
 
+def plot_sawtooth_and_spectrum(wave, root):
+    """Makes a plot showing a sawtoothwave and its spectrum.
+    """
+    thinkplot.preplot(cols=2)
+    wave.plot()
+    thinkplot.config(xlabel='Time (s)')
+
+    thinkplot.subplot(2)
+    spectrum = wave.make_spectrum()
+    spectrum.plot()
+    thinkplot.config(xlabel='Frequency (Hz)',
+                     ylabel='Amplitude',
+                     xlim=[0, spectrum.fs[-1]])
+
+    thinkplot.save(root)
+
+
 def make_filter(window, wave):
     """Computes the filter that corresponds to a window.
     
@@ -52,81 +72,107 @@ def make_filter(window, wave):
     return window_spectrum
 
 
-def plot_diff_filter(close):
-    """Plots the filter that corresponds to first order finite difference.
+def plot_filters(close):
+    """Plots the filter that corresponds to diff, deriv, and integral.
     """
+    thinkplot.preplot(3, cols=2)
+
     diff_window = np.array([1.0, -1.0])
     diff_filter = make_filter(diff_window, close)
-    diff_filter.plot()
-    thinkplot.config(xlabel='Frequency (1/day)', ylabel='Amplitude ratio')
+    diff_filter.plot(label='diff')
+
+    deriv_filter = close.make_spectrum()
+    deriv_filter.hs = PI2 * 1j * deriv_filter.fs
+    deriv_filter.plot(label='derivative')
+
+    thinkplot.config(xlabel='Frequency (1/day)',
+                     ylabel='Amplitude ratio',
+                     loc='upper left')
+
+    thinkplot.subplot(2)
+    integ_filter = deriv_filter.copy()
+    integ_filter.hs = 1 / (PI2 * 1j * integ_filter.fs)
+
+    integ_filter.plot(label='integral')
+    thinkplot.config(xlabel='Frequency (1/day)',
+                     ylabel='Amplitude ratio', 
+                     yscale='log')
     thinkplot.save('diff_int3')
 
 
-def plot_ratios(wave, wave2):
-    spectrum = wave.make_spectrum()
-    spectrum2 = wave2.make_spectrum()
+def plot_diff_deriv(close):
+    change = thinkdsp.Wave(np.diff(close.ys), framerate=1)
+
+    deriv_spectrum = close.make_spectrum()
+    deriv_spectrum.differentiate()
+    deriv = deriv_spectrum.make_wave()
+
+    low, high = 0, 50
+    thinkplot.preplot(2)
+    thinkplot.plot(change.ys[low:high], label='diff')
+    thinkplot.plot(deriv.ys[low:high], label='derivative')
+
+    thinkplot.config(xlabel='Time (day)', ylabel='Price change ($)')
+    thinkplot.save('diff_int4')
+
     
-    amps = spectrum.amps
-    amps2 = spectrum2.amps
+def plot_integral(close):
 
-    n = min(len(amps), len(amps2))
-    ratio = amps2[:n] / amps[:n]
+    deriv_spectrum = close.make_spectrum()
+    deriv_spectrum.differentiate()
 
-    thinkplot.preplot(1)
-    thinkplot.plot(ratio, label='ratio')
+    integ_spectrum = deriv_spectrum.copy()
+    integ_spectrum.integrate()
+    print(integ_spectrum.hs[0])
+    integ_spectrum.hs[0] = 0
+    
+    thinkplot.preplot(2)
+    integ_wave = integ_spectrum.make_wave()
+    close.plot(label='closing prices')
+    integ_wave.plot(label='integrated derivative')
+    thinkplot.config(xlabel='Time (day)', ylabel='Price ($)', 
+                     legend=True, loc='upper left')
 
-    window = np.array([1.0, -1.0])
-    padded = thinkdsp.zero_pad(window, len(wave))
-    fft_window = np.fft.rfft(padded)
-    thinkplot.plot(abs(fft_window), color='0.7', label='filter')
+    thinkplot.save('diff_int5')
 
-    thinkplot.config(xlabel='Frequency (1/days)',
-                     #xlim=[0, spectrum.fs[-1]],
+    
+def plot_ratios(in_wave, out_wave):
+
+    # compare filters for cumsum and integration
+    diff_window = np.array([1.0, -1.0])
+    padded = thinkdsp.zero_pad(diff_window, len(in_wave))
+    diff_wave = thinkdsp.Wave(padded, framerate=in_wave.framerate)
+    diff_filter = diff_wave.make_spectrum()
+    
+    cumsum_filter = diff_filter.copy()
+    cumsum_filter.hs = 1 / cumsum_filter.hs
+    cumsum_filter.plot(label='cumsum filter', color=GRAY, linewidth=7)
+    
+    integ_filter = cumsum_filter.copy()
+    integ_filter.hs = integ_filter.framerate / (PI2 * 1j * integ_filter.fs)
+    integ_filter.plot(label='integral filter')
+
+    thinkplot.config(xlim=[0, integ_filter.max_freq],
+                     yscale='log', legend=True)
+    thinkplot.save('diff_int8')
+
+    # compare cumsum filter to actual ratios
+    cumsum_filter.plot(label='cumsum filter', color=GRAY, linewidth=7)
+    
+    in_spectrum = in_wave.make_spectrum()
+    out_spectrum = out_wave.make_spectrum()
+    ratio_spectrum = out_spectrum.ratio(in_spectrum, thresh=1)
+    ratio_spectrum.plot(label='ratio', style='.', markersize=4)
+
+    thinkplot.config(xlabel='Frequency (Hz)',
                      ylabel='Amplitude ratio',
-                     #ylim=[0, 4],
-                     loc='upper left')
-    thinkplot.save(root='diff_int3')
+                     xlim=[0, integ_filter.max_freq],
+                     yscale='log', legend=True)
+    thinkplot.save('diff_int9')
 
 
-def plot_derivative(wave, wave2):
-    # compute the derivative by spectral decomposition
-    spectrum = wave.make_spectrum()
-    spectrum3 = wave.make_spectrum()
-    spectrum3.differentiate()
-    
-    # plot the derivative computed by diff and differentiate
-    wave3 = spectrum3.make_wave()
-    wave2.plot(color='0.7', label='diff')
-    wave3.plot(label='derivative')
-    thinkplot.config(xlabel='days',
-                     xlim=[0, 1650],
-                     ylabel='dollars',
-                     loc='upper left')
 
-    thinkplot.save(root='diff_int4')
-
-    # plot the amplitude ratio compared to the diff filter
-    amps = spectrum.amps
-    amps3 = spectrum3.amps
-    ratio3 = amps3 / amps
-
-    thinkplot.preplot(1)
-    thinkplot.plot(ratio3, label='ratio')
-
-    window = np.array([1.0, -1.0])
-    padded = thinkdsp.zero_pad(window, len(wave))
-    fft_window = np.fft.rfft(padded)
-    thinkplot.plot(abs(fft_window), color='0.7', label='filter')
-
-    thinkplot.config(xlabel='frequency (1/days)',
-                     xlim=[0, 1650/2],
-                     ylabel='amplitude ratio',
-                     #ylim=[0, 4],
-                     loc='upper left')
-    thinkplot.save(root='diff_int5')
-
-
-def plot_filters(wave):
+def plot_diff_filters(wave):
 
     window1 = np.array([1, -1])
     window2 = np.array([-1, 4, -3]) / 2.0
@@ -144,24 +190,30 @@ def plot_filters(wave):
     thinkplot.show()
 
 
-
-
 def main():
     names = ['date', 'open', 'high', 'low', 'close', 'volume']
     df = pd.read_csv('fb.csv', header=0, names=names, parse_dates=[0])
     ys = df.close.values[::-1]
     close = thinkdsp.Wave(ys, framerate=1)
-    #plot_wave_and_spectrum(close, root='diff_int1')
+    plot_wave_and_spectrum(close, root='diff_int1')
 
     change = thinkdsp.Wave(np.diff(ys), framerate=1)
-    #plot_wave_and_spectrum(change, root='diff_int2')
+    plot_wave_and_spectrum(change, root='diff_int2')
 
-    plot_diff_filter(close)
-    return
+    plot_filters(close)
 
-    plot_derivative(wave, wave2)
+    plot_diff_deriv(close)
 
-    plot_filters(wave)
+    signal = thinkdsp.SawtoothSignal(freq=50)
+    in_wave = signal.make_wave(duration=0.1, framerate=44100)
+    plot_sawtooth_and_spectrum(in_wave, 'diff_int6')
+
+    out_wave = in_wave.cumsum()
+    out_wave.unbias()
+    plot_sawtooth_and_spectrum(out_wave, 'diff_int7')
+
+    plot_integral(close)
+    plot_ratios(in_wave, out_wave)
 
 
 if __name__ == '__main__':
