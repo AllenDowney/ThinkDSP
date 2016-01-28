@@ -2270,15 +2270,37 @@ and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
     spectrum = wave.make_spectrum()
-    spectrum.plot_power(low=1, linewidth=1, alpha=0.5)
+    spectrum.plot_power(linewidth=1, alpha=0.5)
     thinkplot.config(xscale='log', yscale='log')
 \end{verbatim}
 
-%TODO: check this figure reference
 The result is in Figure~\ref{fig.rednoise3}.  The relationship between
-power and frequency is noisy, but nearly linear.  
-The slope of the line is approximately -2 (we'll see why in
-Chapter~\ref{systems}), so we can write this relationship:
+power and frequency is noisy, but roughly linear.
+
+{\tt Spectrum} provides \verb"estimate_slope", which uses SciPy to compute
+a least squares fit to the power spectrum:
+
+\begin{verbatim}
+#class Spectrum
+
+    def estimate_slope(self):
+        x = np.log(self.fs[1:])
+        y = np.log(self.power[1:])
+        t = scipy.stats.linregress(x,y)
+        return t
+\end{verbatim}
+
+It discards the first component of the spectrum because
+this component corresponds to $f=0$, and $\log 0$ is undefined.
+
+\verb"estimate_slope" returns the result from {\tt
+  scipy.stats.linregress} which is an object that contains the
+estimated slope and intercept, coefficient of determination ($R^2$),
+p-value, and standard error.  For our purposes, we only need the
+slope.
+
+For Brownian noise, the slope of the power spectrum is -2 (we'll see
+why in Chapter~\ref{diffint}), so we can write this relationship:
 %
 \[ \log P = k -2 \log f \]
 %
@@ -5018,6 +5040,7 @@ You can also view it at \url{http://tinyurl.com/thinkdsp09}.
 
 
 \section{Finite differences}
+\label{diffs}
 
 In Section~\ref{smoothing}, we applied a smoothing window to
 the stock price of Facebook and found that a smoothing
@@ -5050,8 +5073,9 @@ The framerate is 1 sample per day.
 Figure~\ref{fig.diff_int1} shows
 this time series and its spectrum.
 Visually, the time series resembles Brownian noise (see
-Section~\ref{brownian}).  And the spectrum looks like a straight
-line, albeit a noisy one.  The estimated slope of the spectrum is -1.9,
+Section~\ref{brownian}).
+And the spectrum looks like a straight
+line, albeit a noisy one.  The estimated slope is -1.9,
 which is consistent with Brownian noise.
 
 \begin{figure}
@@ -5067,12 +5091,13 @@ Now let's compute the daily price change using {\tt np.diff}:
 \begin{verbatim}
     diff = np.diff(ys)
     change = thinkdsp.Wave(diff, framerate=1)
+    change_spectrum = change.make_spectrum()
 \end{verbatim}
 
-Figure~\ref{fig.diff_int2} shows the resulting wave and its
-spectrum.  The daily changes and their spectrum resemble white noise,
-and the estimated parameter, -0.06, is near zero, which is what
-we expect for white noise.
+Figure~\ref{fig.diff_int2} shows the resulting wave and its spectrum.
+The daily changes resemble white noise, and the estimated slope of the
+spectrum, -0.06, is near zero, which is what we expect for white
+noise.
 
 \begin{figure}
 % diff_int2.py
@@ -5095,16 +5120,16 @@ We can see the effect of this operation in the frequency domain
 by computing the DFT of the window.  
 
 \begin{verbatim}
-window = np.array([1.0, -1.0])
-padded = thinkdsp.zero_pad(window, len(close))
-window_wave = thinkdsp.Wave(padded, framerate=close.framerate)
-window_spectrum = window_wave.make_spectrum()
+    diff_window = np.array([1.0, -1.0])
+    padded = thinkdsp.zero_pad(diff_window, len(close))
+    diff_wave = thinkdsp.Wave(padded, framerate=close.framerate)
+    diff_filter = diff_wave.make_spectrum()
 \end{verbatim}
 
 \begin{figure}
 % diff_int.py
 \centerline{\includegraphics[height=2.5in]{figs/diff_int3.pdf}}
-\caption{The DFT of the finite difference window.}
+\caption{Filters corresponding to the diff and differentiate operators (left) and integration operator (right, log-$y$ scale).}
 \label{fig.diff_int3}
 \end{figure}
 
@@ -5141,6 +5166,18 @@ In other words, taking the derivative of $E_f$ is the same
 as multiplying by $2 \pi i f$, which is a complex number
 with magnitude $2 \pi f$ and angle $\pi/2$.
 
+We can compute the filter that corresponds to differentiation,
+like this:
+
+\begin{verbatim}
+    deriv_filter = close.make_spectrum()
+    deriv_filter.hs = PI2 * 1j * deriv_filter.fs
+\end{verbatim}
+
+I started with the spectrum of {\tt close}, which has the right
+size and framerate, then replaced the {\tt hs} with $2 \pi i f$.
+Figure~\ref{fig.diff_int3} (left) shows this filter; it is a straight line.
+
 As we saw in Section~\ref{synthmat}, multiplying a complex sinusoid
 by a complex number has two effects: it multiplies
 the amplitude, in this case by $2 \pi f$, and shifts the phase
@@ -5151,7 +5188,7 @@ each $E_f$ is an eigenfunction of the differentiation operator, with the
 corresponding eigenvalue $2 \pi i f$.  See
 \url{http://en.wikipedia.org/wiki/Eigenfunction}.
 
-If you are not familiar with that language, I'll tell you what it
+If you are not familiar with that language, here's what it
 means:
 
 \newcommand{\op}{\mathcal{A}}
@@ -5176,8 +5213,9 @@ a corresponding eigenvalue.
 Because complex sinusoids are eigenfunctions of the differentiation
 operator, they are easy to differentiate.  All we have to do is
 multiply by a complex scalar.
-For signals with more than one component,
-the process is only slightly harder:
+
+For signals with more than one
+component, the process is only slightly harder:
 
 \begin{enumerate}
 
@@ -5200,40 +5238,37 @@ filter:
 # class Spectrum:
 
     def differentiate(self):
-        i = complex(0, 1)
-        filtr = PI2 * i * self.fs
-        self.hs *= filtr
+        self.hs *= PI2 * 1j * self.fs
 \end{verbatim}
 
-We can use it to compute the derivative of the BitCoin time series:
+We can use it to compute the derivative of the Facebook time series:
 
 \begin{verbatim}
-    spectrum3 = wave.make_spectrum()
-    spectrum3.differentiate()
-    wave3 = spectrum3.make_wave()
-\end{verbatim}
-
-And then plot {\tt wave3}, compared to the previous result
-using {\tt np.diff}, {\tt wave3}:
-
-\begin{verbatim}
-    wave2.plot(color='0.7', label='diff')
-    wave3.plot(label='derivative')
+    deriv_spectrum = close.make_spectrum()
+    deriv_spectrum.differentiate()
+    deriv = deriv_spectrum.make_wave()
 \end{verbatim}
 
 \begin{figure}
 % diff_int.py
 \centerline{\includegraphics[height=2.5in]{figs/diff_int4.pdf}}
 \caption{Comparison of daily price changes computed by
-{\tt np.diff} and by filtering in the frequency domain.}
+{\tt np.diff} and by applying the differentiation filter.}
 \label{fig.diff_int4}
 \end{figure}
 
-Figure~\ref{fig.diff_int4} shows the results.  They are similar except
-where the changes are most abrupt.  They also differ at the
-boundaries, because the DFT-based derivative is based on the
-assumption that the signal is periodic.  It wraps around from the end
-to the beginning, creating artifacts at the boundaries.
+Figure~\ref{fig.diff_int4} compares the daily price changes computed by
+{\tt np.diff} with the derivative we just computed.
+I selected the first 50 values in the time series so we can see the
+differences more clearly.
+
+The derivative is noisier, because it amplifies the high frequency
+components more, as shown in Figure~\ref{fig.diff_int3} (left).  Also, the
+first few elements of the derivative are very noisy.  The problem
+there is that the DFT-based derivative is based on the assumption that
+the signal is periodic.  In effect, it connects the last element in
+the time series back to the first element, which creates artifacts at
+the boundaries.
 
 To summarize, we have shown:
 
@@ -5244,12 +5279,14 @@ To summarize, we have shown:
   an approximation of the first derivative.
 
 \item Differentiation in the time domain corresponds to a simple
-  filter in the frequency domain.
+  filter in the frequency domain.  For periodic signals, the result is
+  the first derivative, exactly.  For some non-periodic signals, it
+  can approximate the derivative.
 
 \end{itemize}
 
-The second conclusion is the basis of {\bf spectral methods} for
-solving differential equations (see
+Using the DFT to compute derivatives is the basis of {\bf spectral
+  methods} for solving differential equations (see
 \url{http://en.wikipedia.org/wiki/Spectral_method}).
 
 In particular, it is useful for the analysis of linear, time-invariant
@@ -5258,58 +5295,292 @@ systems, which is coming up in Chapter~\ref{systems}.
 
 \section{Integration}
 
-% TODO
-This section is not done.
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int5.pdf}}
+\caption{Comparison of the original time series and the integrated
+derivative.}
+\label{fig.diff_int5}
+\end{figure}
 
-Integrating a noise signal attenuates high frequency components.
-Specifically, it attenuates the power at each frequency, $f$, in
-proportion to $1/f^2$.
+In the previous section, we showed that differentiation in the time
+domain corresponds to a simple filter in the frequency domain: it
+multiplies each component by $2 \pi i f$.  Since integration is
+the inverse of differentiation, it also corresponds to a simple
+filter: it divides each component by $2 \pi i f$.
 
-This behavior follows from a mathematical property of
-the Fourier transform: given a periodic signal, $h(t)$, and its
-Fourier transform, $H(f)$, we can compute the Fourier transform
-of the integral of $h(t)$:
-%
-\[ g = \int h \]
-%
-\[ G(f) = H(f) / 2 \pi i f \]
-%
-Integration attentuates each component by a factor proportional
-to $f$.  Since power is the square of magnitude, the power of each
-component is attentuated by a factor proportional to $f^2$.
-
-Since we started with white noise, which has equal power at all
-frequencies, we expect Brownian noise to have power at frequency $f$
-proportional to $1/f^2$, on average.  In other words:
-with some unknown constant, $k$.  Taking the log of both sides yields:
-Which means that Figure~\ref{fig.rednoise3}, which shows the power
-spectrum on a log-log scale, should be
-a straight line with slope -2.
-
-It is quite noisy, so we can't be sure it is a straight line, but at
-least we can estimate its slope.  Spectrum provides
-\verb"estimate_slope", which uses {\tt scipy} to do linear regression
-(also known as a least squares fit):
+We can compute this filter like this:
 
 \begin{verbatim}
-    def estimate_slope(self):
-        x = np.log(self.fs[1:])
-        y = np.log(self.power[1:])
-        t = scipy.stats.linregress(x,y)
-        return t
+    integ_filter = close.make_spectrum()
+    integ_filter.hs = 1 / (PI2 * 1j * integ_filter.fs)
 \end{verbatim}
 
-I discard the first component of the spectrum for two reasons: (1)
-this component corresponds to $f=0$, and $\log 0$ is undefined,
-and (2) the amplitude at $f=0$ indicates the mean value of the signal
-(sometimes called the ``DC offset'' or ``bias'').  Since we unbiased
-the signal, this component should be 0 anyway.
+Figure~\ref{fig.diff_int3} (right) shows this filter on a log-$y$ scale,
+which makes it easier to see.
 
-\verb"estimate_slope" returns the
-result from {\tt scipy.stats.linregress} which is a tuple that
-contains the estimated slope and intercept, coefficient of
-determination ($R^2$), p-value, and standard error.  For now,
-we only need the slope, which for this example is -1.8.
+{\tt Spectrum} provides a method that applies the integration filter:
+
+\begin{verbatim}
+# class Spectrum:
+
+    def integrate(self):
+        self.hs /= PI2 * 1j * self.fs
+\end{verbatim}
+
+We can confirm that the integration filter is correct by applying it
+to the spectrum of the derivative we just computed:
+
+\begin{verbatim}
+    integ_spectrum = deriv_spectrum.copy()
+    integ_spectrum.integrate()
+\end{verbatim}
+
+But notice that at $f=0$, we are dividing by 0.  The result in
+NumPy is NaN, which is a special floating-point value that
+represents ``not a number''.  We can partially deal with this
+problem by setting this value to 0 before converting the
+spectrum back to a wave:
+
+\begin{verbatim}
+    integ_spectrum.hs[0] = 0
+    integ_wave = integ_spectrum.make_wave()
+\end{verbatim}
+
+Figure~\ref{fig.diff_int5} shows this integrated derivative along with
+the original time series.  They are almost identical, but the
+integrated derivative has been shifted down.  The problem is that when
+we clobbered the $f=0$ component, we set the bias of the signal to 0.
+But that should not be surprising; in general, differentiation loses
+information about the bias, and integration can't recover it.  In some
+sense, the NaN at $f=0$ is telling us that this element is unknown.
+
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int6.pdf}}
+\caption{A sawtooth wave and its spectrum.}
+\label{fig.diff_int6}
+\end{figure}
+
+If we provide this ``constant of integration'', the results are
+identical, which confirms that this integration filter is the correct
+inverse of the differentiation filter.
+
+\section{Cumulative sum}
+\label{cumsum}
+
+In the same way that the diff operator approximates differentiation,
+the cumulative sum approximates integration.
+I'll demonstrate with a Sawtooth signal.
+
+\begin{verbatim}
+    signal = thinkdsp.SawtoothSignal(freq=50)
+    in_wave = signal.make_wave(duration=0.1, framerate=44100)
+\end{verbatim}
+
+Figure~\ref{fig.diff_int6} shows this wave and its spectrum.
+
+{\tt Wave} provides a method that computes the cumulative sum of
+a wave array and returns a new Wave object:
+
+\begin{verbatim}
+# class Wave:
+
+    def cumsum(self):
+        ys = np.cumsum(self.ys)
+        ts = self.ts.copy()
+        return Wave(ys, ts, self.framerate)
+\end{verbatim}
+
+We can use it to compute the cumulative sum of \verb"in_wave":
+
+\begin{verbatim}
+    out_wave = in_wave.cumsum()
+    out_wave.unbias()
+\end{verbatim}
+
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int7.pdf}}
+\caption{A parabolic wave and its spectrum.}
+\label{fig.diff_int7}
+\end{figure}
+
+Figure~\ref{fig.diff_int7} shows the resulting wave and its spectrum.
+If you did the exercises in Chapter~\ref{harmonics}, this waveform should
+look familiar: it's a parabolic signal.
+
+Comparing the spectrum of the parabolic signal to the spectrum of the
+sawtooth, the amplitudes of the components drop off more quickly.  In
+Chapter~\ref{harmonics}, we saw that the components of the sawtooth
+drop off in proportion to $1/f$.  Since the cumulative sum
+approximates integration, and integration filters components in
+proportion to $1/f$, the components of the parabolic wave drop off in
+proportion to $1/f^2$.
+
+We can see that graphically by computing the filter that corresponds
+to the cumulative sum:
+
+\begin{verbatim}
+    cumsum_filter = diff_filter.copy()
+    cumsum_filter.hs = 1 / cumsum_filter.hs
+\end{verbatim}
+
+Because {\tt cumsum} is the inverse operation of {\tt diff}, we
+start with a copy of \verb"diff_filter", which is the filter
+that corresponds to the {\tt diff} operation, and then invert the
+{\tt hs}.
+
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int8.pdf}}
+\caption{Filters corresponding to cumulative sum and integration.}
+\label{fig.diff_int8}
+\end{figure}
+
+Figure~\ref{fig.diff_int8} shows the filters corresponding to
+cumulative sum and integration.  The cumulative sum is a good
+approximation of integration except at the highest frequencies,
+where it drops off a little faster. 
+
+To confirm that this is the correct filter for the cumulative
+sum, we can compare it to the ratio of the spectrum
+\verb"out_wave" to the spectrum of \verb"in_wave":
+
+\begin{verbatim}
+    in_spectrum = in_wave.make_spectrum()
+    out_spectrum = out_wave.make_spectrum()
+    ratio_spectrum = out_spectrum.ratio(in_spectrum, thresh=1)
+\end{verbatim}
+
+\begin{figure}
+% diff_int.py
+\centerline{\includegraphics[height=2.5in]{figs/diff_int9.pdf}}
+\caption{Filter corresponding to cumulative sum and actual ratios of
+  the before-and-after spectrums.}
+\label{fig.diff_int9}
+\end{figure}
+
+And here's the method that computes the ratios:
+
+\begin{verbatim}
+    def ratio(self, denom, thresh=1):
+        ratio_spectrum = self.copy()
+        ratio_spectrum.hs /= denom.hs
+        ratio_spectrum.hs[denom.amps < thresh] = np.nan
+        return ratio_spectrum
+\end{verbatim}
+
+When {\tt denom.amps} is small, the resulting ratio is noisy,
+so I set those values to NaN.
+
+Figure~\ref{fig.diff_int8} shows the ratios and the filter
+corresponding to the cumulative sum.  They agree, which confirms that
+inverting the filter for {\tt diff} yields the filter for {\tt
+  cumsum}.
+
+Finally, we can confirm that the Convolution Theorem applies by
+applying the {\tt cumsum} filter in the frequency domain:
+
+\begin{verbatim}
+    out_wave2 = (in_spectrum * cumsum_filter).make_wave()
+\end{verbatim}
+
+Within the limits of floating-point error, \verb"out_wave2" is
+identical to \verb"out_wave", which we computed using {\tt cumsum}, so
+the Convolution Theorem works!  But note that this demonstration only
+works with periodic signals.
+
+
+\section{Integrating noise}
+
+In Section~\ref{brownian}, we generated Brownian noise by computing the
+cumulative sum of white noise.
+Now that we understand the effect of {\tt cumsum} in the frequency
+domain, we have some insight into the spectrum of Brownian noise.
+
+White noise has equal power at all frequencies, on average.  When we
+compute the cumulative sum, the amplitude of each component is divided
+by $f$.  Since power is the square of magnitude, the power of each
+component is divided by $f^2$.  So on average, the power at frequency
+$f$ is proportional to $1 / f^2$:
+%
+\[ P_f = K / f^2 \]
+%
+where $K$ is a constant that's not important.
+Taking the log of both sides yields:
+%
+\[ \log P_f = \log K - 2 \log f \]
+%
+And that's why, when we plot the spectrum of Brownian noise on a
+log-log scale, we expect to see a straight line with slope -2, at
+least approximately.
+
+In Section~\ref{diffs} we plotted the spectrum of closing prices for
+Facebook, and estimated that the slope is -1.9, which is consistent
+with Brownian noise.  Many stock prices have similar spectrums.
+
+When we use the {\tt diff} operator to compute daily changes, we
+multiplied the {\em amplitude} of each component by a filter proportional to
+$f$, which means we multiplied the {\em power} of each component by $f^2$.
+On a log-log scale, this operation adds 2 to the slope of the
+power spectrum, which is why the estimated slope of the result
+is near 0.1 (but a little lower, because {\tt diff} only approximates
+differentiation).
+
+
+
+\section{Exercises}
+
+Solutions to these exercises are in {\tt chap09soln.ipynb}.
+
+\begin{exercise}
+The notebook for this chapter is {\tt chap08.ipynb}.
+Read through it and run the code.
+
+In Section~\ref{cumsum}, I mentioned that some of the
+examples don't work with non-periodic signals.  Try replacing the
+sawtooth wave, which is periodic, with the Facebook data, which is
+not, and see what goes wrong.
+\end{exercise}
+
+\begin{exercise}
+The goal of this exercise is to explore the effect of {\tt diff} and
+{\tt differentiate} on a signal. Create a triangle wave and plot
+it. Apply {\tt diff} and plot the result. Compute the spectrum of the
+triangle wave, apply {\tt differentiate}, and plot the result. Convert
+the spectrum back to a wave and plot it. Are there differences between
+the effect of {\tt diff} and {\tt differentiate} for this wave?
+\end{exercise}
+
+\begin{exercise}
+The goal of this exercise is to explore the effect of {\tt cumsum} and
+{\tt integrate} on a signal. Create a square wave and plot it. Apply
+{\tt cumsum} and plot the result. Compute the spectrum of the square
+wave, apply {\tt integrate}, and plot the result. Convert the spectrum
+back to a wave and plot it. Are there differences between the effect
+of {\tt cumsum} and {\tt integrate} for this wave?
+\end{exercise}
+
+\begin{exercise}
+The goal of this exercise is the explore the effect of integrating
+twice. Create a sawtooth wave, compute its spectrum, then apply {\tt
+  integrate} twice. Plot the resulting wave and its spectrum. What is
+the mathematical form of the wave? Why does it resemble a sinusoid?
+\end{exercise}
+
+\begin{exercise}
+The goal of this exercise is to explore the effect of the 2nd
+difference and 2nd derivative. Create a {\tt CubicSignal}, which is
+defined in {\tt thinkdsp}. Compute the second difference by applying
+{\tt diff} twice. What does the result look like?  Compute the second
+derivative by applying {\tt differentiate} to the spectrum twice.
+Does the result look the same?
+
+Plot the filters that corresponds to the 2nd difference and the 2nd
+derivative and compare them. Hint: In order to get the filters on the
+same scale, use a wave with framerate 1.
+\end{exercise}
 
 
 
