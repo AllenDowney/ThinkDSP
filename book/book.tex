@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.10.3}
+\newcommand{\theversion}{0.10.4}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -5474,7 +5474,7 @@ And here's the method that computes the ratios:
 When {\tt denom.amps} is small, the resulting ratio is noisy,
 so I set those values to NaN.
 
-Figure~\ref{fig.diff_int8} shows the ratios and the filter
+Figure~\ref{fig.diff_int9} shows the ratios and the filter
 corresponding to the cumulative sum.  They agree, which confirms that
 inverting the filter for {\tt diff} yields the filter for {\tt
   cumsum}.
@@ -5589,7 +5589,7 @@ same scale, use a wave with framerate 1.
 \label{systems}
 
 This chapter presents the theory of signals and systems, using
-musical acoustics as an example.  And it explains an
+musical acoustics as an example.  It explains an
 important application of the Convolution Theorem, characterization
 of linear, time-invariant systems (which I'll define soon).
 
@@ -5610,12 +5610,12 @@ electrical signal as input and produces a (louder) signal as output.
 
 As another example, when you listen to a musical performance, you
 can think of the room as a system that takes the sound of the
-performance at the location where it is produced and produces a
+performance at the location where it is generated and produces a
 somewhat different sound at the location where you hear it.
 
 A {\bf linear, time-invariant system}\footnote{My presentation here
   follows \url{http://en.wikipedia.org/wiki/LTI_system_theory}.} is a
-system with these additional properties:
+system with these two properties:
 
 \begin{enumerate}
 
@@ -5646,7 +5646,7 @@ dashpots are also LTI, assuming linear springs (force proportional
 to displacement) and dashpots (force proportional to velocity).
 
 \item Also, and most relevant to applications in this book,
-the media that transmit sounds (including air, water
+the media that transmit sound (including air, water
 and solids) are well-modeled by LTI systems.
 
 \end{itemize}
@@ -5687,40 +5687,112 @@ can see the answer by computing the DFT of an impulse.  Here's
 a wave array with an impulse at $t=0$:
 
 \begin{verbatim}
->>> impulse = np.zeros(8)
->>> impulse[0] = 1
->>> impulse
+    impulse = np.zeros(8)
+    impulse[0] = 1
+    impulse_spectrum = np.fft.fft(impulse)
+\end{verbatim}
+
+Here's the wave array:
+
+\begin{verbatim}
 [ 1.  0.  0.  0.  0.  0.  0.  0.]
 \end{verbatim}
 
 And here's its spectrum:
 
 \begin{verbatim}
->>> spectrum = np.fft.fft(impulse)
->>> spectrum
 [ 1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j  1.+0.j]
 \end{verbatim}
 
-That's right: an impulse is the sum of components with equal
-magnitudes at all frequencies\footnote{Not to be confused with white
-  noise, which has the same average power at all frequencies, but
-  varies around that average.} (and a phase offset of 0).
+The spectrum is all ones; that is, an impulse is the sum of components
+with equal magnitudes at all frequencies.  This
+spectrum should not be confused with white noise, which has the same
+{\em average} power at all frequencies, but varies around that
+average.
 
-Therefore when you test a system by inputting
+When you test a system by inputting
 an impulse, you are testing the response of the 
 system at all frequencies.  And you can test them all at the same
 time because the system is linear, so simultaneous tests don't
 interfere with each other.
 
 
-\section{Transfer functions}
+\section{Windows and filters}
+
+To show why this kind of system characterization works, I
+will start with a simple example: a 2-element moving average.
+We can think of this operation as a system that takes a signal
+as an input and produces a slightly smoother signal as an output.
+
+In this example we know what the window is, so we can compute
+the corresponding filter.  But that's not usually the case; in the
+next section we'll look at an example where we don't know the
+window or the filter ahead of time.
+
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems1.pdf}}
+\caption{DFT of a 2-element moving average window.}
+\label{fig.systems1}
+\end{figure}
+
+Here's a window that computes a
+2-element moving average (see Section~\ref{smoothing}):
+
+\begin{verbatim}
+    window_array = np.array([0.5, 0.5, 0, 0, 0, 0, 0, 0,])
+    window = thinkdsp.Wave(window_array, framerate=8)
+\end{verbatim}
+
+We can find the corresponding filter by computing the DFT of the
+window:
+
+\begin{verbatim}
+    filtr = window.make_spectrum(full=True)
+\end{verbatim}
+
+Figure~\ref{fig.systems1} shows the result.  The filter that corresponds to a
+moving average window is a low-pass filter with the approximate shape
+of a Gaussian curve.
+
+Now imagine that we did not know the window or the corresponding filter,
+and we wanted to characterize this system.  We would do that by
+inputting an impulse and measuring the impulse response.
+
+In this example, we can compute the impulse response by multiplying
+spectrum of the impulse and the filter, and then converting the result
+from a spectrum to a wave:
+
+\begin{verbatim}
+    product = impulse_spectrum * filtr
+    filtered = product.make_wave()
+\end{verbatim}
+
+Since \verb"impulse_spectrum" is all ones, the product is
+identical to the filter, and the filtered wave is identical to the
+window.
+
+This example demonstrates two things:
+
+\begin{itemize}
+
+\item Because the spectrum of an impulse is all ones, the DFT
+of the impulse response is identical to the filter that
+characterizes the system.
+
+\item Therefore, the impulse response is identical to the
+convolution window that characterizes the system.
+
+\end{itemize}
+
+
+\section{Acoustic response}
 
 To characterize the acoustic response of a room or open space, a
 simple way to generate an impulse is to pop a balloon or
 fire a gun.  A gunshot puts an impulse into
 the system; the sound you hear is the impulse response.
 
-%TODO: update the numbers for the figures in this chapter
 \begin{figure}
 % systems.py
 \centerline{\includegraphics[height=2.5in]{figs/systems6.pdf}}
@@ -5766,7 +5838,7 @@ of a violin.  Here is the violin recording we used in Section~\ref{violin}
 
 \begin{verbatim}
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
-    wave.ys = wave.ys[:len(response)]
+    wave.truncate(len(response))
     wave.normalize()
 \end{verbatim}
 
@@ -5791,7 +5863,13 @@ output wave:
     output.plot()
 \end{verbatim}
 
-%TODO: Am I missing a figure here?
+\begin{figure}
+% systems.py
+\centerline{\includegraphics[height=2.5in]{figs/systems7.pdf}}
+\caption{The waveform of the violin recording before and after convolution.}
+\label{fig.systems7}
+\end{figure}
+
 Figure~\ref{fig.systems7} shows the output of the system superimposed
 on the input.  The overall shape is similar, but there are substantial
 differences.  And those differences are clearly audible.  Load
@@ -5800,7 +5878,7 @@ about this example is that you can get a sense of what the room
 was like; to me, it sounds like a long, narrow room with hard floors
 and ceilings.  That is, like a firing range.
 
-There's one things I glossed over in this example that I'll mention
+There's one thing I glossed over in this example that I'll mention
 in case it bothers anyone.  The violin recording I started with
 has already been transformed by one system: the room where it was
 recorded.  So what I really computed in my example is the sound
