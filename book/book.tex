@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.10.4}
+\newcommand{\theversion}{0.10.6}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -68,7 +68,7 @@
   {\topsep}% measure of space to leave above the theorem. E.g.: 3pt
   {\topsep}% measure of space to leave below the theorem. E.g.: 3pt
   {}% name of font to use in the body of the theorem
-  {0pt}% measure of space to indent
+  {}% measure of space to indent
   {\bfseries}% name of head font
   {}% punctuation between head and body
   { }% space after theorem head; " " = normal interword space
@@ -81,6 +81,7 @@
 
 \begin{latexonly}
 
+\renewcommand{\topfraction}{0.9}
 \renewcommand{\blankpage}{\thispagestyle{empty} \quad \newpage}
 
 % TITLE PAGES FOR LATEX VERSION
@@ -3089,6 +3090,15 @@ called \verb"saxophone.ipynb" that explores autocorrelation,
 pitch perception, and a phenomenon called the ``missing fundamental''.
 Read through this notebook and run the examples.  Try selecting
 a different segment of the recording and running the examples again.
+
+Vi Hart has an excellent video called ``What is up with Noises? (The
+Science and Mathematics of Sound, Frequency, and Pitch)''; it
+demonstrates the missing fundamental phenomenon and explains how pitch
+perception works (at least, to the degree that we know).  Watch it at
+\url{https://www.youtube.com/watch?v=i_0DXxNeaQ0}.
+
+
+
 \end{exercise}
 
 
@@ -3580,7 +3590,7 @@ dct.plot()
 \end{verbatim}
 
 The result is the DCT of a triangle wave at 400 Hz, shown in
-Figure~\ref{dct1}.  The values of the DCT can be positive or negative;
+Figure~\ref{fig.dct1}.  The values of the DCT can be positive or negative;
 a negative value in the DCT corresponds to a negated cosine or,
 equivalently, to a cosine shifted by 180 degrees.
 
@@ -5718,6 +5728,7 @@ interfere with each other.
 
 
 \section{Windows and filters}
+\label{winfilt}
 
 To show why this kind of system characterization works, I
 will start with a simple example: a 2-element moving average.
@@ -5787,6 +5798,7 @@ convolution window that characterizes the system.
 
 
 \section{Acoustic response}
+\label{response}
 
 To characterize the acoustic response of a room or open space, a
 simple way to generate an impulse is to pop a balloon or
@@ -5837,9 +5849,9 @@ Now we can simulate the effect this room would have on the sound
 of a violin.  Here is the violin recording we used in Section~\ref{violin}
 
 \begin{verbatim}
-    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
-    wave.truncate(len(response))
-    wave.normalize()
+    violin = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
+    violin.truncate(len(response))
+    violin.normalize()
 \end{verbatim}
 
 The violin and gunshot waves were sampled at the same framerate,
@@ -5849,7 +5861,7 @@ same.  I trimmed the violin wave to the same length as the gunshot.
 Next I compute the DFT of the violin wave:
 
 \begin{verbatim}
-    spectrum = wave.make_spectrum()
+    spectrum = violin.make_spectrum()
 \end{verbatim}
 
 Now I know the magnitude and phase of each component in the
@@ -5870,13 +5882,12 @@ output wave:
 \label{fig.systems7}
 \end{figure}
 
-Figure~\ref{fig.systems7} shows the output of the system superimposed
-on the input.  The overall shape is similar, but there are substantial
-differences.  And those differences are clearly audible.  Load
-{\tt chap10.ipynb} and listen to them.  One thing I find striking
-about this example is that you can get a sense of what the room
-was like; to me, it sounds like a long, narrow room with hard floors
-and ceilings.  That is, like a firing range.
+Figure~\ref{fig.systems7} shows the input (top) and output (bottom) of
+the system.  They are substantially different, and the differences are
+clearly audible.  Load {\tt chap10.ipynb} and listen to them.  One
+thing I find striking about this example is that you can get a sense
+of what the room was like; to me, it sounds like a long, narrow room
+with hard floors and ceilings.  That is, like a firing range.
 
 There's one thing I glossed over in this example that I'll mention
 in case it bothers anyone.  The violin recording I started with
@@ -5889,12 +5900,12 @@ of that transfer function first.
 
 
 \section{Systems and convolution}
+\label{sysconv}
 
 \begin{figure}
 % systems.py
 \centerline{\includegraphics[height=2.5in]{figs/systems8.pdf}}
-\caption{Sum of a gunshot waveform with a shifted, scaled version of
-itself.}
+\caption{Sum of a wave and a shifted, scaled copy.}
 \label{fig.systems8}
 \end{figure}
 
@@ -5923,15 +5934,34 @@ In the previous section, I suggested one way to think about it:
 \end{itemize}
 
 But if you don't like that, there's another way to think about
-it altogether: convolution!
+it altogether: convolution!  By the Convolution Theorem, multiplication
+in the frequency domain corresponds to convolution in the time
+domain.  In this example, the output of the system is the convolution
+of the input and the system response.
 
-Suppose that instead of firing one gun, you fire two guns:
-a big one with amplitude 1 at $t=0$ and a smaller one with
-amplitude 0.5 at $t=1$.
+Here are the keys to understanding why that works:
+
+\begin{itemize}
+
+\item You can think of the samples in the input wave as a sequence
+of impulses with varying amplitude.
+
+\item Each impulse in the input yields a copy of the impulse response,
+  shifted in time (because the system is time-invariant) and scaled by
+  the amplitude of the input.
+
+\item The output is the sum of the shifted, scaled copies of the
+  impulse response.  The copies add up because the system is linear.
+
+\end{itemize}
+
+Let's work our way up gradually: suppose that instead of firing one
+gun, we fire two: a big one with amplitude 1 at $t=0$ and a
+smaller one with amplitude 0.5 at $t=1$.
 
 We can compute the response of the system by adding up
-the original impulse response and a scaled, shifted version of itself.
-Here's a function that makes a shifted, scaled version of
+the original impulse response and a scaled, shifted copy of itself.
+Here's a function that makes a shifted, scaled copy of
 a wave:
 
 \begin{verbatim}
@@ -5942,41 +5972,45 @@ def shifted_scaled(wave, shift, factor):
     return res
 \end{verbatim}
 
+The parameter {\tt shift} is a time shift in seconds; {\tt factor}
+is a multiplicative factor.
+
 Here's how we use it to compute the response to a two-gun salute:
 
 \begin{verbatim}
-dt = 1
-shift = dt * response.framerate
-factor = 0.5
-response2 = response + shifted_scaled(response, shift, factor)
+    shift = 1
+    factor = 0.5
+    gun2 = response + shifted_scaled(response, shift, factor)
 \end{verbatim}
 
 Figure~\ref{fig.systems8} shows the result.  You can hear what
 it sounds like in {\tt chap10.ipynb}.  Not surprisingly, it
 sounds like two gunshots, the first one louder than the second.
 
-Now suppose instead of two guns, you add up 100 guns, with
-a shift of 100 between them.  This loop computes the result:
+Now suppose instead of two guns, you add up 100 guns fired at a rate
+of 441 shots per second.
+This loop computes the result:
 
 \begin{verbatim}
+    dt = 1 / 441
     total = 0
-    for j in range(100):
-        total += shifted_scaled(response, j*100, 1.0)
+    for k in range(100):
+        total += shifted_scaled(response, k*dt, 1.0)
 \end{verbatim}
 
-At a framerate of 44,100 Hz, there are 441 gunshots per second,
+With 441 shots per second,
 so you don't hear the individual shots.  Instead, it sounds
 like a periodic signal at 441 Hz.  If you play this example, it
 sounds like a car horn in a garage.
 
 And that brings us to a key insight: you can think of any wave as a
 series of samples, where each sample is an impulse with a different
-magnitude.
+amplitude.
 
-As a example, I'll generate a sawtooth signal at 410 Hz:
+As a example, I'll generate a sawtooth signal at 441 Hz:
 
 \begin{verbatim}
-    signal = thinkdsp.SawtoothSignal(freq=410)
+    signal = thinkdsp.SawtoothSignal(freq=441)
     wave = signal.make_wave(duration=0.1,
                             framerate=response.framerate)
 \end{verbatim}
@@ -5986,8 +6020,8 @@ sawtooth, and add up the impulse responses:
 
 \begin{verbatim}
     total = 0
-    for j, y in enumerate(wave.ys):
-        total += shifted_scaled(response, j, y)
+    for t, y in zip(wave.ts, wave.ys):
+        total += shifted_scaled(response, t, y)
 \end{verbatim}
 
 The result is what it would sound like to play a sawtooth wave in a
@@ -6034,7 +6068,7 @@ on a signal:
 
 \end{enumerate}
 
-The equivalence of these two descriptions should not be a surprise;
+The equivalence of these descriptions should not be a surprise;
 it is basically a statement of the Convolution Theorem:
 convolution of $f$ and $g$ in the time
 domain corresponds to multiplication in the frequency domain.
@@ -6069,19 +6103,20 @@ then add up the results.
 \end{enumerate}
 
 Together these steps prove the Convolution Theorem.  But first, let's
-assemble the pieces we'll need.  The DFT of $g$ is:
+assemble the pieces we'll need.  The DFT of $g$, which I'll call $G$
+is:
 %
-\[ DFT(g) = G[k] = \sum_n g[n] \exp(-2 \pi i n k / N) \]
+\[ DFT(g)[k] = G[k] = \sum_n g[n] \exp(-2 \pi i n k / N) \]
 %
 where $k$ is an index of frequency from
 0 to $N-1$ and $n$ is an index of time from 0 to $N-1$.
-The result, $G$, is a vector of $N$ complex numbers.
+The result is a vector of $N$ complex numbers.
 
 The inverse DFT of $F$, which I'll call $f$, is:
 %
-\[ IDFT(F) = f[n] = \sum_k F[k] \exp(2 \pi i n k / N) \]
+\[ IDFT(F)[n] = f[n] = \sum_k F[k] \exp(2 \pi i n k / N) \]
 %
-And here's the definition of convolution:
+Here's the definition of convolution:
 %
 \[ (f \conv g)[n] = \sum_m f[m] g[n-m] \]
 %
@@ -6118,7 +6153,7 @@ $G[k]$ (using $m$ as the index of time).  So we can write:
 which shows that for each complex exponential, $e_k$, convolution
 with $g$ has the effect of multiplying $e_k$ by $G[k]$.  In mathematical
 terms, each $e_k$ is an eigenvector of this operation, and
-$G[k]$ is the corresponding eigenvalue.
+$G[k]$ is the corresponding eigenvalue (see Section~\ref{effdiff}).
 
 Now for the second part of the proof.  If the input signal, $f$, doesn't
 happen to be a complex exponential, we can express it as a sum of
@@ -6128,7 +6163,7 @@ magnitude of the component with frequency $k$.
 
 Each input component is a complex exponential with magnitude
 $F[k]$, so each output component is a complex
-exponential with magnitude $F[k]G[k]$, based on the first part of
+exponential with magnitude $F[k] G[k]$, based on the first part of
 the proof.
 
 Because the system is linear, the output is just the sum of the
@@ -6157,25 +6192,62 @@ QED
 
 \section{Exercises}
 
-% TODO: make exercises
-\begin{exercise}
-\end{exercise}
-
-\begin{exercise}
-\end{exercise}
-
 Solutions to these exercises are in {\tt chap10soln.ipynb}.
+
+\begin{exercise}
+In Section~\ref{sysconv} I describe convolution as the sum of shifted,
+scaled copies of a signal.  Strictly speaking, this operation is
+{\em linear} convolution, which does not assume that the signal
+is periodic.
+
+But in Section~\ref{response}, when we multiply the
+DFT of the signal by the transfer function, that operation corresponds
+to {\em circular} convolution, which assumes that the signal is
+periodic.  As a result, you might notice that the output contains
+an extra note at the beginning, which wraps around from the end.
+
+Fortunately, there is a standard solution to this problem.  If you
+add enough zeros to the end of the signal before computing the DFT,
+you can avoid wrap-around and compute a linear convolution.
+
+Modify the example in {\tt chap10.ipynb} and confirm that zero-padding
+eliminates the extra note at the beginning of the output.
+\end{exercise}
+
+
+\begin{exercise}
+The Open AIR library provides a ``centralized... on-line resource for
+anyone interested in auralization and acoustical impulse response
+data'' (\url{http://www.openairlib.net}).  Browse their collection
+of impulse response data and download one that sounds interesting.
+Find a short recording that has the same sample rate as the impulse
+response you downloaded.
+
+Simulate the sound of your recording in the space where the impulse
+response was measured, computed two way: by convolving the recording
+with the impulse response and by computing the filter that corresponds
+to the impulse response and multiplying by the DFT of the recording.
+\end{exercise}
+
+%TODO: one more?
+%\begin{exercise}
+%\end{exercise}
+
 
 
 \chapter{Modulation and sampling}
 
-In Section~\ref{aliasing} I defined the folding frequency, also called
-the Nyquist frequency, and I claimed that ???
+In Section~\ref{aliasing} we saw that when a signal is sampled at
+10,000 Hz, a component at 5500 Hz is indistinguishable from a
+component at 4500 Hz.  In this example, the folding frequency, 5000 Hz,
+is half of the sampling rate.  But I didn't explain why.
 
-This chapter presents the theory of signals and systems, using
-musical acoustics as an example.  And it explains an
-important application of the Convolution Theorem, characterization
-of linear, time-invariant systems (which I'll define soon).
+This chapter explores the effect of sampling and presents the
+Sampling Theorem, which explains aliasing and the folding frequency.
+
+I'll start by exploring the effect of convolution with impulses;
+I'll uses that to explain amplitude modulation (AM), which
+turns out to be useful for understanding the Sampling Theorem.
 
 The code for this chapter is in {\tt chap11.ipynb}, which is in the
 repository for this book (see Section~\ref{code}).
@@ -6184,17 +6256,454 @@ You can also view it at \url{http://tinyurl.com/thinkdsp11}.
 
 \section{Convolution with impulses}
 
+As we saw in Section~\ref{sysconv}, convolution of a signal with
+a series of impulses has the effect of making shifted, scaled
+copies of the signal.
+
+As an example, I'll read signal that sounds like a beep:
+
+\begin{verbatim}
+filename = '253887__themusicalnomad__positive-beeps.wav'
+wave = thinkdsp.read_wave(filename)
+wave.normalize()
+\end{verbatim}
+
+And I'll construct a wave with four impulses:
+
+\begin{verbatim}
+imp_sig = thinkdsp.Impulses([0.005, 0.3, 0.6,  0.9], 
+                       amps=[1,     0.5, 0.25, 0.1])
+impulses = imp_sig.make_wave(start=0, duration=1.0, 
+                             framerate=wave.framerate)
+\end{verbatim}
+
+And then convolve them:
+
+\begin{verbatim}
+convolved = wave.convolve(impulses)
+\end{verbatim}
+
 \begin{figure}
 % sampling.py
-\centerline{\includegraphics[height=2.5in]{figs/sampling1.pdf}}
-\caption{.}
+\centerline{\includegraphics[height=3.5in]{figs/sampling1.pdf}}
+\caption{The effect of convolving a signal (top left) with a series of
+  impulses (bottom left).  The result (right) is the sum of shifted,
+  scaled copies of the signal.}
 \label{fig.sampling1}
 \end{figure}
 
-Figure~\ref{fig.sampling1} shows 
+Figure~\ref{fig.sampling1} shows the results, with the signal in
+the top left, the impulses in the lower left, and the result on
+the right.
+
+You can hear the result in {\tt chap11.ipynb}; it sounds like
+a series of four beeps with decreasing loudness.
+
+The point of this example is just to demonstrate that convolution
+with impulses makes shifted, scaled copies.  This result will be
+useful in the next section.
 
 
+\section{Amplitude modulation}
+\label{am}
 
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=5.5in]{figs/sampling2.pdf}}
+\caption{Demonstration of amplitude modulation.  The top row is the
+spectrum of the signal; the next row is the spectrum after modulation;
+the next row is the spectrum after demodulation; the last row is the
+demodulated signal after low-pass filtering.}
+\label{fig.sampling2}
+\end{figure}
+
+Amplitude modulation (AM) is used to broadcast AM radio, among other
+applications.  At the transmitter, the signal (which might contain
+speech, music, etc.) is ``modulated'' by multiplying it with a cosine
+signal that acts as a ``carrier wave''.  The result is a
+high-frequency wave that is suitable for broadcast by radio.  Typical
+frequencies for AM radio in the United States are 500--1600 kHz (see
+\url{https://en.wikipedia.org/wiki/AM_broadcasting}).
+
+At the receiving end, the broadcast signal is ``demodulated'' to
+recover the original signal.  Surprisingly, demodulation works by
+multiplying the broadcast signal, again, by the same carrier wave.
+
+To see how that works, I'll modulate a signal with a carrier wave at
+10 kHz.  Here's the signal:
+
+\begin{verbatim}
+filename = '105977__wcfl10__favorite-station.wav'
+wave = thinkdsp.read_wave(filename)
+wave.unbias()
+wave.normalize()
+\end{verbatim}
+
+And here's the carrier:
+
+\begin{verbatim}
+carrier_sig = thinkdsp.CosSignal(freq=10000)
+carrier_wave = carrier_sig.make_wave(duration=wave.duration, 
+                                     framerate=wave.framerate)
+\end{verbatim}
+
+We can multiply them using the {\tt *} operator, which multiplies
+the wave arrays elementwise:
+
+\begin{verbatim}
+modulated = wave * carrier_wave
+\end{verbatim}
+
+The result sounds pretty bad.  You can hear it in {\tt chap11.ipynb}.
+
+Figure~\ref{fig.sampling2} shows what's happening in the frequency
+domain.  The top row is the spectrum of the original signal.  The
+next row is the spectrum of the modulated signal, after multiplying
+by the carrier.  It contains two copies of the original spectrum,
+shifted by plus and minus 10 kHz.
+
+To understand why, recall that convolution in the time domain corresponds
+to multiplication in the frequency domain.  Conversely, multiplication
+in the time domain corresponds to convolution in the frequency domain.
+When we multiply the signal by the carrier, we are convolving its
+spectrum with the DFT of the carrier.
+
+Since the carrier is a simple cosine wave, its DFT is two impulses, at
+plus and minus 10 kHz.  Convolution with these impulses makes
+shifted, scaled copies of the spectrum.  Notice that the amplitude of
+the spectrum is smaller after modulation.  The energy from the original
+signal is split between the copies.
+
+We demodulate the signal, by multiplying by the carrier wave again:
+
+\begin{verbatim}
+demodulated = modulated * carrier_wave
+\end{verbatim}
+
+The third row of Figure~\ref{fig.sampling2} shows the result.  Again,
+multiplication in the time domain corresponds to convolution in the
+frequency domain, which makes shifted, scaled copies of the spectrum.
+
+Since the modulated spectrum contains two peaks, each peak gets split
+in half and shifted by plus and minus 20 kHz.  Two of the copies
+meet at 0 kHz and get added together; the other two copies end up
+centered at plus and minus 20 kHz.
+
+If you listen to the demodulated signal, it sounds pretty good.  The
+extra copies of the spectrum add high frequency components that were
+not it the original signal, but they are so high that your speakers
+probably can't play them, and most people can't hear them.  But if
+you have good speakers and good ears, you might.
+
+In that case, you can get rid of the extra components by applying a
+low-pass filter:
+
+\begin{verbatim}
+demodulated_spectrum = demodulated.make_spectrum(full=True)
+demodulated_spectrum.low_pass(10000)
+filtered = demodulated_spectrum.make_wave()
+\end{verbatim}
+
+The result is quite close to the original wave, although about half
+of the power is lost after demodulating and filtering.  But that's not
+a problem in practice, because much more of the power is lost in
+transmitting and receiving the broadcast signal.  We have to amplify
+the result anyway, another factor of 2 is not an issue.
+
+
+\section{Sampling}
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=3.0in]{figs/sampling3.pdf}}
+\caption{Spectrum of a signal before (top) and after (bottom) sampling.}
+\label{fig.sampling3}
+\end{figure}
+
+I explained amplitude modulation in part because it is interesting, but
+mostly because it will help us understand sampling.  ``Sampling'' is
+the process of measuring an analog signal at an series of points in
+time, usually with equal spacing.
+
+For example, the WAV files we have used as examples were
+recorded by sampling the output of a microphone using an analog-to-digital
+converter (ADC).  The sampling rate for most of them is 44.1 kHz,
+which is the standard rate for ``CD quality'' sound, or 48 kHz, which
+is the standard for DVD sound.
+
+At 48 kHz, the folding frequency is 24 kHz, which is higher than most
+people can hear (see \url{https://en.wikipedia.org/wiki/Hearing_range}).
+
+In most of these waves, each sample has 16 bits, so there
+are $2^{16}$ distinct levels.  This ``bit depth'' turns out to be enough
+that adding more bits does not improve the sound quality noticeably
+(see \url{https://en.wikipedia.org/wiki/Digital_audio}).
+
+Of course, applications other than audio signals might require higher
+sampling rates, in order to capture higher frequencies, or higher
+bit-depth, in order to reproduce waveforms with more fidelity.
+
+%TODO: refer to Vi Hart's video
+%TODO: refer to the sampling video
+
+To demonstrate the effect of the sampling process, I am going to start
+with a wave sampled at 44.1 kHz and select samples from it at about 11 kHz.
+This is not exactly the same as sampling from an analog signal, but
+the effect is the same.
+
+First I'll load a recording of a drum solo:
+
+\begin{verbatim}
+filename = '263868__kevcio__amen-break-a-160-bpm.wav'
+wave = thinkdsp.read_wave(filename)
+wave.normalize()
+\end{verbatim}
+
+Figure~\ref{fig.sampling3} (top) shows the spectrum of this wave.
+Now here's the function that samples from the wave:
+
+\begin{verbatim}
+def sample(wave, factor=4):
+    ys = np.zeros(len(wave))
+    ys[::factor] = wave.ys[::factor]
+    return thinkdsp.Wave(ys, framerate=wave.framerate)
+\end{verbatim}
+
+I'll use it to select every fourth element:
+
+\begin{verbatim}
+sampled = sample(wave, 4)
+\end{verbatim}
+
+The result has the same framerate as  the original, but most of the
+elements are zero.  If you play the sampled wave, it doesn't sound
+very good.  The sampling process introduces high-frequency
+components that were not in the original.
+
+Figure~\ref{fig.sampling3} (bottom) shows the spectrum of the sampled
+wave.  It contains four copies of the original spectrum (it looks like
+five copies because one is split between the highest and lowest
+frequencies).
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=4in]{figs/sampling9.pdf}}
+\caption{The DFT of an impulse train is also an impulse train.}
+\label{fig.sampling9}
+\end{figure}
+
+To understand where these copies come from, we can think of the
+sampling process as multiplication with a series of impulses.  Instead
+of using {\tt sample} to select every fourth element, we could use
+this function to make a series of impulses, sometimes called an
+``impulse train'':
+ 
+\begin{verbatim}
+def make_impulses(wave, factor):
+    ys = np.zeros(len(wave))
+    ys[::factor] = 1
+    ts = np.arange(len(wave)) / wave.framerate
+    return thinkdsp.Wave(ys, ts, wave.framerate)
+\end{verbatim}
+
+And then multiply the original wave by the impulse train:
+ 
+\begin{verbatim}
+impulses = make_impulses(wave, 4)
+sampled = wave * impulses
+\end{verbatim}
+
+The result is the same; it still doesn't sound very good, but now
+we understand why.  Multiplication in the time domain corresponds
+to convolution in the frequency domain.  When we multiply
+by an impulse train, we are convolving with the DFT of an
+impulse train.  As it turns out, the DFT of an impulse
+train is also an impulse train. 
+
+Figure~\ref{fig.sampling9} shows two examples.  The top row is
+the impulse train in the example, with frequency 11,025 Hz.
+The DFT is a train of 4 impulses, which is why we get 4 copies
+of the spectrum.  The bottom row shows an impulse
+train with a lower frequency, about 5512 Hz.  Its DFT is a train
+of 8 impulses.  In general, more impulses in the time
+domain correspond to fewer impulses in the frequency
+domain.
+
+In summary:
+
+\begin{itemize}
+
+\item We can think of sampling as multiplication by an impulse train.
+
+\item Multiplying by an impulse train corresponds
+to convolution with an impulse train in the frequency domain.
+
+\item Convolution with an impulse train makes multiple copies of the
+signal's spectrum.
+
+\end{itemize}
+
+
+\section{Aliasing}
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=5.5in]{figs/sampling4.pdf}}
+\caption{Spectrum of the drum solo (top), spectrum of the impulse
+train (second row), spectrum of the sampled wave (third row),
+after low-pass filtering (bottom).}
+\label{fig.sampling4}
+\end{figure}
+
+Section~\ref{am}, after demodulating an AM signal we got rid of
+the extra copies of the spectrum by applying a low-pass filter.
+We can do the same thing after sampling, but it turns out
+not to be a perfect solution.
+
+Figure~\ref{fig.sampling4} shows why not.  The top row is the spectrum
+of the drum solo.  It contains high frequency components that extend
+past 10 kHz.  When we sample this wave, we convolve the spectrum 
+with the impulse train (second row), which makes copies of the spectrum
+(third row).  The bottom row shows the result after applying a low-pass
+filter with a cutoff at the folding frequency, 5512 Hz.
+
+If we convert the result back to a wave, it is similar to the original
+wave, but there are two problems:
+
+\begin{itemize}
+
+\item Because of the low-pass filter, the components above 5500 Hz
+have been lost, so the result sounds muted.
+
+\item Even the components below 5500 Hz are not quite right, because
+the include contributions from leftover from the spectral copies we
+tried to filter out.
+
+\end{itemize}
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=4.8in]{figs/sampling5.pdf}}
+\caption{Spectrum of a bass guitar solo (top), its spectrum after
+sampling (middle), and after filtering (bottom).}
+\label{fig.sampling5}
+\end{figure}
+
+If the spectral copies overlap after sampling, we lose information
+about the spectrum, and we won't be able to recover it.
+
+But if the copies don't overlap, things work out pretty well.  As
+a second example, I loaded a recording of a bass guitar solo. 
+
+Figure~\ref{fig.sampling5} shows its spectrum (top row), which contains
+no visible energy above 5512 Hz.  The second row shows the spectrum of
+the sampled wave, and the third row shows the spectrum after the low
+pass filter.  The amplitude is lower because we've filtered out some
+of the energy, but the shape of the spectrum is almost exactly what we
+started with.  And if we convert back to a wave, it sounds the same.
+
+
+\section{Interpolation}
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=2.5in]{figs/sampling6.pdf}}
+\caption{A brick wall low-pass filter (right) and the corresponding
+convolution window (left).}
+\label{fig.sampling6}
+\end{figure}
+
+The low pass filter I used in the last step is a so-called ``brick wall''
+filter; frequencies above the cutoff are removed completely, as if they
+hit a brick wall.
+
+Figure~\ref{fig.sampling6} (right) shows what this filter looks like.
+Of course, multiplication by the this filter, in the frequency domain,
+corresponds to convolution with a window in the time domain.  We can
+find out what that window is by computing the inverse DFT of the
+filter, which is shown in Figure~\ref{fig.sampling6} (left).
+
+That function has a name; it is the normalized sinc function, or at
+least a discrete approximation of it (see
+\url{https://en.wikipedia.org/wiki/Sinc_function}):
+
+\[ \mathrm{sinc}(x) = \frac{\sin \pi x}{\pi x} \]
+
+When we apply the low-pass filter, we are convolving with a sinc
+function.  We can think of this convolution as the sum of shifted,
+scaled copies of the sinc function.  
+
+The value of sinc is 1 at 0 and 0 at every other integer
+value of $x$.  When we shift the sinc function, we move the zero point.
+When we scale it, we change the height at the zero point.
+So when we add up the shifted, scaled copies, they interpolate
+between the sampled points.
+
+\begin{figure}
+% sampling.py
+\centerline{\includegraphics[height=2.5in]{figs/sampling8.pdf}}
+\caption{.}
+\label{fig.sampling8}
+\end{figure}
+
+Figure~\ref{fig.sampling8} shows how that works using a short segment
+of the bass guitar solo.  The line across the to is the original
+wave.  The vertical gray lines show the sampled values.  The thin
+curves are the shifted, scaled copies of the sinc function.
+The sum of these sinc functions is identical to the original wave.
+
+Read that last sentence again, because it is more surprising than it
+might seem.  Because we started with a signal that contained no energy
+above 5512 Hz, and we sampled at 11,025 Hz, we were able to recover
+the original spectrum exactly.
+
+In this example, I started with a wave that had already been
+sampled at 44,100 Hz, and I resampled it at 11,025 Hz.  After
+resampling, the gap between the spectral copies is the sampling
+rate, 11.025 kHz.  If the original signal contains components that
+exceed half of the sampling rate, 5512 Hz, the copies overlap
+and we lose information.
+
+But if the signal is ``bandwidth limited''; that is, it contains no
+energy above 5512 Hz, the spectral copies don't overlap, we don't lose
+information, and we can recover the original signal exactly.
+
+This result is known as the Nyquist-Shannon sampling theorem (see 
+\url{https://en.wikipedia.org/wiki/Nyquist-Shannon_sampling_theorem}).
+
+This example does not prove the Sampling Theorem, but I hope it
+helps you understand what it says and why it works.
+
+Notice that the argument I made does
+not depend on the original sampling rate, 44.1 kHz.  The result
+would be the same if the original had been sampled at a higher
+frequency, or even if the original had been a continuous analog
+signal: if we sample at framerate $f$, we can recover the original
+signal exactly, as long as it contains no energy at frequencies
+above $f/2$.  
+
+
+\section{Exercises}
+
+Solutions to these exercises are in {\tt chap11soln.ipynb}.
+
+\begin{exercise}
+The code in this chapter is in {\tt chap11.ipynb}.  Read through
+it and listen to the examples.
+\end{exercise}
+
+
+\begin{exercise}
+Chris ``Monty'' Montgomery has an excellent video called ``D/A and A/D
+| Digital Show and Tell''; it demonstrates the Sampling Theorem in
+action, and presents lots of other excellent information about
+sampling.  Watch it at
+\url{https://www.youtube.com/watch?v=cIQ9IXSUzuM}.
+\end{exercise}
+
+
+\begin{exercise}
+\end{exercise}
 
 
 
