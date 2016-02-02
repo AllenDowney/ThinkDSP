@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{0.10.6}
+\newcommand{\theversion}{1.0.2}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -258,7 +258,7 @@ The code and sound samples used in this book are available from
 \url{https://github.com/AllenDowney/ThinkDSP}.  Git is a version
 control system that allows you to keep track of the files that
 make up a project.  A collection of files under Git's control is
-called a {\bf repository}.  GitHub is a hosting service that provides
+called a ``repository''.  GitHub is a hosting service that provides
 storage for Git repositories and a convenient web interface.
 \index{repository}
 \index{Git}
@@ -373,6 +373,52 @@ Both made many suggestions and corrections.
 % ENDCONTRIB
 
 \end{itemize}
+
+Special thanks to Freesound, which is the source of many of the
+sound samples I use in this book, and to the Freesound users who
+uploaded those sounds.  I include some of their wave files in
+the GitHub repository for this book, using the original file
+names, so it should be easy to find their sources.
+
+Unfortunately, most Freesound users don't make their real names
+available, so I can only thank them using their user names.  Samples
+used in this book were contributed by Freesound users: iluppai,
+wcfl10, thirsk, docquesting, kleeb, landup, zippi1, themusicalnomad,
+bcjordan, rockwehrmann, marcgascon7, jcveliz.  Thank you all!
+
+%100475__iluppai__saxophone-weep.wav
+%http://www.freesound.org/people/iluppai/sounds/100475/
+
+%105977__wcfl10__favorite-station.wav
+%http://www.freesound.org/people/wcfl10/sounds/105977/
+
+%120994__thirsk__120-oboe.wav
+%http://www.freesound.org/people/Thirsk/sounds/120994/
+
+%132736__ciccarelli__ocean-waves.wav
+%http://www.freesound.org/people/ciccarelli/sounds/132736/
+
+%180960__kleeb__gunshot.wav
+%http://www.freesound.org/people/Kleeb/sounds/180960/
+
+%18871__zippi1__sound-bell-440hz.wav
+%http://www.freesound.org/people/zippi1/sounds/18871/
+
+%253887__themusicalnomad__positive-beeps.wav
+%http://www.freesound.org/people/themusicalnomad/sounds/253887/
+
+%28042__bcjordan__voicedownbew.wav
+%http://www.freesound.org/people/bcjordan/sounds/28042/
+
+%72475__rockwehrmann__glissup02.wav
+%http://www.freesound.org/people/rockwehrmann/sounds/72475/
+
+%87778__marcgascon7__vocals.wav
+%http://www.freesound.org/people/marcgascon7/sounds/87778/
+
+%92002__jcveliz__violin-origional.wav
+%http://www.freesound.org/people/jcveliz/sounds/92002/
+
 
 \normalsize
 
@@ -605,7 +651,7 @@ from negative infinity to infinity.
 You can't do much with a Signal until you evaluate it.  In this
 context, ``evaluate'' means taking a sequence of points in time, {\tt
   ts}, and computing the corresponding values of the signal, {\tt ys}.
-I represent {\tt ts} and {\tt ys} using NumPy arrays and excapsulate
+I represent {\tt ts} and {\tt ys} using NumPy arrays and encapsulate
 them in an object called a Wave.
 
 A Wave represents a signal evaluated at a sequence of points in
@@ -764,8 +810,8 @@ makes an Audio widget that plays the sound.
 
 \begin{figure}
 % http://yuml.me/edit/5294b377
-% pdftops -eps diagram1.pdf
-\centerline{\includegraphics[width=3.5in]{figs/diagram1.pdf}}
+% pdftops -eps uml_diagram1.pdf
+\centerline{\includegraphics[width=3.5in]{figs/uml_diagram1.pdf}}
 \caption{Relationships among the classes in {\tt thinkdsp}.}
 \label{fig.diagram1}
 \end{figure}
@@ -1746,7 +1792,7 @@ limitation of this kind of time-frequency analysis.
 
 \begin{figure}
 % chirp.py
-\centerline{\includegraphics[height=2.5in]{figs/windowing1.pdf}}
+\centerline{\includegraphics[width=5.5in]{figs/windowing1.pdf}}
 \caption{Spectrum of a periodic segment of a sinusoid (left), a
   non-periodic segment (middle), a windowed non-periodic segment
   (right).}
@@ -1797,7 +1843,7 @@ starts at 0 and ends at 1.
 Figure~\ref{fig.windowing1} (middle) shows
 the spectrum of this segment.  Again, the peak is at 440 Hz, but now
 there are additional components spread out from 240 to 640 Hz.  This
-spread is called ``spectral leakage'', because some of the energy that
+spread is called {\bf spectral leakage}, because some of the energy that
 is actually at the fundamental frequency leaks into other frequencies.
 
 In this example, leakage happens because we are using DFT on a segment
@@ -2205,7 +2251,7 @@ visible frequencies is white.
 \end{figure}
 
 UU noise is uncorrelated, which means that each value does not depend
-on the others.  An alternative is Brownian noise, in which each value
+on the others.  An alternative is {\bf Brownian noise}, in which each value
 is the sum of the previous value and a random ``step''.
 
 It is called ``Brownian'' by analogy with Brownian motion, in which a
@@ -2349,7 +2395,7 @@ When $\beta = 0$, power is constant at all frequencies,
 so the result is white noise.  When $\beta=2$ the result is red noise.
 
 When $\beta$ is between 0 and 2, the result is between white and
-red noise, so it is called ``pink noise''.
+red noise, so it is called {\bf pink noise}.
 
 There are several ways to generate pink noise.  The simplest is to
 generate white noise and then apply a low-pass filter with the
@@ -3087,7 +3133,7 @@ Is there evidence of periodic behavior?
 \begin{exercise}
 In the repository for this book you will find an IPython notebook
 called \verb"saxophone.ipynb" that explores autocorrelation,
-pitch perception, and a phenomenon called the ``missing fundamental''.
+pitch perception, and a phenomenon called the {\bf missing fundamental}.
 Read through this notebook and run the examples.  Try selecting
 a different segment of the recording and running the examples again.
 
@@ -3198,7 +3244,7 @@ wave, how do we identify the frequency components and their amplitudes?
 \label{synthesis}
 
 \begin{figure}
-\input{diagram}
+\centerline{\includegraphics[height=2.5in]{figs/diagram1.pdf}}
 \caption{Synthesis with arrays.}
 \label{fig.synthesis}
 \end{figure}
@@ -3462,7 +3508,7 @@ def test2():
 
 If you compare this to the previous version, you'll notice
 two changes.  First, I added 0.5 to {\tt ts} and {\tt fs}.
-Second, I cancelled out \verb"time_units", which simplifies
+Second, I canceled out \verb"time_units", which simplifies
 the expression for {\tt fs}.
 
 With these values, $M$ is
@@ -3885,7 +3931,7 @@ The result is a NumPy array of complex numbers:
 \begin{verbatim}
 >>> signal = thinkdsp.ComplexSinusoid(freq=1, amp=0.6, offset=1)
 >>> wave = signal.make_wave(duration=1, framerate=4)
->>> print(wave.ys)
+>>> wave.ys
 [ 0.324+0.505j -0.505+0.324j -0.324-0.505j  0.505-0.324j]
 \end{verbatim}
 
@@ -3923,12 +3969,16 @@ Section~\ref{synth1}; the only difference is that I replaced
 Here's an example:
 
 \begin{verbatim}
->>> amps = np.array([0.6, 0.25, 0.1, 0.05])
->>> fs = [100, 200, 300, 400]
->>> framerate = 11025
->>> ts = np.linspace(0, 1, framerate)
->>> ys = synthesize1(amps, fs, ts)
->>> print(ys)
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
+    fs = [100, 200, 300, 400]
+    framerate = 11025
+    ts = np.linspace(0, 1, framerate)
+    ys = synthesize1(amps, fs, ts)
+\end{verbatim}
+
+The result is:
+
+\begin{verbatim}
 [ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
   0.979 -1.803e-01j  0.995 -9.093e-02j  1.000 -5.081e-15j]
 \end{verbatim}
@@ -4018,7 +4068,7 @@ Here's the example from the previous section again:
 
 \begin{verbatim}
 >>> ys = synthesize2(amps, fs, ts)
->>> print(ys)
+>>> ys
 [ 1.000 +0.000e+00j  0.995 +9.093e-02j  0.979 +1.803e-01j ...,
   0.979 -1.803e-01j  0.995 -9.093e-02j  1.000 -5.081e-15j]
 \end{verbatim}
@@ -4108,7 +4158,7 @@ slicing {\tt ys} and {\tt ts} down to the length of {\tt fs}:
 \begin{verbatim}
 >>> n = len(fs)
 >>> amps2 = analyze1(ys[:n], fs, ts[:n])
->>> print(amps2)
+>>> amps2
 [ 0.60+0.j  0.25-0.j  0.10+0.j  0.05-0.j]
 \end{verbatim}
 
@@ -4136,11 +4186,11 @@ The NumPy methods {\tt conj} and {\tt transpose} do what we
 want.  Here's the code that computes {\tt M} for $N=4$ components:
 
 \begin{verbatim}
->>> N = 4
->>> ts = np.arange(N) / N
->>> fs = np.arange(N)
->>> args = np.outer(ts, fs)
->>> M = np.exp(1j * PI2 * args)
+    N = 4
+    ts = np.arange(N) / N
+    fs = np.arange(N)
+    args = np.outer(ts, fs)
+    M = np.exp(1j * PI2 * args)
 \end{verbatim}
 
 If $M$ is unitary, $M^*M = I$, where $M^*$ is the conjugate transpose
@@ -4148,7 +4198,7 @@ of $M$, and $I$ is the identity matrix.  We can test whether $M$
 is unitary like this:
 
 \begin{verbatim}
->>> MstarM = M.conj().transpose().dot(M)
+    MstarM = M.conj().transpose().dot(M)
 \end{verbatim}
 
 The result, within the tolerance of floating-point error, is
@@ -4168,19 +4218,20 @@ def analyze2(ys, fs, ts):
 And test it with appropriate values of {\tt fs} and {\tt ts}:
 
 \begin{verbatim}
->>> N = 4
->>> amps = np.array([0.6, 0.25, 0.1, 0.05])
->>> fs = np.arange(N)
->>> ts = np.arange(N) / N
->>> ys = synthesize2(amps, fs, ts)
-
->>> amps23 = analyze2(ys, fs, ts)
->>> print(amps3)
-[ 0.60+0.j  0.25+0.j  0.10-0.j  0.05-0.j]
+    N = 4
+    amps = np.array([0.6, 0.25, 0.1, 0.05])
+    fs = np.arange(N)
+    ts = np.arange(N) / N
+    ys = synthesize2(amps, fs, ts)
+    amps3 = analyze2(ys, fs, ts)
 \end{verbatim}
 
 Again, the result is correct within the tolerance of floating-point
 arithmetic.
+
+\begin{verbatim}
+[ 0.60+0.j  0.25+0.j  0.10-0.j  0.05-0.j]
+\end{verbatim}
 
 
 \section{DFT}
@@ -4345,10 +4396,10 @@ So what happens when we apply the ``full DFT'' to a real signal?
 Let's look at an example:
 
 \begin{verbatim}
->>> signal = thinkdsp.SawtoothSignal(freq=500)
->>> wave = signal.make_wave(duration=0.1, framerate=10000)
->>> hs = dft(wave.ys)
->>> amps = np.absolute(hs)
+    signal = thinkdsp.SawtoothSignal(freq=500)
+    wave = signal.make_wave(duration=0.1, framerate=10000)
+    hs = dft(wave.ys)
+    amps = np.absolute(hs)
 \end{verbatim}
 
 This code makes a sawtooth wave with frequency 500 Hz, sampled at
@@ -4358,7 +4409,7 @@ frequency do these amplitudes correspond to?  If we look at the
 body of {\tt dft}, we see:
 
 \begin{verbatim}
->>> fs = np.arange(N)
+    fs = np.arange(N)
 \end{verbatim}
 
 It's tempting to think that these values are the right frequencies.
@@ -4369,15 +4420,15 @@ frequencies, we have to convert from these arbitrary time units back
 to seconds, like this:
 
 \begin{verbatim}
->>> fs = np.arange(N) * framerate / N
+    fs = np.arange(N) * framerate / N
 \end{verbatim}
 
 With this change, the range of frequencies is from 0 to the actual
 framerate, 10 kHz.  Now we can plot the spectrum:
 
 \begin{verbatim}
->>> thinkplot.plot(fs, amps)
->>> thinkplot.config(xlabel='frequency (Hz)', 
+    thinkplot.plot(fs, amps)
+    thinkplot.config(xlabel='frequency (Hz)', 
                      ylabel='amplitude')
 \end{verbatim}
 
@@ -4514,9 +4565,9 @@ Section~\ref{square}, the harmonics of a square wave drop off
 slowly, so it contains many high-frequency components.
 
 \begin{verbatim}
->>> signal = thinkdsp.SquareSignal(freq=440)
->>> wave = signal.make_wave(duration=1, framerate=44100)
->>> segment = wave.segment(duration=0.01)
+    signal = thinkdsp.SquareSignal(freq=440)
+    wave = signal.make_wave(duration=1, framerate=44100)
+    segment = wave.segment(duration=0.01)
 \end{verbatim}
 
 {\tt wave} is a 1-second segment of the signal; {\tt segment}
@@ -4527,20 +4578,19 @@ a window with 11 elements and normalize it so the elements
 add up to 1.
 
 \begin{verbatim}
->>> window = np.ones(11)
->>> window /= sum(window)
+    window = np.ones(11)
+    window /= sum(window)
 \end{verbatim}
 
 Now I can compute the average of the first 11 elements by
 multiplying the window by the wave array:
 
 \begin{verbatim}
->>> ys = segment.ys
->>> N = len(ys)
->>> padded = thinkdsp.zero_pad(window, N)
->>> prod = padded * ys
->>> sum(prod)
--1
+    ys = segment.ys
+    N = len(ys)
+    padded = thinkdsp.zero_pad(window, N)
+    prod = padded * ys
+    sum(prod)
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
@@ -4564,19 +4614,19 @@ window to the right and compute the average of the next 11 elements of
 the wave array, starting with the second.
 
 \begin{verbatim}
->>> rolled = np.roll(rolled, 1)
->>> prod = rolled * ys
->>> sum(prod)
--1
+    rolled = np.roll(rolled, 1)
+    prod = rolled * ys
+    sum(prod)
 \end{verbatim}
 
+The result is -1 again.
 To compute the moving average, we repeat this process and store
 the result in an array named {\tt smoothed}:
 
 \begin{verbatim}
->>> smoothed = np.zeros_like(ys)
->>> rolled = padded
->>> for i in range(N):
+    smoothed = np.zeros_like(ys)
+    rolled = padded
+    for i in range(N):
         smoothed[i] = sum(rolled * ys)
         rolled = np.roll(rolled, 1)
 \end{verbatim}
@@ -4603,8 +4653,8 @@ and it is such a common operation that NumPy provides an
 implementation that is simpler and faster than my version:
 
 \begin{verbatim}
->>> convolved = np.convolve(ys, window, mode='valid')
->>> smooth2 = thinkdsp.Wave(convolved, framerate=wave.framerate)
+    convolved = np.convolve(ys, window, mode='valid')
+    smooth2 = thinkdsp.Wave(convolved, framerate=wave.framerate)
 \end{verbatim}
 
 {\tt np.convolve} computes the convolution of the wave
@@ -4669,17 +4719,17 @@ operation has on the spectrum.  First I'll plot the spectrum
 of the original wave:
 
 \begin{verbatim}
->>> spectrum = wave.make_spectrum()
->>> spectrum.plot(color=GRAY)
+    spectrum = wave.make_spectrum()
+    spectrum.plot(color=GRAY)
 \end{verbatim}
 
 Then the smoothed wave:
 
 \begin{verbatim}
->>> convolved = np.convolve(wave.ys, window, mode='same')
->>> smooth = thinkdsp.Wave(convolved, framerate=wave.framerate)
->>> spectrum2 = smooth.make_spectrum()
->>> spectrum2.plot()
+    convolved = np.convolve(wave.ys, window, mode='same')
+    smooth = thinkdsp.Wave(convolved, framerate=wave.framerate)
+    spectrum2 = smooth.make_spectrum()
+    spectrum2.plot()
 \end{verbatim}
 
 The mode flag {\tt same} indicates that the result should have the
@@ -4696,11 +4746,11 @@ To see how much each component has been attenuated, we can
 compute the ratio of the two spectrums:
 
 \begin{verbatim}
->>> amps = spectrum.amps
->>> amps2 = spectrum2.amps
->>> ratio = amps2 / amps    
->>> ratio[amps<560] = 0
->>> thinkplot.plot(ratio)
+    amps = spectrum.amps
+    amps2 = spectrum2.amps
+    ratio = amps2 / amps    
+    ratio[amps<560] = 0
+    thinkplot.plot(ratio)
 \end{verbatim}
 
 {\tt ratio} is the ratio of the amplitude before and after 
@@ -4809,7 +4859,7 @@ compute it.  Figure~\ref{fig.convolution7} shows the shape
 of the window.  It is a discrete approximation of the Gaussian
 ``bell curve''.  The figure also shows the moving average window
 from the previous example, which is sometimes called a
-``boxcar'' window because it looks like a rectangular railway car.
+{\bf boxcar window} because it looks like a rectangular railway car.
 
 \begin{figure}
 % convolution.py
@@ -6028,7 +6078,7 @@ The result is what it would sound like to play a sawtooth wave in a
 firing range.  Again, you can listen to it in {\tt chap10.ipynb}.
 
 \begin{figure}
-\input{diagram2}
+\centerline{\includegraphics[height=1.2in]{figs/diagram2.pdf}}
 \caption{Diagram of the sum of scaled and shifted copies of $g$.}
 \label{fig.convolution}
 \end{figure}
@@ -6496,7 +6546,7 @@ To understand where these copies come from, we can think of the
 sampling process as multiplication with a series of impulses.  Instead
 of using {\tt sample} to select every fourth element, we could use
 this function to make a series of impulses, sometimes called an
-``impulse train'':
+{\bf impulse train}:
  
 \begin{verbatim}
 def make_impulses(wave, factor):
@@ -6613,9 +6663,9 @@ convolution window (left).}
 \label{fig.sampling6}
 \end{figure}
 
-The low pass filter I used in the last step is a so-called ``brick wall''
-filter; frequencies above the cutoff are removed completely, as if they
-hit a brick wall.
+The low pass filter I used in the last step is a so-called {\bf brick
+  wall filter}; frequencies above the cutoff are removed completely,
+as if they hit a brick wall.
 
 Figure~\ref{fig.sampling6} (right) shows what this filter looks like.
 Of course, multiplication by the this filter, in the frequency domain,
@@ -6703,33 +6753,26 @@ sampling.  Watch it at
 
 
 \begin{exercise}
+As we have seen, if you sample a signal at too low a
+framerate, frequencies above the folding frequency get aliased.
+Once that happens, it is no longer possible to filter out
+these components, because they are indistinguishable from
+lower frequencies.
+
+It is a good idea to filter out these frequencies {\em before}
+sampling; a low-pass filter used for this purpose is called
+an {\bf anti-aliasing filter}.
+
+Returning to the drum solo example, apply a low-pass filter
+before sampling, then apply the low-pass filter again to remove
+the spectral copies introduced by sampling.  The result should
+be identical to the filtered signal.
 \end{exercise}
 
 
-
+\backmatter
+\printindex
 
 \end{document}
-
-
-
-Case study ideas:
-
-\begin{itemize}
-
-\item Pitch tracking in Rock Band
-
-\item Auto-Tune
-
-\item JPEG compression
-
-\item Image recognition in Fourier space (money)
-
-\item Application of cepstrum?
-
-\item Application of z transform -- digital control systems
-
-\item tilt shift effect on a photo
-
-
 
 \end{itemize}
