@@ -117,9 +117,9 @@ def make_figures():
     thinkplot.plot(ts[:n], ys[:n].real, label='real')
     thinkplot.plot(ts[:n], ys[:n].imag, label='imag')
     thinkplot.save(root='dft1',
-                   xlabel='time (s)',
-                   ylabel='wave',
-                   ylim=[-1.05, 1.05])
+                   xlabel='Time (s)',
+                   ylim=[-1.05, 1.05],
+                   loc='lower right')
 
     ys = synthesize2(amps, freqs, ts)
 
@@ -130,8 +130,7 @@ def make_figures():
     thinkplot.plot(ts[:n], ys.real[:n], label=r'$\phi_0 = 0$')
     thinkplot.plot(ts[:n], ys2.real[:n], label=r'$\phi_0 = 1.5$')
     thinkplot.save(root='dft2',
-                   xlabel='time (s)', 
-                   ylabel='wave',
+                   xlabel='Time (s)', 
                    ylim=[-1.05, 1.05],
                    loc='lower right')
 
@@ -146,8 +145,8 @@ def make_figures():
     fs = numpy.arange(N) * framerate / N
     thinkplot.plot(fs, amps)
     thinkplot.save(root='dft3',
-                   xlabel='frequency (Hz)', 
-                   ylabel='amplitude',
+                   xlabel='Frequency (Hz)', 
+                   ylabel='Amplitude',
                    legend=False)
 
 

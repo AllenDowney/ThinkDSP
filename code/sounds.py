@@ -79,7 +79,7 @@ def segment_violin(start=1.2, duration=0.6):
     spectrum.plot(high=10000)
     thinkplot.Save(root='sounds3',
                    xlabel='Frequency (Hz)',
-                   ylabel='Amplitude density',
+                   ylabel='Amplitude',
                    formats=FORMATS,
                    legend=False)
 

@@ -141,7 +141,7 @@ def play_wave(filename='sound.wav', player='aplay'):
 
 
 def find_index(x, xs):
-    """Find the index corresponding to a given value is an array."""
+    """Find the index corresponding to a given value in an array."""
     n = len(xs)
     start = xs[0]
     end = xs[-1]
@@ -185,6 +185,19 @@ class _SpectrumParent:
         Returns: new Spectrum
         """
         return copy.deepcopy(self)
+
+    def max_diff(self, other):
+        """Computes the maximum absolute difference between spectra.
+
+        other: Spectrum
+
+        returns: float
+        """
+        assert self.framerate == other.framerate
+        assert len(self) == len(other)
+
+        hs = self.hs - other.hs
+        return np.max(np.abs(hs))
 
     def ratio(self, denom, thresh=1, val=0):
         """The ratio of two spectrums.
@@ -387,9 +400,21 @@ class Spectrum(_SpectrumParent):
 
     def differentiate(self):
         """Apply the differentiation filter.
+
+        returns: new Spectrum
         """
-        filtr = PI2 * 1j * self.fs
-        self.hs *= filtr
+        new = self.copy()
+        new.hs *= PI2 * 1j * new.fs
+        return new
+
+    def integrate(self):
+        """Apply the integration filter.
+
+        returns: new Spectrum
+        """
+        new = self.copy()
+        new.hs /= PI2 * 1j * new.fs
+        return new
 
     def make_integrated_spectrum(self):
         """Makes an integrated spectrum.
@@ -650,19 +675,31 @@ class Wave:
         if other == 0:
             return self
 
-        #TODO: use ts to line up the waves in time
         assert self.framerate == other.framerate
-        n1, n2 = len(self), len(other)
-        if n1 > n2:
-            ys = self.ys.copy()
-            ys[:n2] += other.ys
-            ts = self.ts.copy()
-        else:
-            ys = other.ys.copy()
-            ys[:n1] += self.ys
-            ts = other.ts.copy()
-            
-        #TODO: test this
+
+        # make an array of times that covers both waves
+        start = min(self.start, other.start)
+        end = max(self.end, other.end)
+        n = int(round((end - start) * self.framerate)) + 1
+        ys = np.zeros(n)
+        ts = start + np.arange(n) / self.framerate
+
+        def add_ys(wave):
+            i = find_index(wave.start, ts)
+
+            # make sure the arrays line up reasonably well
+            diff = ts[i] - wave.start
+            dt = 1 / wave.framerate
+            if (diff / dt) > 0.1:
+                warnings.warn("Can't add these waveforms; their "
+                              "time arrays don't line up.")
+
+            j = i + len(wave)
+            ys[i:j] += wave.ys
+
+        add_ys(self)
+        add_ys(other)
+
         return Wave(ys, ts, self.framerate)
 
     __radd__ = __add__
@@ -698,6 +735,19 @@ class Wave:
         ys = self.ys * other.ys
         return Wave(ys, self.ts, self.framerate)
         
+    def max_diff(self, other):
+        """Computes the maximum absolute difference between waves.
+
+        other: Wave
+
+        returns: float
+        """
+        assert self.framerate == other.framerate
+        assert len(self) == len(other)
+
+        ys = self.ys - other.ys
+        return np.max(np.abs(ys))
+
     def convolve(self, other):
         """Convolves two waves.
 
@@ -797,6 +847,14 @@ class Wave:
         self.ys = truncate(self.ys, n)
         self.ts = truncate(self.ts, n)
 
+    def zero_pad(self, n):
+        """Trims this wave to the given length.
+
+        n: integer index
+        """
+        self.ys = zero_pad(self.ys, n)
+        self.ts = self.start + np.arange(n) / self.framerate
+
     def normalize(self, amp=1.0):
         """Normalizes the signal to the given amplitude.
 
@@ -812,8 +870,8 @@ class Wave:
     def find_index(self, t):
         """Find the index corresponding to a given time."""
         n = len(self)
-        start = self.ts[0]
-        end = self.ts[-1]
+        start = self.start
+        end = self.end
         i = round((n-1) * (t - start) / (end - start))
         return int(i)
 
@@ -1339,6 +1397,22 @@ class ParabolicSignal(Sinusoid):
         return ys
 
 
+class CubicSignal(ParabolicSignal):
+    """Represents a cubic signal."""
+    
+    def evaluate(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+        
+        returns: float wave array
+        """
+        ys = ParabolicSignal.evaluate(self, ts)
+        ys = np.cumsum(ys)
+        ys = normalize(unbias(ys), self.amp)
+        return ys
+
+
 class GlottalSignal(Sinusoid):
     """Represents a periodic signal that resembles a glottal signal."""
     
@@ -1352,7 +1426,7 @@ class GlottalSignal(Sinusoid):
         ts = np.asarray(ts)
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = np.modf(cycles)
-        ys = frac**4 * (1-frac)
+        ys = frac**2 * (1-frac)
         ys = normalize(unbias(ys), self.amp)
         return ys
 

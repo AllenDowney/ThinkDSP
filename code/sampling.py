@@ -9,15 +9,12 @@ from __future__ import print_function, division
 
 import thinkdsp
 import thinkplot
-import math
-import numpy as np
 
+import numpy as np
 import matplotlib.pyplot as plt
 
-PI2 = 2 * math.pi
-
+PI2 = 2 * np.pi
 FORMATS = ['pdf', 'eps']
-FORMATS = ['pdf']
 
 
 def plot_beeps():
@@ -55,6 +52,7 @@ def plot_beeps():
                    formats=FORMATS,
                    legend=False)
 
+XLIM = [-22050, 22050]
 
 def plot_am():
     wave = thinkdsp.read_wave('105977__wcfl10__favorite-station.wav')
@@ -64,10 +62,9 @@ def plot_am():
     # top
     ax1 = thinkplot.preplot(6, rows=4)
     spectrum = wave.make_spectrum(full=True)
-    spectrum.plot(label='wave')
+    spectrum.plot(label='spectrum')
 
-    xlim = [-22050, 22050]
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     #second
     carrier_sig = thinkdsp.CosSignal(freq=10000)
@@ -77,7 +74,7 @@ def plot_am():
 
     ax2 = thinkplot.subplot(2, sharey=ax1)
     modulated.make_spectrum(full=True).plot(label='modulated')
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     # third
     demodulated = modulated * carrier_wave
@@ -85,13 +82,13 @@ def plot_am():
 
     ax3 = thinkplot.subplot(3, sharey=ax1)
     demodulated_spectrum.plot(label='demodulated')
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     #fourth
     ax4 = thinkplot.subplot(4, sharey=ax1)
     demodulated_spectrum.low_pass(10000)
     demodulated_spectrum.plot(label='filtered')
-    thinkplot.config(xlim=xlim, xlabel='Frequency (Hz)')
+    thinkplot.config(xlim=XLIM, xlabel='Frequency (Hz)')
 
     thinkplot.save(root='sampling2',
                    formats=FORMATS)
@@ -134,58 +131,69 @@ def plot_segments(original, filtered):
     filtered.segment(start=start, duration=duration).plot()
 
 
-def plot_amen():
-    wave = thinkdsp.read_wave('263868__kevcio__amen-break-a-160-bpm.wav')
-    wave.normalize()
-
+def plot_sampling(wave, root):
     ax1 = thinkplot.preplot(2, rows=2)
-    wave.make_spectrum(full=True).plot()
+    wave.make_spectrum(full=True).plot(label='spectrum')
 
-    xlim = [-22050, 22050]
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
-    ax2 = thinkplot.subplot(2, sharey=ax1)
+    ax2 = thinkplot.subplot(2)
     sampled = sample(wave, 4)
-    sampled.make_spectrum(full=True).plot()
-    thinkplot.config(xlim=xlim, xlabel='Frequency (Hz)')
+    sampled.make_spectrum(full=True).plot(label='sampled')
+    thinkplot.config(xlim=XLIM, xlabel='Frequency (Hz)')
 
-    thinkplot.show()
-    return
+    thinkplot.save(root=root,
+                   formats=FORMATS)
 
 
-def plot_amen2():
-    wave = thinkdsp.read_wave('263868__kevcio__amen-break-a-160-bpm.wav')
-    wave.normalize()
-
+def plot_sampling2(wave, root):
     ax1 = thinkplot.preplot(6, rows=4)
     wave.make_spectrum(full=True).plot(label='spectrum')
-    xlim = [-22050-250, 22050]
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     ax2 = thinkplot.subplot(2)
     impulses = make_impulses(wave, 4)
     impulses.make_spectrum(full=True).plot(label='impulses')
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     ax3 = thinkplot.subplot(3)
     sampled = wave * impulses
     spectrum = sampled.make_spectrum(full=True)
     spectrum.plot(label='sampled')
-    thinkplot.config(xlim=xlim, xticklabels='invisible')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
     ax4 = thinkplot.subplot(4)
     spectrum.low_pass(5512.5)
     spectrum.plot(label='filtered')
-    thinkplot.config(xlim=xlim, xlabel='Frequency (Hz)')
+    thinkplot.config(xlim=XLIM, xlabel='Frequency (Hz)')
 
-    thinkplot.save(root='sampling4',
+    thinkplot.save(root=root,
                    formats=FORMATS)
 
 
-def plot_amen3():
-    filtered = spectrum.make_wave()
+def plot_sampling3(wave, root):
+    ax1 = thinkplot.preplot(6, rows=3)
+    wave.make_spectrum(full=True).plot(label='spectrum')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
 
-    plot_segments(wave, filtered)
+    impulses = make_impulses(wave, 4)
+
+    ax2 = thinkplot.subplot(2)
+    sampled = wave * impulses
+    spectrum = sampled.make_spectrum(full=True)
+    spectrum.plot(label='sampled')
+    thinkplot.config(xlim=XLIM, xticklabels='invisible')
+
+    ax3 = thinkplot.subplot(3)
+    spectrum.low_pass(5512.5)
+    spectrum.plot(label='filtered')
+    thinkplot.config(xlim=XLIM, xlabel='Frequency (Hz)')
+
+    thinkplot.save(root=root,
+                   formats=FORMATS)
+
+    #filtered = spectrum.make_wave()
+    #plot_segments(wave, filtered)
 
 
 def make_boxcar(spectrum, factor):
@@ -204,36 +212,6 @@ def make_boxcar(spectrum, factor):
     return thinkdsp.Spectrum(hs, fs, spectrum.framerate, full=spectrum.full)
 
 
-def plot_bass():
-    wave = thinkdsp.read_wave('328878__tzurkan__guitar-phrase-tzu.wav')
-    wave.normalize()
-    wave.plot()
-
-    wave.make_spectrum(full=True).plot()
-
-
-    sampled = sample(wave, 4)
-    sampled.make_spectrum(full=True).plot()
-
-    spectrum = sampled.make_spectrum(full=True)
-    boxcar = make_boxcar(spectrum, 4)
-    boxcar.plot()
-
-    filtered = (spectrum * boxcar).make_wave()
-    filtered.scale(4)
-    filtered.make_spectrum(full=True).plot()
-
-    plot_segments(wave, filtered)
-
-
-    diff = wave.ys - filtered.ys
-    #thinkplot.plot(diff)
-    np.mean(abs(diff))
-
-    sinc = boxcar.make_wave()
-    ys = np.roll(sinc.ys, 50)
-    thinkplot.plot(ys[:100])
-
 
 def plot_sinc_demo(wave, factor, start=None, duration=None):
 
@@ -245,7 +223,7 @@ def plot_sinc_demo(wave, factor, start=None, duration=None):
         sinc.scale(y * factor)
         return sinc
  
-    def plot_sincs(wave):
+    def plot_mini_sincs(wave):
         """Plots sinc functions for each sample in wave."""
         t0 = wave.ts[0]
         for i in range(0, len(wave), factor):
@@ -269,46 +247,111 @@ def plot_sinc_demo(wave, factor, start=None, duration=None):
         
     sampled.segment(start, duration).plot_vlines(color='gray')
     wave.segment(start, duration).plot(color='gray')
-    plot_sincs(wave)
+    plot_mini_sincs(wave)
 
 
-def plot_sincs():
+def plot_sincs(wave):
     start = 1.0
     duration = 0.01
     factor = 4
 
     short = wave.segment(start=start, duration=duration)
-    short.plot()
+    #short.plot()
 
     sampled = sample(short, factor)
-    sampled.plot_vlines(color='gray')
+    #sampled.plot_vlines(color='gray')
 
-
-    spectrum = sampled.make_spectrum()
+    spectrum = sampled.make_spectrum(full=True)
     boxcar = make_boxcar(spectrum, factor)
+
     sinc = boxcar.make_wave()
     sinc.shift(sampled.ts[0])
     sinc.roll(len(sinc)//2)
 
-    thinkplot.preplot(1)
+    thinkplot.preplot(2, cols=2)
     sinc.plot()
+    thinkplot.config(xlabel='Time (s)')
+
+    thinkplot.subplot(2)
+    boxcar.plot()
+    thinkplot.config(xlabel='Frequency (Hz)',
+                     ylim=[0, 1.05],
+                     xlim=[-boxcar.max_freq, boxcar.max_freq])
+
+    thinkplot.save(root='sampling6',
+                   formats=FORMATS)
+
+    return
 
     # CAUTION: don't call plot_sinc_demo with a large wave or it will
     # fill memory and crash
     plot_sinc_demo(short, 4)
+    thinkplot.config(xlabel='Time (s)')
+    thinkplot.save(root='sampling7',
+                   formats=FORMATS)
 
     start = short.start + 0.004
     duration = 0.00061
     plot_sinc_demo(short, 4, start, duration)
-    thinkplot.config(xlim=[start, start+duration],
-                         ylim=[-0.05, 0.17], legend=False)
+    thinkplot.config(xlabel='Time (s)',
+                     xlim=[start, start+duration],
+                     ylim=[-0.06, 0.17], legend=False)
+    thinkplot.save(root='sampling8',
+                   formats=FORMATS)
+
+
+def kill_yticklabels():
+    axis = plt.gca()
+    plt.setp(axis.get_yticklabels(), visible=False)
+
+
+def show_impulses(wave, factor, i):
+    thinkplot.subplot(i)
+    thinkplot.preplot(2)
+    impulses = make_impulses(wave, factor)
+    impulses.segment(0, 0.001).plot_vlines(linewidth=2)
+    if i == 1:
+        thinkplot.config(title='Impulse train',
+                         ylim=[0, 1.05])
+    else:
+        thinkplot.config(xlabel='Time (s)',
+                         ylim=[0, 1.05])
+    
+    thinkplot.subplot(i+1)
+    impulses.make_spectrum(full=True).plot()
+    kill_yticklabels()
+    if i == 1:
+        thinkplot.config(title='DFT of impulse train', 
+                         xlim=[-22400, 22400])
+    else:
+        thinkplot.config(xlabel='Frequency (Hz)',
+                         xlim=[-22400, 22400])
+
+
+def plot_impulses(wave):
+    thinkplot.preplot(rows=2, cols=2)
+    show_impulses(wave, 4, 1)
+    show_impulses(wave, 8, 3)
+    thinkplot.save('sampling9',
+                   formats=FORMATS)
 
 
 def main():
-    #plot_beeps()
-    #plot_am()
-    #plot_amen()
-    plot_amen2()
+    wave = thinkdsp.read_wave('328878__tzurkan__guitar-phrase-tzu.wav')
+    wave.normalize()
+
+    plot_sampling3(wave, 'sampling5')
+    plot_sincs(wave)
+
+    plot_beeps()
+    plot_am()
+
+    wave = thinkdsp.read_wave('263868__kevcio__amen-break-a-160-bpm.wav')
+    wave.normalize()
+    plot_impulses(wave)
+
+    plot_sampling(wave, 'sampling3')
+    plot_sampling2(wave, 'sampling4')
 
 
 if __name__ == '__main__':

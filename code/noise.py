@@ -50,7 +50,7 @@ def process_noise(signal, root='white'):
                    xlim=[0, framerate/2])
 
     # 3: log-log power spectrum
-    spectrum.fs[0] = 0
+    spectrum.hs[0] = 0
     spectrum.plot_power(linewidth=1, alpha=0.5)
     thinkplot.save(root=root+'noise3',
                    xlabel='Frequency (Hz)',

@@ -7,167 +7,81 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 from __future__ import print_function, division
 
-import numpy
-import pandas
-
-import thinkstats2
 import thinkdsp
 import thinkplot
 
+import numpy as np
 
-def plot_wave_and_spectrum(wave, root):
-    """Makes a plot showing 
+
+def plot_filter():
+    """Plots the filter that corresponds to a 2-element moving average.
     """
-    thinkplot.preplot(cols=2)
-    wave.plot()
-    thinkplot.config(xlabel='days',
-                     xlim=[0, 1650],
-                     ylabel='dollars', 
-                     legend=False)
+    impulse = np.zeros(8)
+    impulse[0] = 1
+    wave = thinkdsp.Wave(impulse, framerate=8)
+    
+    impulse_spectrum = wave.make_spectrum(full=True)
+    window_array = np.array([0.5, 0.5, 0, 0, 0, 0, 0, 0,])
+    window = thinkdsp.Wave(window_array, framerate=8)
+    filtr = window.make_spectrum(full=True)
 
-    thinkplot.subplot(2)
-    spectrum = wave.make_spectrum()
-    print(spectrum.estimate_slope())
-    spectrum.plot()
-    thinkplot.config(xlabel='frequency (1/days)',
-                     ylabel='power',
-                     xscale='log',
-                     yscale='log', 
-                     legend=False)
-
-    thinkplot.save(root=root)
+    filtr.plot()
+    thinkplot.config(xlabel='Frequency', ylabel='Amplitude')
+    thinkplot.save('systems1')
 
 
-def zero_pad(array, n):
-    """Makes a new array with the same elements and the given length.
-
-    array: numpy array
-    n: length of result
-
-    returns: new NumPy array
+def read_response():
+    """Reads the impulse response file and removes the initial silence.
     """
-    res = numpy.zeros(n)
-    res[:len(array)] = array
-    return res
-
-
-def plot_ratios(wave, wave2):
-    spectrum = wave.make_spectrum()
-    spectrum2 = wave2.make_spectrum()
-    
-    amps = spectrum.amps
-    amps2 = spectrum2.amps
-
-    n = min(len(amps), len(amps2))
-    ratio = amps2[:n] / amps[:n]
-
-    thinkplot.preplot(1)
-    thinkplot.plot(ratio, label='ratio')
-
-    window = numpy.array([1.0, -1.0])
-    padded = zero_pad(window, len(wave))
-    fft_window = numpy.fft.rfft(padded)
-    thinkplot.plot(abs(fft_window), color='0.7', label='filter')
-
-    thinkplot.config(xlabel='frequency (1/days)',
-                     xlim=[0, 1650/2],
-                     ylabel='amplitude ratio',
-                     ylim=[0, 4],
-                     loc='upper left')
-    thinkplot.save(root='systems3')
-
-
-def plot_derivative(wave, wave2):
-    # compute the derivative by spectral decomposition
-    spectrum = wave.make_spectrum()
-    spectrum3 = wave.make_spectrum()
-    spectrum3.differentiate()
-    
-    # plot the derivative computed by diff and differentiate
-    wave3 = spectrum3.make_wave()
-    wave2.plot(color='0.7', label='diff')
-    wave3.plot(label='derivative')
-    thinkplot.config(xlabel='days',
-                     xlim=[0, 1650],
-                     ylabel='dollars',
-                     loc='upper left')
-
-    thinkplot.save(root='systems4')
-
-    # plot the amplitude ratio compared to the diff filter
-    amps = spectrum.amps
-    amps3 = spectrum3.amps
-    ratio3 = amps3 / amps
-
-    thinkplot.preplot(1)
-    thinkplot.plot(ratio3, label='ratio')
-
-    window = numpy.array([1.0, -1.0])
-    padded = zero_pad(window, len(wave))
-    fft_window = numpy.fft.rfft(padded)
-    thinkplot.plot(abs(fft_window), color='0.7', label='filter')
-
-    thinkplot.config(xlabel='frequency (1/days)',
-                     xlim=[0, 1650/2],
-                     ylabel='amplitude ratio',
-                     ylim=[0, 4],
-                     loc='upper left')
-    thinkplot.save(root='systems5')
-
-
-def plot_filters(wave):
-
-    window1 = numpy.array([1, -1])
-    window2 = numpy.array([-1, 4, -3]) / 2.0
-    window3 = numpy.array([2, -9, 18, -11]) / 6.0
-    window4 = numpy.array([-3, 16, -36, 48, -25]) / 12.0
-    window5 = numpy.array([12, -75, 200, -300, 300, -137]) / 60.0
-
-    thinkplot.preplot(5)
-    for i, window in enumerate([window1, window2, window3, window4, window5]):
-        padded = zero_pad(window, len(wave))
-        fft_window = numpy.fft.rfft(padded)
-        n = len(fft_window)
-        thinkplot.plot(abs(fft_window)[:], label=i+1)
-
-    thinkplot.show()
-
-
-def plot_response():
-    thinkplot.preplot(cols=2)
-
     response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
-    response = response.segment(start=0.26, duration=5.0)
+    start = 0.26
+    response = response.segment(start=start)
+    response.shift(-start)
     response.normalize()
+    return response
+
+
+def plot_response(response):
+    """Plots an input wave and the corresponding output.
+    """
+    thinkplot.preplot(cols=2)
     response.plot()
-    thinkplot.config(xlabel='time',
-                     xlim=[0, 5.0],
-                     ylabel='amplitude',
+    thinkplot.config(xlabel='Time (s)',
+                     xlim=[0.26, response.end],
                      ylim=[-1.05, 1.05])
 
     thinkplot.subplot(2)
     transfer = response.make_spectrum()
     transfer.plot()
-    thinkplot.config(xlabel='frequency',
+    thinkplot.config(xlabel='Frequency (Hz)',
                      xlim=[0, 22500],
-                     ylabel='amplitude')
-
+                     ylabel='Amplitude')
     thinkplot.save(root='systems6')
 
-    wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
-    wave.ys = wave.ys[:len(response)]
-    wave.normalize()
-    spectrum = wave.make_spectrum()
+    violin = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
+
+    start = 0.11
+    violin = violin.segment(start=start)
+    violin.shift(-start)
+
+    violin.truncate(len(response))
+    violin.normalize()
+    spectrum = violin.make_spectrum()
 
     output = (spectrum * transfer).make_wave()
     output.normalize()
 
-    wave.plot(color='0.7')
-    output.plot(alpha=0.4)
-    thinkplot.config(xlabel='time',
-                     xlim=[0, 5.0],
-                     ylabel='amplitude',
+    thinkplot.preplot(rows=2)
+    violin.plot(label='input')
+    thinkplot.config(xlim=[0, violin.end],
                      ylim=[-1.05, 1.05])
+
+    thinkplot.subplot(2)
+    output.plot(label='output')
+    thinkplot.config(xlabel='Time (s)',
+                     xlim=[0, violin.end],
+                     ylim=[-1.05, 1.05])
+
     thinkplot.save(root='systems7')
 
 
@@ -177,62 +91,45 @@ def shifted_scaled(wave, shift, factor):
     res.scale(factor)
     return res
 
-def plot_convolution():
-    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
-    response = response.segment(start=0.26, duration=5.0)
-    response.normalize()
 
-    dt = 1
-    shift = dt * response.framerate
+def plot_convolution(response):
+    """Plots the impulse response and a shifted, scaled copy.
+    """
+    shift = 1
     factor = 0.5
     
     gun2 = response + shifted_scaled(response, shift, factor)
     gun2.plot()
-    thinkplot.config(xlabel='time (s)',
-                     ylabel='amplitude',
+    thinkplot.config(xlabel='Time (s)',
                      ylim=[-1.05, 1.05],
                      legend=False)
     thinkplot.save(root='systems8')
 
-    signal = thinkdsp.SawtoothSignal(freq=410)
+
+def plot_sawtooth(response):
+    signal = thinkdsp.SawtoothSignal(freq=441)
     wave = signal.make_wave(duration=0.1, framerate=response.framerate)
 
     total = 0
-    for j, y in enumerate(wave.ys):
-        total += shifted_scaled(response, j, y)
+    for t, y in zip(wave.ts, wave.ys):
+        total += shifted_scaled(response, t, y)
 
     total.normalize()
 
-    wave.make_spectrum().plot(high=500, color='0.7', label='original')
+    high = 5000
+    wave.make_spectrum().plot(high=high, color='0.7', label='original')
     segment = total.segment(duration=0.2)
-    segment.make_spectrum().plot(high=1000, label='convolved')
-    thinkplot.config(xlabel='frequency (Hz)', ylabel='amplitude')
+    segment.make_spectrum().plot(high=high, label='convolved')
+    thinkplot.config(xlabel='Frequency (Hz)', ylabel='Amplitude')
     thinkplot.save(root='systems9')
 
 
 def main():
-    plot_convolution()
-    return
+    plot_filter()
 
-    plot_response()
-    return
-
-    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
-                         nrows=1625,
-                         parse_dates=[0])
-    ys = df.Close.values
-    wave = thinkdsp.Wave(ys, framerate=1)
-    #plot_wave_and_spectrum(wave, root='systems1')
-
-    diff = numpy.diff(ys)
-    wave2 = thinkdsp.Wave(diff, framerate=1)
-    #plot_wave_and_spectrum(wave2, root='systems2')
-
-    #plot_ratios(wave, wave2)
-    plot_derivative(wave, wave2)
-    return
-
-    plot_filters(wave)
+    response = read_response()
+    plot_response(response)
+    plot_convolution(response)
 
 
 if __name__ == '__main__':
