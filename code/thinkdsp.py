@@ -482,15 +482,12 @@ class IntegratedSpectrum:
 class Dct(_SpectrumParent):
     """Represents the spectrum of a signal using discrete cosine transform."""
 
-    def __init__(self, hs, fs, framerate, full=False):
-        self.hs = hs
-        self.fs = fs
-        self.framerate = framerate
-        self.full = full
-
     @property
     def amps(self):
-        """Returns a sequence of amplitudes (read-only property)."""
+        """Returns a sequence of amplitudes (read-only property).
+
+        Note: for DCTs, amps are positive or negative real.
+        """
         return self.hs
 
     def __add__(self, other):
