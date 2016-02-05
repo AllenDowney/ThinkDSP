@@ -37,6 +37,14 @@ class Test(unittest.TestCase):
         
         self.assertAlmostEqual(dct.fs[0], 0.25)
 
+    def testImpulses(self):
+        imp_sig = thinkdsp.Impulses([0.01, 0.4, 0.8, 1.2], 
+                                    amps=[1, 0.5, 0.25, 0.1])
+        impulses = imp_sig.make_wave(start=0, duration=1.3, 
+                                     framerate=11025)
+
+        self.assertAlmostEqual(len(impulses), 14333)
+
 
 if __name__ == "__main__":
     unittest.main()

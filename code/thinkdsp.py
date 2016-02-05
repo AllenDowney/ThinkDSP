@@ -156,11 +156,13 @@ class _SpectrumParent:
     def __init__(self, hs, fs, framerate, full=False):
         """Initializes a spectrum.
 
-        hs: NumPy array of complex
+        hs: array of amplitudes (real or complex)
+        fs: array of frequencies
         framerate: frames per second
+        full: boolean to indicate full or real FFT
         """
-        self.hs = hs
-        self.fs = fs
+        self.hs = np.asanyarray(hs)
+        self.fs = np.asanyarray(fs)
         self.framerate = framerate
         self.full = full
 
@@ -447,10 +449,10 @@ class IntegratedSpectrum:
         """Initializes an integrated spectrum:
 
         cs: sequence of cumulative amplitudes
-        fs: sequence of frequences
+        fs: sequence of frequencies
         """
-        self.cs = cs
-        self.fs = fs
+        self.cs = np.asanyarray(cs)
+        self.fs = np.asanyarray(fs)
 
     def plot_power(self, low=0, high=None, expo=False, **options):
         """Plots the integrated spectrum.
@@ -617,24 +619,21 @@ class Spectrogram:
 class Wave:
     """Represents a discrete-time waveform.
 
-    ys: a "wave array" which is a numpy array of floats.
-    framerate: sample rate in samples per second
-    start: optional start time in seconds
-
     """
     def __init__(self, ys, ts=None, framerate=None):
         """Initializes the wave.
 
         ys: wave array
+        ts: array of times
         framerate: samples per second
         """
-        self.ys = ys
+        self.ys = np.asanyarray(ys)
         self.framerate = framerate if framerate is not None else 11025
 
         if ts is None:
             self.ts = np.arange(len(ys)) / self.framerate
         else:
-            self.ts = ts 
+            self.ts = np.asanyarray(ts)
 
     def copy(self):
         """Makes a copy.
@@ -1524,7 +1523,7 @@ class Impulses(Signal):
     """Represents silence."""
     
     def __init__(self, locations, amps=1):
-        self.locations = locations
+        self.locations = np.asanyarray(locations)
         self.amps = amps
 
     def evaluate(self, ts):

@@ -22,6 +22,7 @@ def plot_tuning(start=7.0, duration=0.006835):
     period = duration/3
     freq = 1/period
     print(period, freq)
+    assert abs(freq - 438.917337235) < 1e-7
 
     wave = thinkdsp.read_wave('18871__zippi1__sound-bell-440hz.wav')
 
@@ -45,6 +46,7 @@ def plot_violin(start=1.30245, duration=0.00683):
     period = duration/3
     freq = 1/period
     print(period, freq)
+    assert abs(freq - 439.238653001) < 1e-7
 
     wave = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
 
@@ -87,6 +89,7 @@ def segment_violin(start=1.2, duration=0.6):
     peaks = spectrum.peaks()
     for amp, freq in peaks[:10]:
         print(freq, amp)
+    assert abs(peaks[0][0] - 3762.382899) < 1e-7
 
 
 def mix_cosines():
@@ -101,8 +104,9 @@ def mix_cosines():
 
     # create a wave
     wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
-    print('Number of samples', len(wave.ys))
+    print('Number of samples', len(wave))
     print('Timestep in ms', 1.0 / 11025 * 1000)
+    assert len(wave) == 5513
 
     # select a segment
     period = mix.period
