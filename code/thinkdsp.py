@@ -283,7 +283,7 @@ class _SpectrumParent:
 
         returns: sorted list of (amplitude, frequency) pairs
         """
-        t = zip(self.amps, self.fs)
+        t = list(zip(self.amps, self.fs))
         t.sort(reverse=True)
         return t
 

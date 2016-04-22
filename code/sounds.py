@@ -103,10 +103,10 @@ def mix_cosines():
     mix = sin_sig + cos_sig
 
     # create a wave
-    wave = mix.make_wave(duration=0.5, start=0, framerate=11025)
+    wave = mix.make_wave(duration=1.0, start=0, framerate=11025)
     print('Number of samples', len(wave))
-    print('Timestep in ms', 1.0 / 11025 * 1000)
-    assert len(wave) == 5513
+    print('Timestep in ms', 1000 / wave.framerate)
+    assert len(wave) == wave.framerate
 
     # select a segment
     period = mix.period

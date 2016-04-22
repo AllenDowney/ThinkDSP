@@ -82,7 +82,7 @@ def three_spectrums():
     discontinuity(num_periods=30, hamming=False)
 
     thinkplot.subplot(2)
-    thinkplot.config(xticks=xticks)
+    thinkplot.config(xticks=xticks, xlabel='Frequency (Hz)')
     discontinuity(num_periods=30.25, hamming=False)
 
     thinkplot.subplot(3)
@@ -154,7 +154,8 @@ def chirp_spectrum():
     spectrum = wave.make_spectrum()
     spectrum.plot(high=700)
     thinkplot.save('chirp1',
-                   xlabel='Frequency (Hz)')
+                   xlabel='Frequency (Hz)',
+                   ylabel='Amplitude')
     
 
 def chirp_spectrogram():
@@ -210,7 +211,6 @@ def invert_spectrogram():
     
 def main():
     chirp_spectrum()
-    return
     chirp_spectrogram()
     overlapping_windows()
     window_plot()

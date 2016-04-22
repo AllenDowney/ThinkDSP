@@ -30,7 +30,8 @@ def triangle_example(freq):
     spectrum = wave.make_spectrum()
     spectrum.plot()
     thinkplot.save(root='triangle-%d-2' % freq,
-                   xlabel='Frequency (Hz)')
+                   xlabel='Frequency (Hz)',
+                   ylabel='Amplitude')
 
 
 def square_example(freq):
@@ -52,7 +53,8 @@ def square_example(freq):
     spectrum = wave.make_spectrum()
     spectrum.plot()
     thinkplot.save(root='square-%d-2' % freq,
-                   xlabel='Frequency (Hz)')
+                   xlabel='Frequency (Hz)',
+                   ylabel='Amplitude')
 
 
 def aliasing_example(offset=0.000003):
@@ -83,9 +85,9 @@ def aliasing_example(offset=0.000003):
 
 
 def main():
-    #triangle_example(freq=200)
-    #triangle_example(freq=1100)
-    #square_example(freq=100)
+    triangle_example(freq=200)
+    triangle_example(freq=1100)
+    square_example(freq=100)
     aliasing_example()
 
 

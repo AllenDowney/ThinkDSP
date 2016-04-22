@@ -71,7 +71,7 @@ def plot_gaussian_noise():
     thinkplot.preplot(2, cols=2)
     thinkstats2.NormalProbabilityPlot(spectrum.real, label='real')
     thinkplot.config(xlabel='Normal sample',
-                     ylabel='Power',
+                     ylabel='Amplitude',
                      ylim=[-250, 250],
                      loc='lower right')
 
