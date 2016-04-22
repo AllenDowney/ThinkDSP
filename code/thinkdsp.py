@@ -592,7 +592,7 @@ class Spectrogram:
         returns: Wave
         """
         res = []
-        for t, spectrum in sorted(self.spec_map.iteritems()):
+        for t, spectrum in sorted(self.spec_map.items()):
             wave = spectrum.make_wave()
             n = len(wave)
             
