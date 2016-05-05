@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{1.0.2}
+\newcommand{\theversion}{1.0.4}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -325,11 +325,55 @@ recommend using Anaconda or one of the other Python distributions
 that include these packages.
 \index{installation}
 
-Most exercises use Python scripts, but some also use the IPython
-notebook.  If you have not used IPython notebook before, I suggest
-you start with the documentation at
-\url{http://ipython.org/ipython-doc/stable/notebook/notebook.html}.
-\index{IPython}
+Most exercises use Python scripts, but some also use Jupyter
+notebooks.  If you have not used Jupyter before, you can read about
+it at \url{http://jupyter.org}.
+\index{Jupyter}
+
+There are three ways you can work with the Jupyter notebooks:
+
+\begin{description}
+
+\item[Run Jupyter on your computer]
+
+If you installed Anaconda, you
+  probably got Jupyter by default.  To check, start the server from
+the command line, like this:
+
+\begin{verbatim}
+$ jupyter notebook
+\end{verbatim}
+
+If it's not installed, you can install it in Anaconda like this
+
+\begin{verbatim}
+$ conda install jupyter
+\end{verbatim}
+
+When you start the server, it should launch your default web browser
+or create a new tab in an open browser window.
+
+\item[Run Jupyter on Binder]
+
+Binder is a service that runs Jupyter in a virtual machine.  If you
+follow this link, \url{http://mybinder.org/repo/AllenDowney/ThinkDSP},
+you should get a Jupyter home page with the notebooks for this book
+and the supporting data and scripts.
+
+You can run the scripts and modify them to run your own code, but the
+virtual machine you run in is temporary.  Any changes you make will
+disappear, along with the virtual machine, if you leave it idle for
+more than about an hour.
+
+\item[View notebooks on nbviewer]
+
+When we refer to notebooks later in the book, we we provide links to
+nbviewer, which provides a static view of the code and results.  You
+can use these links to read the notebooks and listen to the examples,
+but you won't be able to modify or run the code, or use the
+interactive widgets.
+
+\end{description}
 
 Good luck, and have fun!
 
@@ -369,6 +413,8 @@ along with Prof. Oscar Mur-Miranda and Prof. Siddhartan Govindasamy.
 Both made many suggestions and corrections.
 
 \item Silas Gyger corrected an arithmetic error.
+
+\item Giuseppe Masetti sent a number of very helpful suggestions.
 
 % ENDCONTRIB
 
@@ -440,10 +486,10 @@ bcjordan, rockwehrmann, marcgascon7, jcveliz.  Thank you all!
 \chapter{Sounds and signals}
 \label{sounds}
 
-A {\bf signal} represents a quantity that varies in time,
-or space, or both.  That definition is pretty abstract, so let's start
-with a concrete example: sound.  Sound is variation in air pressure.
-A sound signal represents variations in air pressure over time.
+A {\bf signal} represents a quantity that varies in time.  That
+definition is pretty abstract, so let's start with a concrete example:
+sound.  Sound is variation in air pressure.  A sound signal represents
+variations in air pressure over time.
 
 A microphone is a device that measures these variations and generates
 an electrical signal that represents sound.  A speaker is a device
@@ -579,6 +625,7 @@ musically harmonious with the fundamental:
 \begin{itemize}
 
 \item 880 is the frequency of A5, one octave higher than the fundamental.  
+An {\bf octave} is a doubling in frequency.
 
 \item 1320 is approximately E6, which is a major fifth above A5.
   If you are not familiar with musical intervals like "major fifth'', see
@@ -630,10 +677,7 @@ play back.
 {\tt offset} is a {\bf phase offset} in radians.  Phase offset
 determines where in the period the signal starts.  For example, a
 sine signal with {\tt offset=0} starts at $\sin 0$, which is 0.
-With {\tt offset=pi/2} it starts at $\sin \pi/2$, which is 1.  A cosine
-signal with {\tt offset=0} also starts at 0.  In fact, a cosine signal
-with {\tt offset=0} is identical to a sine signal with {\tt
-  offset=pi/2}.
+With {\tt offset=pi/2} it starts at $\sin \pi/2$, which is 1.
 
 Signals have an \verb"__add__" method, so you can use the {\tt +}
 operator to add them:
@@ -678,7 +722,7 @@ audio file formats, including Waveform Audio File (WAV) and mp3.
 
 This example evaluates the signal from {\tt t=0} to {\tt t=0.5} at
 5,513 equally-spaced frames (because 5,513 is half of 11,025).
-The time between frames, or {\bf timestep}, is {\tt 1/11025} seconds, or
+The time between frames, or {\bf timestep}, is {\tt 1/11025} seconds, about
 91 $\mu$s.
 
 {\tt Wave} provides a {\tt plot} method that uses {\tt pyplot}.
@@ -803,7 +847,7 @@ like, you can convert the Spectrum back to a Wave, and then play it.
 \end{verbatim}
 
 The {\tt play} method writes the wave to a file and then plays it.
-If you use IPython notebooks, you can use \verb"make_audio", which
+If you use Jupyter notebooks, you can use \verb"make_audio", which
 makes an Audio widget that plays the sound.
 
 
@@ -858,7 +902,7 @@ wave.shift(1)
 \end{verbatim} 
 
 You can read the documentation of these methods and others at
-\url{http://think-dsp.com/thinkdsp.html}.
+\url{http://greenteapress.com/thinkdsp.html}.
 
 
 \section{Signal objects}
@@ -977,7 +1021,7 @@ for this book, following the instructions in Section~\ref{code}.
 Solutions to these exercises are in {\tt chap01soln.ipynb}.
 
 \begin{exercise}
-If you have IPython, load {\tt chap01.ipynb}, read through it, and run
+If you have Jupyter, load {\tt chap01.ipynb}, read through it, and run
 the examples.  You can also view this notebook at
 \url{http://tinyurl.com/thinkdsp01}.
 \end{exercise}
@@ -1100,7 +1144,9 @@ signal.plot()
 \begin{figure}
 % aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/triangle-200-2.pdf}}
-\caption{Spectrum of a triangle signal at 200 Hz.}
+\caption{Spectrum of a triangle signal at 200 Hz, shown on two
+  vertical scales.  The version on the right cuts off the fundamental
+  to show the harmonics more clearly.}
 \label{fig.triangle.200.2}
 \end{figure}
 
@@ -1113,10 +1159,11 @@ spectrum = wave.make_spectrum()
 spectrum.plot()
 \end{verbatim}
 
-Figure~\ref{fig.triangle.200.2} shows the result.  As expected, the
-highest peak is at the fundamental frequency, 200 Hz, and there
-are additional peaks at harmonic frequencies, which are integer
-multiples of 200.
+Figure~\ref{fig.triangle.200.2} shows two views of the result; the
+view on the right is scaled to show the harmonics more clearly.  As
+expected, the highest peak is at the fundamental frequency, 200 Hz,
+and there are additional peaks at harmonic frequencies, which are
+integer multiples of 200.
 
 But one surprise is that there are no peaks at the even multiples:
 400, 800, etc.  The harmonics of a triangle wave are all
@@ -1197,7 +1244,8 @@ explore other waveforms and other harmonic structures.
 % aliasing.py
 \centerline{\includegraphics[height=2.5in]{figs/triangle-1100-2.pdf}}
 \caption{Spectrum of a triangle signal at 1100 Hz sampled at
-10,000 frames per second.}
+10,000 frames per second.  The view on the right is scaled to
+show the harmonics.}
 \label{fig.triangle.1100.2}
 \end{figure}
 
@@ -1206,9 +1254,11 @@ carefully to avoid showing you something confusing.  But now it's
 time to get confused.
 
 Figure~\ref{fig.triangle.1100.2} shows the spectrum of a triangle wave
-at 1100 Hz, sampled at 10,000 frames per second.  The harmonics
-of this wave should be at 3300, 5500, 7700, and 9900 Hz.
+at 1100 Hz, sampled at 10,000 frames per second.  Again, the view on
+the right is scaled to show the harmonics.
 
+The harmonics
+of this wave should be at 3300, 5500, 7700, and 9900 Hz.
 In the figure, there are peaks at 1100 and 3300 Hz, as expected, but
 the third peak is at 4500, not 5500 Hz.  The
 fourth peak is at 2300, not 7700 Hz.  And if you look closely, the
@@ -1241,17 +1291,18 @@ and sample them at 10,000 frames per second:
 
 \begin{figure}
 % aliasing.py
-\centerline{\includegraphics[height=2.5in]{figs/aliasing1.pdf}}
+\centerline{\includegraphics[height=3.5in]{figs/aliasing1.pdf}}
 \caption{Cosine signals at 4500 and 5500 Hz, sampled at 10,000 frames
-per second.  They are identical.}
+per second.  The signals are different, but the samples are identical.}
 \label{fig.aliasing1}
 \end{figure}
 
-Figure~\ref{fig.aliasing1} shows the result.  I plotted the
-samples using vertical lines, to make it easier to compare the
-two Waves, and I offset them slightly in time.  The problem
-should be clear: the
-the two Waves are exactly the same!
+Figure~\ref{fig.aliasing1} shows the result.  I plotted the Signals
+with thin gray lines and the samples using vertical lines,
+to make it easier to compare the
+two Waves.  The problem
+should be clear: even though the Signals are different, the
+Waves are identical!
 
 When we sample a 5500 Hz signal at 10,000 frames per second, the
 result is indistinguishable from a 4500 Hz signal.
@@ -1368,7 +1419,7 @@ spectrum.low_pass(cutoff)
 \end{verbatim}
 
 You can read the documentation of these methods and others at
-\url{http://think-dsp.com/thinkdsp.html}.
+\url{http://greenteapress.com/thinkdsp.html}.
 
 At this point you should have a better idea of how the Signal, Wave,
 and Spectrum classes work, but I have not explained how the Fast
@@ -1380,7 +1431,7 @@ Fourier Transform works.  That will take a few more chapters.
 Solutions to these exercises are in {\tt chap02soln.ipynb}.
 
 \begin{exercise}
-If you use IPython, load {\tt chap02.ipynb} and try out the examples.
+If you use Jupyter, load {\tt chap02.ipynb} and try out the examples.
 You can also view the notebook at \url{http://tinyurl.com/thinkdsp02}.
 \end{exercise}
 
@@ -1498,7 +1549,7 @@ frequency.  {\tt thinkdsp} provides a Signal called Chirp that
 makes a sinusoid that sweeps linearly through a range of
 frequencies.
 
-Here's an example what sweeps from 220 to 880 Hz, which
+Here's an example that sweeps from 220 to 880 Hz, which
 is two octaves from A3 to A5:
 
 \begin{verbatim}
@@ -1757,7 +1808,7 @@ spectrogram.
 The {\bf time resolution} of the spectrogram is the duration of the
 segments, which corresponds to the width of the cells in the
 spectrogram.  Since each segment is 512 frames, and there are 11,025
-frames per second, there are 0.046 seconds per segment.
+frames per second, the duration of each segment is about 0.046 seconds.
 
 The {\bf frequency resolution} is the frequency range between
 elements in the spectrum, which corresponds to the height of the
@@ -2305,13 +2356,15 @@ high, and vice versa.
 \begin{figure}
 % noise.py
 \centerline{\includegraphics[height=2.5in]{figs/rednoise3.pdf}}
-\caption{Spectrum of Brownian noise on a log-log scale.}
+\caption{Spectrum of Brownian noise on a linear scale (left) and
+  log-log scale (right).}
 \label{fig.rednoise3}
 \end{figure}
 
-If you plot the spectrum of Brownian noise, it doesn't look like
-much.  Nearly all of the power is at the lowest frequencies; on a
-linear scale, the higher frequency components are not visible.
+If you plot the spectrum of Brownian noise on a linear scale, as
+in Figure~\ref{fig.rednoise3} (left), it
+doesn't look like much.  Nearly all of the power is at the lowest
+frequencies; the higher frequency components are not visible.
 
 To see the shape of the spectrum more clearly, we can plot power
 and frequency on a log-log scale.  Here's the code:
@@ -2322,7 +2375,7 @@ and frequency on a log-log scale.  Here's the code:
     thinkplot.config(xscale='log', yscale='log')
 \end{verbatim}
 
-The result is in Figure~\ref{fig.rednoise3}.  The relationship between
+The result is in Figure~\ref{fig.rednoise3} (right).  The relationship between
 power and frequency is noisy, but roughly linear.
 
 {\tt Spectrum} provides \verb"estimate_slope", which uses SciPy to compute
@@ -2882,7 +2935,7 @@ periodic signals is more useful.
 As an example, I downloaded from \url{freesound.org} a recording of
 someone singing a chirp; the repository for this book includes the
 file: \url{28042__bcjordan__voicedownbew.wav}.  You can use the
-IPython notebook for this chapter, {\tt chap05.ipynb}, to play it.
+Jupyter notebook for this chapter, {\tt chap05.ipynb}, to play it.
 
 Figure~\ref{fig.autocorr5} shows the spectrogram of this wave.
 The fundamental frequency and some of the harmonics show up clearly.
@@ -3104,7 +3157,7 @@ ways to compute it.
 Solutions to these exercises are in {\tt chap05soln.ipynb}.
 
 \begin{exercise}
-The IPython notebook for this chapter, {\tt chap05.ipynb}, includes
+The Jupyter notebook for this chapter, {\tt chap05.ipynb}, includes
 an interaction that lets you compute autocorrelations for different
 lags.  Use this interaction to estimate the pitch of the vocal chirp
 for a few different start times.
@@ -3132,7 +3185,7 @@ Is there evidence of periodic behavior?
 
 
 \begin{exercise}
-In the repository for this book you will find an IPython notebook
+In the repository for this book you will find a Jupyter notebook
 called \verb"saxophone.ipynb" that explores autocorrelation,
 pitch perception, and a phenomenon called the {\bf missing fundamental}.
 Read through this notebook and run the examples.  Try selecting
@@ -3694,7 +3747,7 @@ Solutions are in {\tt chap06soln.ipynb}.
 In this chapter I claim that {\tt analyze1} takes time proportional
 to $n^3$ and {\tt analyze2} takes time proportional to $n^2$.  To
 see if that's true, run them on a range of input sizes and time
-them.  In IPython, you can use the ``magic command'' \verb"%timeit".
+them.  In Jupyter, you can use the ``magic command'' \verb"%timeit".
 
 If you plot run time versus input size on a log-log scale, you
 should get a straight line with slope 3 for  {\tt analyze1} and
@@ -3739,8 +3792,8 @@ read about at
 
 
 \begin{exercise}
-In the repository for this book you will find an IPython notebook
-called \verb"phase.ipynb" that the effect of phase on sound
+In the repository for this book you will find a Jupyter notebook
+called \verb"phase.ipynb" that explores the effect of phase on sound
 perception.
 Read through this notebook and run the examples.  
 Choose another segment of sound and run the same experiments.
