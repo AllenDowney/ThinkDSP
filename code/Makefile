@@ -36,6 +36,7 @@ autocorr6.pdf autocorr6.eps \
 autocorr7.pdf autocorr7.eps \
 autocorr8.pdf autocorr8.eps \
 autocorr9.pdf autocorr9.eps \
+dct1.pdf dct1.eps \
 dft1.pdf dft1.eps \
 dft2.pdf dft2.eps \
 dft3.pdf dft3.eps \
@@ -47,11 +48,16 @@ convolution6.pdf convolution6.eps \
 convolution7.pdf convolution7.eps \
 convolution8.pdf convolution8.eps \
 convolution9.pdf convolution9.eps \
+diff_int1.pdf diff_int1.eps \
+diff_int2.pdf diff_int2.eps \
+diff_int3.pdf diff_int3.eps \
+diff_int4.pdf diff_int4.eps \
+diff_int5.pdf diff_int5.eps \
+diff_int6.pdf diff_int6.eps \
+diff_int7.pdf diff_int7.eps \
+diff_int8.pdf diff_int8.eps \
+diff_int9.pdf diff_int9.eps \
 systems1.pdf systems1.eps \
-systems2.pdf systems2.eps \
-systems3.pdf systems3.eps \
-systems4.pdf systems4.eps \
-systems5.pdf systems5.eps \
 systems6.pdf systems6.eps \
 systems7.pdf systems7.eps \
 systems8.pdf systems8.eps \
@@ -63,6 +69,7 @@ sampling5.pdf sampling5.eps \
 sampling6.pdf sampling6.eps \
 sampling7.pdf sampling7.eps \
 sampling8.pdf sampling8.eps \
+sampling9.pdf sampling9.eps \
 
 FIGDEST = ../book/figs
 
@@ -75,7 +82,7 @@ figs:
 .PHONY: docs $(DOCPY)
 
 docs: $(DOCPY)
-	rsync -a $(DOCS) $(DEST)
+	rsync -a $(DOCS) /home/downey/public_html/greent
 	cd /home/downey/public_html/greent; sh back
 
 $(DOCPY):

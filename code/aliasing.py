@@ -28,10 +28,19 @@ def triangle_example(freq):
 
     wave = signal.make_wave(duration=0.5, framerate=framerate)
     spectrum = wave.make_spectrum()
+
+    thinkplot.preplot(cols=2)
     spectrum.plot()
-    thinkplot.save(root='triangle-%d-2' % freq,
-                   xlabel='Frequency (Hz)',
-                   ylabel='Amplitude')
+    thinkplot.config(xlabel='Frequency (Hz)',
+                     ylabel='Amplitude')
+
+    thinkplot.subplot(2)
+    spectrum.plot()
+    thinkplot.config(ylim=[0, 500],
+                     xlabel='Frequency (Hz)',
+                     ylabel='Amplitude')
+    
+    thinkplot.save(root='triangle-%d-2' % freq)
 
 
 def square_example(freq):
