@@ -51,13 +51,20 @@ def process_noise(signal, root='white'):
 
     # 3: log-log power spectrum
     spectrum.hs[0] = 0
+    thinkplot.preplot(cols=2)
     spectrum.plot_power(linewidth=1, alpha=0.5)
-    thinkplot.save(root=root+'noise3',
-                   xlabel='Frequency (Hz)',
-                   ylabel='Power',
+    thinkplot.config(xlabel='Frequency (Hz)',
+                     ylabel='Power',
+                     xlim=[0, framerate/2])
+
+    thinkplot.subplot(2)
+    spectrum.plot_power(linewidth=1, alpha=0.5)
+    thinkplot.config(xlabel='Frequency (Hz)',                  
                    xscale='log',
                    yscale='log',
                    xlim=[0, framerate/2])
+
+    thinkplot.save(root=root+'noise3')
 
 
 def plot_gaussian_noise():

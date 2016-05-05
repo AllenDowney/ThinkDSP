@@ -37,8 +37,7 @@ def triangle_example(freq):
     thinkplot.subplot(2)
     spectrum.plot()
     thinkplot.config(ylim=[0, 500],
-                     xlabel='Frequency (Hz)',
-                     ylabel='Amplitude')
+                     xlabel='Frequency (Hz)')
     
     thinkplot.save(root='triangle-%d-2' % freq)
 
@@ -70,27 +69,26 @@ def aliasing_example(offset=0.000003):
     """Makes a figure showing the effect of aliasing.
     """
     framerate = 10000
-    thinkplot.preplot(num=2)
 
-    freq1 = 4500
-    signal = thinkdsp.CosSignal(freq1)
-    duration = signal.period*5
-    segment = signal.make_wave(duration, framerate=framerate)
-    thinkplot.Hlines(0, 0, duration, color='gray')
+    def plot_segment(freq):
+        signal = thinkdsp.CosSignal(freq)
+        duration = signal.period*4
+        thinkplot.Hlines(0, 0, duration, color='gray')
+        segment = signal.make_wave(duration, framerate=framerate*10)
+        segment.plot(linewidth=0.5, color='gray')
+        segment = signal.make_wave(duration, framerate=framerate)
+        segment.plot_vlines(label=freq, linewidth=4)
 
-    segment.shift(-offset)
-    segment.plot_vlines(label=freq1, linewidth=3)
+    thinkplot.preplot(rows=2)
+    plot_segment(4500)
+    thinkplot.config(axis=[-0.00002, 0.0007, -1.05, 1.05])
 
-    freq2 = 5500
-    signal = thinkdsp.CosSignal(freq2)
-    segment = signal.make_wave(duration, framerate=framerate)
-    segment.shift(+offset)
-    segment.plot_vlines(label=freq2, linewidth=3)
+    thinkplot.subplot(2)
+    plot_segment(5500)
+    thinkplot.config(axis=[-0.00002, 0.0007, -1.05, 1.05])
 
     thinkplot.save(root='aliasing1',
-                   xlabel='Time (s)',
-                   axis=[-0.00002, duration, -1.05, 1.05]
-                   )
+                   xlabel='Time (s)')
 
 
 def main():

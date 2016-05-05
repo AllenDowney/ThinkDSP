@@ -46,7 +46,7 @@ class _Brewer(object):
     # lists that indicate which colors to use depending on how many are used
     which_colors = [[],
                     [1],
-                    [1, 3],
+                    [0, 4],
                     [0, 2, 4],
                     [0, 2, 4, 6],
                     [0, 2, 3, 5, 6],
