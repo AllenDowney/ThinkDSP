@@ -953,17 +953,27 @@ class Wave:
 
         return Spectrogram(spec_map, seg_length)
 
+    def get_xfactor(self, options):
+        try:
+            xfactor = options['xfactor']
+            options.pop('xfactor')
+        except KeyError:
+            xfactor = 1
+        return xfactor
+
     def plot(self, **options):
         """Plots the wave.
 
         """
-        thinkplot.plot(self.ts, self.ys, **options)
+        xfactor = self.get_xfactor(options)
+        thinkplot.plot(self.ts * xfactor, self.ys, **options)
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples.
 
         """
-        thinkplot.vlines(self.ts, 0, self.ys, **options)
+        xfactor = self.get_xfactor(options)
+        thinkplot.vlines(self.ts * xfactor, 0, self.ys, **options)
 
     def corr(self, other):
         """Correlation coefficient two waves.

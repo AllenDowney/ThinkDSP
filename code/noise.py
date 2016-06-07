@@ -115,9 +115,10 @@ def plot_pink_noise():
     red = make_spectrum(signal)
 
     linewidth = 2
-    white.plot_power(label='white', color='#9ecae1', linewidth=linewidth)
-    pink.plot_power(label='pink', color='#4292c6', linewidth=linewidth)
-    red.plot_power(label='red', color='#2171b5', linewidth=linewidth)
+    # colorbrewer2.org 4-class sequential OrRd
+    white.plot_power(label='white', color='#fdcc8a', linewidth=linewidth)
+    pink.plot_power(label='pink', color='#fc8d59', linewidth=linewidth)
+    red.plot_power(label='red', color='#d7301f', linewidth=linewidth)
     thinkplot.save(root='noise-triple',
                    xlabel='Frequency (Hz)',
                    ylabel='Power',

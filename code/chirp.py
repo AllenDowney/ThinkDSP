@@ -73,7 +73,7 @@ def three_spectrums():
 
     pyplot.subplots_adjust(wspace=0.3, hspace=0.4, 
                            right=0.95, left=0.1,
-                           top=0.95, bottom=0.05)
+                           top=0.95, bottom=0.1)
 
     xticks = range(0, 900, 200)
 
@@ -136,16 +136,16 @@ def chirp_spectrum():
 
     thinkplot.preplot(3, cols=3)
     duration = 0.01
-    wave.segment(0, duration).plot()
+    wave.segment(0, duration).plot(xfactor=1000)
     thinkplot.config(ylim=[-1.05, 1.05])
 
     thinkplot.subplot(2)
-    wave.segment(0.5, duration).plot()
+    wave.segment(0.5, duration).plot(xfactor=1000)
     thinkplot.config(yticklabels='invisible',
-                     xlabel='Time (s)')
+                     xlabel='Time (ms)')
 
     thinkplot.subplot(3)
-    wave.segment(0.9, duration).plot()
+    wave.segment(0.9, duration).plot(xfactor=1000)
     thinkplot.config(yticklabels='invisible')
 
     thinkplot.save('chirp3')
@@ -191,7 +191,7 @@ def overlapping_windows():
         start += n/2
 
     thinkplot.save(root='windowing3',
-                   xlabel='Time (s)',
+                   xlabel='Index',
                    axis=[0, 800, 0, 1.05])
 
 

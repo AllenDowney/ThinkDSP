@@ -309,12 +309,12 @@ def show_impulses(wave, factor, i):
     thinkplot.subplot(i)
     thinkplot.preplot(2)
     impulses = make_impulses(wave, factor)
-    impulses.segment(0, 0.001).plot_vlines(linewidth=2)
+    impulses.segment(0, 0.001).plot_vlines(linewidth=2, xfactor=1000)
     if i == 1:
         thinkplot.config(title='Impulse train',
                          ylim=[0, 1.05])
     else:
-        thinkplot.config(xlabel='Time (s)',
+        thinkplot.config(xlabel='Time (ms)',
                          ylim=[0, 1.05])
     
     thinkplot.subplot(i+1)

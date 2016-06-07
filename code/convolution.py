@@ -145,7 +145,7 @@ def plot_boxcar():
     padded = thinkdsp.zero_pad(window, len(wave))
     dft_window = np.fft.rfft(padded)
 
-    thinkplot.plot(abs(dft_window), color=GRAY, label='boxcar filter')
+    thinkplot.plot(abs(dft_window), color=GRAY, label='DFT(window)')
     thinkplot.plot(ratio, label='amplitude ratio')
 
     thinkplot.config(xlabel='Frequency (Hz)',
@@ -200,12 +200,16 @@ def plot_gaussian():
 
 
 def fft_convolve(signal, window):
+    """Computes convolution using FFT.
+    """
     fft_signal = np.fft.fft(signal)
     fft_window = np.fft.fft(window)
     return np.fft.ifft(fft_signal * fft_window)
 
 
 def fft_autocorr(signal):
+    """Computes the autocorrelation function using FFT.
+    """
     N = len(signal)
     signal = thinkdsp.zero_pad(signal, 2*N)
     window = np.flipud(signal)
@@ -219,7 +223,8 @@ def plot_fft_convolve():
     """Makes a plot showing that FFT-based convolution works.
     """
     names = ['date', 'open', 'high', 'low', 'close', 'volume']
-    df = pd.read_csv('fb.csv', header=0, names=names, parse_dates=[0])
+    df = pd.read_csv('fb.csv',
+                     header=0, names=names, parse_dates=[0])
     close = df.close.values[::-1]
 
     # compute a 30-day average using np.convolve

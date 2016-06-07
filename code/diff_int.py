@@ -52,7 +52,7 @@ def plot_sawtooth_and_spectrum(wave, root):
     spectrum = wave.make_spectrum()
     spectrum.plot()
     thinkplot.config(xlabel='Frequency (Hz)',
-                     ylabel='Amplitude',
+                     #ylabel='Amplitude',
                      xlim=[0, spectrum.fs[-1]])
 
     thinkplot.save(root)
@@ -103,8 +103,7 @@ def plot_filters(close):
 def plot_diff_deriv(close):
     change = thinkdsp.Wave(np.diff(close.ys), framerate=1)
 
-    deriv_spectrum = close.make_spectrum()
-    deriv_spectrum.differentiate()
+    deriv_spectrum = close.make_spectrum().differentiate()
     deriv = deriv_spectrum.make_wave()
 
     low, high = 0, 50
@@ -118,11 +117,9 @@ def plot_diff_deriv(close):
     
 def plot_integral(close):
 
-    deriv_spectrum = close.make_spectrum()
-    deriv_spectrum.differentiate()
+    deriv_spectrum = close.make_spectrum().differentiate()
 
-    integ_spectrum = deriv_spectrum.copy()
-    integ_spectrum.integrate()
+    integ_spectrum = deriv_spectrum.integrate()
     print(integ_spectrum.hs[0])
     integ_spectrum.hs[0] = 0
     
