@@ -934,7 +934,7 @@ class Wave:
         if win_flag:
             window = np.hamming(seg_length)
         i, j = 0, seg_length
-        step = seg_length / 2
+        step = seg_length // 2
 
         # map from time to Spectrum
         spec_map = {}
