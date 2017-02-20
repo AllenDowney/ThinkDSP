@@ -32,3 +32,9 @@ used in this book were contributed by Freesound users: iluppai,
 wcfl10, thirsk, docquesting, kleeb, landup, zippi1, themusicalnomad,
 bcjordan, rockwehrmann, marchascon7, jcveliz.  Thank you all!
 
+### Tutorial
+
+I offer a half-day tutorial based on material from _Think DSP_.
+[Information about the tutorial is here](http://allendowney.github.io/ThinkDSP/tutorial).
+
+
