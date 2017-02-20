@@ -2,7 +2,7 @@ title: ThinkDSP
 description: Digital Signal Processing in Python, by Allen B. Downey.
 google_analytics: 
 show_downloads: true
-theme: jekyll-theme-tactile
+theme: jekyll-theme-minimal
 
 gems:
   - jekyll-mentions
