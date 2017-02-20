@@ -1,22 +1,38 @@
-### Welcome to GitHub Pages.
-This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:
+## ThinkDSP
 
-```
-$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-```
+Allen B. Downey (@AllenDowney)
 
-If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.
+_Think DSP: Digital Signal Processing in Python_ is an introduction to digital signal processing
+using Python.  The premise of this book (and the other books in the _Think X_ series) is that if 
+you know how to program, you can use that skill to learn other things.  
 
-### Designer Templates
-We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.
+I wrote this book because I think the conventional
+approach to digital signal processing is backward: most books (and the classes that use them) present
+the material bottom-up, starting with mathematical abstractions like phasors.
 
-### Rather Drive Stick?
-If you prefer to not use the automatic generator, push a branch named `gh-pages` to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.
+With a programming-based approach, I can go top-down, which means I can present the most important
+ideas right away.  By the end of the first chapter, you can
+break down a sound into its harmonics, modify the harmonics, and generate new sounds.
 
-### Authors and Contributors
-You can @mention a GitHub username to generate a link to their profile. The resulting `<a>` element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (@defunkt), PJ Hyett (@pjhyett), and Tom Preston-Werner (@mojombo) founded GitHub.
+The book is under a Creative Commons license: [Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0).
+The code is under the [GNU GPLv3](http://www.gnu.org/licenses/gpl.html).
 
-### Support or Contact
-Having trouble with Pages? Check out the documentation at http://help.github.com/pages or contact support@github.com and we’ll help you sort it out.
+Other Free Books by Allen Downey are available from [Green Tea Press](http://greenteapress.com/wp/).
+
+_Think DSP_ is published by [O'Reilly Media](http://shop.oreilly.com/product/0636920044970.do).
+You can [order Think DSP from Amazon.com](http://amzn.to/1naaUCN).
+
+### Freesound
+
+Special thanks to Freesound (http://freesound.org), which is the source of many of the
+sound samples I use in this book, and to the Freesound users who
+uploaded those sounds.  I include some of their wave files in
+the GitHub repository for this book, using the original file
+names, so it should be easy to find their sources.
+
+Unfortunately, most Freesound users don't make their real names
+available, so I can only thank them by user name.  Samples
+used in this book were contributed by Freesound users: iluppai,
+wcfl10, thirsk, docquesting, kleeb, landup, zippi1, themusicalnomad,
+bcjordan, rockwehrmann, marchascon7, jcveliz.  Thank you all!
+
