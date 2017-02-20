@@ -1,7 +1,3 @@
-## ThinkDSP
-
-Allen B. Downey (@AllenDowney)
-
 _Think DSP: Digital Signal Processing in Python_ is an introduction to digital signal processing
 using Python.  The premise of this book (and the other books in the _Think X_ series) is that if 
 you know how to program, you can use that skill to learn other things.  
@@ -24,7 +20,7 @@ You can [order Think DSP from Amazon.com](http://amzn.to/1naaUCN).
 
 ### Freesound
 
-Special thanks to Freesound (http://freesound.org), which is the source of many of the
+Special thanks to [Freesound](http://freesound.org), which is the source of many of the
 sound samples I use in this book, and to the Freesound users who
 uploaded those sounds.  I include some of their wave files in
 the GitHub repository for this book, using the original file
