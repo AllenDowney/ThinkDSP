@@ -1,4 +1,4 @@
-## Introduction to Digital Signal Processing
+## Tutorial: Introduction to Digital Signal Processing
 
 _Intro to DSP_ is a half-day tutorial that uses material from _Think DSP_ to 
 introduce the fundamental ideas of Digital Signal Processing, in particular
