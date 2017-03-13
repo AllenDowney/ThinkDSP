@@ -8,6 +8,9 @@ represented equivalently in terms of time or frequency.
 
 If you don't quite understand what that means, this tutorial is for you!
 
+Important: **Please bring headphones or earbuds!**  Many of the exercises in this tutorial
+make noise.  If people don't have headphones, it's going to be chaos!
+
 ### Installation instructions
 
 To prepare for this tutorial, you have two options:
@@ -49,7 +52,7 @@ If not, the Jupyter server should print a URL you can use.  For example, when I 
     [I 10:03:20.115 NotebookApp] The Jupyter Notebook is running at: http://localhost:8888/
     [I 10:03:20.115 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
 
-In this case, the URL is [http://localhost:8888].  
+In this case, the URL is [http://localhost:8888](http://localhost:8888).  
 When you start your server, you might get a different URL.
 Whatever it is, if you paste it into a browser, you should should see a home page with a list of the
 notebooks in the repository.
