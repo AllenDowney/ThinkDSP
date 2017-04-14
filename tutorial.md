@@ -111,7 +111,7 @@ To run Think DSP with Launchbot, you must:
 * Install docker
 * Install and configure the launchbot app
 
-# Install and start Docker
+#### Install and start Docker
 
 Before you can use LaunchBot, you'll need to install [Docker for Mac](https://www.docker.com/products/docker-engine)
 
@@ -127,21 +127,21 @@ You will get the following error in Launchbot if Docker is not running:
 Cannot connect to the docker engine endpoint
 ```
 
-# Install and Configure the Launchbot App
+#### Install and Configure the Launchbot App
 
 Download and unzip LaunchBot from https://launchbot.io
 
-# Clone Think DSP
+#### Clone Think DSP
 
 Once the Launchbot app is running, you can clone the ThinkDSP repository from the list of projects on the main screen.
 
-# Launch Think DSP
+#### Launch Think DSP
 
 Once it's cloned, open it from the "Your Projects" list.  Then click "Launch".  
 
 *IMPORTANT*: The first time you build a project, Launchbot must download and build the entire image.  Since these images are often quite large, this can take several minutes.  
 
-# Get Your Jupyter Access token from the container log
+#### Get Your Jupyter Access token from the container log
 
 Jupyter password protects the Notebooks by default.  To find your password, click the "Log" button.  Scroll down until you find a line like this:
 
