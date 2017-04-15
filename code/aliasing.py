@@ -10,6 +10,7 @@ from __future__ import print_function, division
 import thinkdsp
 import thinkplot
 
+FORMATS = ['pdf', 'png']
 
 def triangle_example(freq):
     """Makes a figure showing a triangle wave.
@@ -88,7 +89,8 @@ def aliasing_example(offset=0.000003):
     thinkplot.config(axis=[-0.00002, 0.0007, -1.05, 1.05])
 
     thinkplot.save(root='aliasing1',
-                   xlabel='Time (s)')
+                   xlabel='Time (s)',
+                   formats=FORMATS)
 
 
 def main():

@@ -705,7 +705,7 @@ class Wave:
 
         other: Wave
         
-        returns: Wave
+        returns: new Wave
         """
         if self.framerate != other.framerate:
             raise ValueError('Wave.__or__: framerates do not agree')
@@ -720,9 +720,9 @@ class Wave:
         Note: this operation ignores the timestamps; the result
         has the timestamps of self.
 
-        other: Spectrum
+        other: Wave
 
-        returns: new Spectrum
+        returns: new Wave
         """
         # the spectrums have to have the same framerate and duration
         assert self.framerate == other.framerate
