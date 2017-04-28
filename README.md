@@ -12,7 +12,7 @@ With a programming-based approach, I can go top-down, which means I can present 
 ideas right away.  By the end of the first chapter, you can
 break down a sound into its harmonics, modify the harmonics, and generate new sounds.
 
-###Run the code for this book on Binder: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/AllenDowney/ThinkDSP)
+### Run the code for this book on Binder: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/AllenDowney/ThinkDSP)
 
 
 
@@ -28,7 +28,7 @@ http://creativecommons.org/licenses/by-nc-sa/3.0/
 The code is under the GNU GPL:
 GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
-###Freesound
+### Freesound
 
 Special thanks to Freesound (http://freesound.org), which is the source of many of the
 sound samples I use in this book, and to the Freesound users who
