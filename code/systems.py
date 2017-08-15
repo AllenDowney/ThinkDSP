@@ -33,7 +33,7 @@ def plot_filter():
 def read_response():
     """Reads the impulse response file and removes the initial silence.
     """
-    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = thinkdsp.read_wave('180960__kleeb__gunshot.wav')
     start = 0.26
     response = response.segment(start=start)
     response.shift(-start)
