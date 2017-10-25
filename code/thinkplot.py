@@ -527,7 +527,7 @@ def Cdf(cdf, complement=False, transform=None, **options):
         scale['yscale'] = 'log'
 
     if transform == 'gumbel':
-        xs = xp.delete(xs, 0)
+        xs = np.delete(xs, 0)
         ps = np.delete(ps, 0)
         ps = [-math.log(p) for p in ps]
         scale['yscale'] = 'log'
