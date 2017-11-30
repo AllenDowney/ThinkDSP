@@ -6,6 +6,7 @@ LABEL workdir.launchbot.io="/usr/workdir"
 LABEL 8888.port.launchbot.io="Jupyter Notebook"
 
 # Set the working directory
+USER root
 ENV WORKDIR /usr/workdir
 WORKDIR ${WORKDIR}
 COPY code ${WORKDIR}
