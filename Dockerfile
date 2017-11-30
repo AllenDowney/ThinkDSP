@@ -6,7 +6,12 @@ LABEL workdir.launchbot.io="/usr/workdir"
 LABEL 8888.port.launchbot.io="Jupyter Notebook"
 
 # Set the working directory
-WORKDIR /usr/workdir
+USER root
+ENV WORKDIR /usr/workdir
+WORKDIR ${WORKDIR}
+COPY code ${WORKDIR}
+RUN chown -R ${NB_USER} ${WORKDIR}
+USER ${NB_USER}
 
 # Expose the notebook port
 EXPOSE 8888
