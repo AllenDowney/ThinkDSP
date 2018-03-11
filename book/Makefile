@@ -25,7 +25,9 @@ all:	book.tex
 html: thinkdsp.html
 
 book-svg.tex: book.tex
-	sed 's/figs\/\([^.]*\).pdf/figs\/\1.svg/' book.tex | grep -v '\\input{section.sty}' > book-svg.tex
+	sed 's/figs\/\([^.]*\).pdf/figs\/\1.svg/' book.tex\
+		| sed 's/\\includegraphics\[.*\]/\\includegraphics/'\
+		| grep -v '\\input{section.sty}' > book-svg.tex
 
 thinkdsp.html: book-svg.tex
 	pandoc --standalone --mathjax --from=latex --to=html5 $< --output $@
