@@ -22,20 +22,13 @@ all:	book.tex
 	mv book.pdf thinkdsp.pdf
 	evince thinkdsp.pdf
 
-hevea:
-	sed 's/\(figs\/[^.]*\).\(pdf\|png\)/\1.eps/' book.tex > thinkdsp.tex
-	rm -rf html
-	mkdir html
-	hevea -O -e latexonly htmlonly thinkdsp
-# the following greps are a kludge to prevent imagen from seeing
-# the definitions in latexonly, and to avoid headers on the images
-	grep -v latexonly thinkdsp.image.tex > a; mv a thinkdsp.image.tex
-	sed s/\\\\usepackage{fancyhdr}// < thinkdsp.image.tex > a; mv a thinkdsp.image.tex
-	imagen -png thinkdsp
-	hacha thinkdsp.html
-	cp up.png next.png back.png html
-	mv index.html thinkdsp.css thinkdsp*.html  html
-	mv thinkdsp*.png *motif.gif html
+html: thinkdsp.html
+
+book-svg.tex: book.tex
+	sed 's/figs\/\([^.]*\).pdf/figs\/\1.svg/' book.tex > book-svg.tex
+
+thinkdsp.html: book-svg.tex
+	pandoc --standalone --mathjax --from=latex --to=html5 $< --output $@
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
