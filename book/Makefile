@@ -30,6 +30,11 @@ book-svg.tex: book.tex
 thinkdsp.html: book-svg.tex
 	pandoc --standalone --mathjax --from=latex --to=html5 $< --output $@
 
+epub: thinkdsp.epub
+	
+thinkdsp.epub: book-svg.tex
+	pandoc book-svg.tex --output thinkdsp.epub
+
 DEST = /home/downey/public_html/greent/thinkdsp
 
 distrib:
