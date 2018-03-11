@@ -95,19 +95,7 @@
 
 \makeatletter
 
-\renewcommand{\section}{\@startsection
-    {section} {1} {0mm}%
-    {-3.5ex \@plus -1ex \@minus -.2ex}%
-    {0.7ex \@plus.2ex}%
-    {\normalfont\Large\bfseries}}
-\renewcommand\subsection{\@startsection {subsection}{2}{0mm}%
-    {-3.25ex\@plus -1ex \@minus -.2ex}%
-    {0.3ex \@plus .2ex}%
-    {\normalfont\large\bfseries}}
-\renewcommand\subsubsection{\@startsection {subsubsection}{3}{0mm}%
-    {-3.25ex\@plus -1ex \@minus -.2ex}%
-    {0.3ex \@plus .2ex}%
-    {\normalfont\normalsize\bfseries}}
+\input{section.sty}
 
 % The following line adds a little extra space to the column
 % in which the Section numbers appear in the table of contents
