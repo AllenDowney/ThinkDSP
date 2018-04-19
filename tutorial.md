@@ -33,24 +33,30 @@ check is to run my code and see if it works.
 Code for this workshop is in a Git repository on Github.  
 If you have a Git client installed, you should be able to download it by running:
 
+```
     git clone https://github.com/AllenDowney/ThinkDSP.git
+```
 
 It should create a directory named `ThinkDSP`.
 Otherwise you can download the repository in [this zip file](https://github.com/AllenDowney/ThinkDSP/zipball/gh-pages).
 
 To start Jupyter, run:
 
+```
     cd ThinkDSP/code
     jupyter notebook
+```
 
 Jupyter should launch your default browser or open a tab in an existing browser window.
 If not, the Jupyter server should print a URL you can use.  For example, when I launch Jupyter, I get
 
+```
     ~/ThinkDSP$ jupyter notebook
     [I 10:03:20.115 NotebookApp] Serving notebooks from local directory: /home/downey/ThinkDSP
     [I 10:03:20.115 NotebookApp] 0 active kernels
     [I 10:03:20.115 NotebookApp] The Jupyter Notebook is running at: http://localhost:8888/
     [I 10:03:20.115 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+```
 
 In this case, the URL is [http://localhost:8888](http://localhost:8888).  
 When you start your server, you might get a different URL.
@@ -76,7 +82,9 @@ user-level install, it will not interfere with other Python installations.
 
 When you install Anaconda, you should get Jupyter by default, but if not, run
 
+```
     conda install jupyter
+```
 
 Then go to Option 1A to make sure you can run my code.
 
@@ -92,62 +100,12 @@ You can run my notebook in a virtual machine on Binder. To launch the VM, press 
 
 You should see a home page with a list of the notebooks in the repository.
 
-If you want to try the exercises, open 'chap01.ipynb`. If you just want to see the answers, open `chap01soln.ipynb`.
-Either way, you should be able to run the notebooks in your browser and try out the examples.  
+If you want to try the exercises, open `chap01.ipynb`. If you just want to see the answers,
+open `chap01soln.ipynb`.  Either way, you should be able to run the notebooks in your browser 
+and try out the examples.  
 
 However, be aware that the virtual machine you are running is temporary.
 If you leave it idle for more than an hour or so, it will disappear along with any work you have done.
 
 Special thanks to the generous people who run Binder, which makes it easy to share and reproduce computation.
 
-### Option 3: If you have a Mac and are willing to try something new
-
-Launchbot is a tool being developed within O'Reilly Media to make it simple to build and run Jupyter-based projects. It's basically a GUI for git, Docker, and Jupyter:
-
-<img src="https://launchbot.io/images/launchbot-client.gif"/>
-
-To run Think DSP with Launchbot, you must:
-
-* Install docker
-* Install and configure the launchbot app
-
-#### Install and start Docker
-
-Before you can use LaunchBot, you'll need to install [Docker for Mac](https://www.docker.com/products/docker-engine)
-
-Docker allows you "containerize" applications. Launchbot uses it to build and run the underlying environment required for your application to function.
-
-*IMPORTANT*: Docker must be running to use LaunchBot, so you'll need to make sure it's started each time you want to use LaunchBot.  On a Mac, you'll see the Docker "whale" icon in the Menubar.
-
-<img src="http://launchbot.io/docs/images/docker-mac-toolbar.png"/>
-
-You will get the following error in Launchbot if Docker is not running:
-
-```
-Cannot connect to the docker engine endpoint
-```
-
-#### Install and Configure the Launchbot App
-
-Download and unzip LaunchBot from https://launchbot.io
-
-#### Clone Think DSP
-
-Once the Launchbot app is running, you can clone the ThinkDSP repository from the list of projects on the main screen.
-
-#### Launch Think DSP
-
-Once it's cloned, open it from the "Your Projects" list.  Then click "Launch".  
-
-*IMPORTANT*: The first time you build a project, Launchbot must download and build the entire image.  Since these images are often quite large, this can take several minutes.  
-
-#### Get Your Jupyter Access token from the container log
-
-Jupyter password protects the Notebooks by default.  To find your password, click the "Log" button.  Scroll down until you find a line like this:
-
-```
-To login with a token:
-       http://localhost:8888/?token=00e6b380dddd53b77649f6a533a2407db1996f44b6b9e325
-```
-
-Copy just the token (in this case, `00e6b380dddd53b77649f6a533a2407db1996f44b6b9e325`) and then paste it into the prompt for the notebook.
