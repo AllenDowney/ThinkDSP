@@ -103,6 +103,6 @@ Special thanks to the generous people who run Binder, which makes it easy to sha
 
 ### Option 3
 
-You can read the notebooks on GitHub.  [The repository is here](https://github.com/AllenDowney/ThinkDSP/code).
+You can read the notebooks on GitHub.  [The repository is here](https://github.com/AllenDowney/ThinkDSP/tree/master/code).
 You should see the list of files in the repo.   Open `workshop01.ipynb` or, if you just want to see the answers, 
 open `workshop01_soln.ipynb`.
