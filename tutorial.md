@@ -86,7 +86,7 @@ package manager, or install Anaconda.
 
 You can run my notebook in a virtual machine on Binder. To launch the VM, press this button:
 
- [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org:/repo/allendowney/thinkdsp)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/AllenDowney/ThinkDSP/master)
 
 You should see a home page with a list of the notebooks in the repository.
 
