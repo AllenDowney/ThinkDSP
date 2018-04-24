@@ -90,8 +90,7 @@ You can run my notebook in a virtual machine on Binder. To launch the VM, press 
 
 You should see a home page with a list of the notebooks in the repository.
 
-If you want to try the exercises, open `chap01.ipynb`. If you just want to see the answers,
-open `chap01soln.ipynb`.  Either way, you should be able to run the notebooks in your browser 
+If you want to try the exercises, open `chap01.ipynb`. You should be able to run the notebook in your browser 
 and try out the examples.  
 
 However, be aware that the virtual machine you are running is temporary.
@@ -102,5 +101,4 @@ Special thanks to the generous people who run Binder, which makes it easy to sha
 ### Option 3
 
 You can read the notebooks on GitHub.  [The repository is here](https://github.com/AllenDowney/ThinkDSP/tree/master/code).
-You should see the list of files in the repo.   Open `workshop01.ipynb` or, if you just want to see the answers, 
-open `workshop01_soln.ipynb`.
+You should see the list of files in the repo.   Open `chap01.ipynb`.  You should be able to read the notebook, but you won't be able to run the code.
