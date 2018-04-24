@@ -13,25 +13,37 @@ make noise.  If people don't have headphones, it's going to be chaos!
 
 ### Installation instructions
 
-To prepare for this tutorial, you have two options:
+To prepare for this tutorial, you have these options:
 
-1. Install Jupyter on your laptop and download my code from Git.
+1) Install Jupyter on your laptop and download my code from Git.
 
-2. Run the Jupyter notebook on a virtual machine on Binder.
+2) Run the Jupyter notebook on a virtual machine on Binder.
+This is the easiest option, with one drawback: the virtual machine you get is temporary;
+any work you do during the tutorial will be lost.
 
-I'll provide instructions for both, but here's the catch: if everyone chooses Option 2,
-the wireless network will fail and no one will be able to do the hands-on part of the workshop.
+3) Just read the notebooks on GitHub.
 
-So, I strongly encourage you to try Option 1 and only resort to Option 2 if you can't get Option 1 working.
+Option 1 is the best choice if you are able to do it ahead of time, because it does not depend on the network at the conference.  Option 2 depends on network performance, which is unpredictable.  Option 3 is easy and reliable,
+but you will only be able to read the notebooks; you won't be able to run the code or do the exercises.
 
-### Option 1A: If you already have Jupyter installed.
+Here are instructions for each option.
 
-To do the exercises, you need Python 2 or 3 with NumPy, SciPy, and matplotlib.
-If you are not sure whether you have those modules already, the easiest way to
-check is to run my code and see if it works.
+### Option 1
 
-Code for this workshop is in a Git repository on Github.  
-If you have a Git client installed, you should be able to download it by running:
+If you don't already have Jupyter, I highly recommend installing Anaconda, which is a Python distribution that contains everything you need for the workshop.  It is easy to install on Windows, Mac, and Linux, and because it does a
+user-level install, it will not interfere with other Python installations.
+
+[Information about installing Anaconda is here](http://docs.continuum.io/anaconda/install.html).
+
+When you install Anaconda, you should get Jupyter by default, but if not, run
+
+```
+    conda install jupyter
+```
+
+Then go to Option 1A to make sure you can run my code.
+
+Once you have Jupyter, you can get my code from  this Git repository on Github.  If you have a Git client installed, you should be able to download it by running:
 
 ```
     git clone https://github.com/AllenDowney/ThinkDSP.git
@@ -72,27 +84,7 @@ If you get error messages about missing packages, you can install the packages y
 package manager, or try Option 1B and install Anaconda.
 
 
-### Option 1B: If you don't already have Jupyter.
-
-I highly recommend installing Anaconda, which is a Python distribution that contains everything
-you need for the workshop.  It is easy to install on Windows, Mac, and Linux, and because it does a
-user-level install, it will not interfere with other Python installations.
-
-[Information about installing Anaconda is here](http://docs.continuum.io/anaconda/install.html).
-
-When you install Anaconda, you should get Jupyter by default, but if not, run
-
-```
-    conda install jupyter
-```
-
-Then go to Option 1A to make sure you can run my code.
-
-If you don't want to install Anaconda,
-[you can see some other options here](http://jupyter.readthedocs.io/en/latest/install.html).
-
-
-### Option 2: only if Option 1 failed.
+### Option 2
 
 You can run my notebook in a virtual machine on Binder. To launch the VM, press this button:
 
@@ -109,3 +101,8 @@ If you leave it idle for more than an hour or so, it will disappear along with a
 
 Special thanks to the generous people who run Binder, which makes it easy to share and reproduce computation.
 
+### Option 3
+
+You can read the notebooks on GitHub.  [The repository is here](https://github.com/AllenDowney/ThinkDSP/code).
+You should see the list of files in the repo.   Open `workshop01.ipynb` or, if you just want to see the answers, 
+open `workshop01_soln.ipynb`.
