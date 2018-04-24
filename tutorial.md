@@ -41,8 +41,6 @@ When you install Anaconda, you should get Jupyter by default, but if not, run
     conda install jupyter
 ```
 
-Then go to Option 1A to make sure you can run my code.
-
 Once you have Jupyter, you can get my code from  this Git repository on Github.  If you have a Git client installed, you should be able to download it by running:
 
 ```
@@ -81,7 +79,7 @@ Select the cell with the import statements and press "Shift-Enter" to run the co
 If it works and you get no error messages, **you are all set**.  
 
 If you get error messages about missing packages, you can install the packages you need using your
-package manager, or try Option 1B and install Anaconda.
+package manager, or install Anaconda.
 
 
 ### Option 2
