@@ -48,7 +48,7 @@ Once you have Jupyter, you can get my code from  this Git repository on Github. 
 ```
 
 It should create a directory named `ThinkDSP`.
-Otherwise you can download the repository in [this zip file](https://github.com/AllenDowney/ThinkDSP/zipball/gh-pages).
+Otherwise you can download the repository in [this zip file](https://github.com/AllenDowney/ThinkDSP/archive/master.zip).
 
 To start Jupyter, run:
 
