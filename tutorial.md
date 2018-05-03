@@ -48,12 +48,31 @@ Once you have Jupyter, you can get my code from  this Git repository on Github. 
 ```
 
 It should create a directory named `ThinkDSP`.
-Otherwise you can download the repository in [this zip file](https://github.com/AllenDowney/ThinkDSP/archive/master.zip).
+Otherwise you can download the repository in [this zip file](https://github.com/AllenDowney/ThinkDSP/archive/master.zip) and unzip it.
+
+Then cd into the new directory:
+
+```
+    cd ThinkDSP
+```
+
+To make sure you have the packages you need, you can use `environment.yml`
+to create a Conda environment named `thinkdsp`
+
+```
+   conda env create -f environment.yml
+```
+
+Then activate the new environment
+
+ ```
+   conda activate thinkdsp
+```
 
 To start Jupyter, run:
 
 ```
-    cd ThinkDSP/code
+    cd code
     jupyter notebook
 ```
 
