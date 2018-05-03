@@ -1,0 +1,12 @@
+name: thinkdsp
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python=3.*
+- matplotlib
+- numpy
+- jupyter
+- ipykernel
+- scipy
+- pandas
