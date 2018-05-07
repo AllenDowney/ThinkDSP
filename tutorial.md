@@ -41,6 +41,8 @@ When you install Anaconda, you should get Jupyter by default, but if not, run
     conda install jupyter
 ```
 
+The code for the tutorial works in Python 2 and Python 3, but I recommend Python 3.
+
 Once you have Jupyter, you can get my code from  this Git repository on Github.  If you have a Git client installed, you should be able to download it by running:
 
 ```
