@@ -401,7 +401,7 @@ class Spectrum(_SpectrumParent):
         self.hs /= denom
 
     def differentiate(self):
-        """Apply the differentiation filter.
+        """Apply the time-differentiation filter.
 
         returns: new Spectrum
         """
@@ -410,7 +410,7 @@ class Spectrum(_SpectrumParent):
         return new
 
     def integrate(self):
-        """Apply the integration filter.
+        """Apply the time-integration filter.
 
         returns: new Spectrum
         """
