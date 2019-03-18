@@ -11,7 +11,7 @@ import math
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas
+import pandas as pd
 
 import warnings
 
@@ -232,7 +232,7 @@ def Plot(obj, ys=None, style='', **options):
     if ys is None:
         if hasattr(obj, 'Render'):
             xs, ys = obj.Render()
-        if isinstance(obj, pandas.Series):
+        if isinstance(obj, pd.Series):
             ys = obj.values
             xs = obj.index
 
@@ -268,6 +268,41 @@ def Hlines(ys, x1, x2, **options):
     options = _UnderrideColor(options)
     options = _Underride(options, linewidth=1, alpha=0.5)
     plt.hlines(ys, x1, x2, **options)
+
+
+def axvline(x, **options):
+    """Plots a vertical line.
+
+    Args:
+      x: x location
+      options: keyword args passed to plt.axvline
+    """
+    options = _UnderrideColor(options)
+    options = _Underride(options, linewidth=1, alpha=0.5)
+    plt.axvline(x, **options)
+
+
+def axhline(y, **options):
+    """Plots a horizontal line.
+
+    Args:
+      y: y location
+      options: keyword args passed to plt.axhline
+    """
+    options = _UnderrideColor(options)
+    options = _Underride(options, linewidth=1, alpha=0.5)
+    plt.axhline(y, **options)
+
+
+def tight_layout(**options):
+    """Adjust subplots to minimize padding and margins.
+    """
+    options = _Underride(options,
+                         wspace=0.1, hspace=0.1,
+                         left=0, right=1,
+                         bottom=0, top=1)
+    plt.tight_layout()
+    plt.subplots_adjust(**options)
 
 
 def FillBetween(xs, y1, y2=None, where=None, **options):
@@ -308,7 +343,7 @@ def Scatter(xs, ys=None, **options):
     options = _Underride(options, color='blue', alpha=0.2,
                          s=30, edgecolors='none')
 
-    if ys is None and isinstance(xs, pandas.Series):
+    if ys is None and isinstance(xs, pd.Series):
         ys = xs.values
         xs = xs.index
 
@@ -680,6 +715,39 @@ def Config(**options):
             labels = ax.get_yticklabels()
             plt.setp(labels, visible=False)
 
+def set_font_size(title_size=16, label_size=16, ticklabel_size=14, legend_size=14):
+    """Set font sizes for the title, labels, ticklabels, and legend.
+    """
+    def set_text_size(texts, size):
+        for text in texts:
+            text.set_size(size)
+
+    ax = plt.gca()
+
+    # TODO: Make this function more robust if any of these elements
+    # is missing.
+
+    # title
+    ax.title.set_size(title_size)
+
+    # x axis
+    ax.xaxis.label.set_size(label_size)
+    set_text_size(ax.xaxis.get_ticklabels(), ticklabel_size)
+
+    # y axis
+    ax.yaxis.label.set_size(label_size)
+    set_text_size(ax.yaxis.get_ticklabels(), ticklabel_size)
+
+    # legend
+    legend = ax.get_legend()
+    if legend is not None:
+        set_text_size(legend.texts, legend_size)
+
+
+def bigger_text():
+    sizes = dict(title_size=16, label_size=16, ticklabel_size=14, legend_size=14)
+    set_font_size(**sizes)
+
 
 def Show(**options):
     """Shows the plot.
@@ -716,6 +784,10 @@ def Save(root=None, formats=None, **options):
 
     For options, see Config.
 
+    Note: With a capital S, this is the original save, maintained for
+    compatibility.  New code should use save(), which works better
+    with my newer code, especially in Jupyter notebooks.
+
     Args:
       root: string filename root
       formats: list of string formats
@@ -728,6 +800,8 @@ def Save(root=None, formats=None, **options):
         if option in options:
             save_options[option] = options.pop(option)
 
+    # TODO: falling Config inside Save was probably a mistake, but removing
+    # it will require some work
     Config(**options)
 
     if formats is None:
@@ -744,6 +818,29 @@ def Save(root=None, formats=None, **options):
             SaveFormat(root, fmt, **save_options)
     if clf:
         Clf()
+
+
+def save(root, formats=None, **options):
+    """Saves the plot in the given formats and clears the figure.
+
+    For options, see plt.savefig.
+
+    Args:
+      root: string filename root
+      formats: list of string formats
+      options: keyword args passed to plt.savefig
+    """
+    if formats is None:
+        formats = ['pdf', 'png']
+
+    try:
+        formats.remove('plotly')
+        Plotly(clf=False)
+    except ValueError:
+        pass
+
+    for fmt in formats:
+        SaveFormat(root, fmt, **options)
 
 
 def SaveFormat(root, fmt='eps', **options):
@@ -781,7 +878,6 @@ contour = Contour
 pcolor = Pcolor
 config = Config
 show = Show
-save = Save
 
 
 def main():
