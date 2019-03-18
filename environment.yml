@@ -1,4 +1,5 @@
 name: ThinkDSP
+
 dependencies:
   - python>=3.6
   - numpy
@@ -6,4 +7,3 @@ dependencies:
   - pandas
   - scipy
   - jupyter
-  - ipython
