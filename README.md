@@ -40,7 +40,7 @@ It takes a minute or so to start up, but then you should see the Jupyter home pa
 First, download the files from this repository.  If you are a Git user, you can run
 
 ```
-git clone --depth 1 https://github.com/AllenDowney/ThinkComplexity2.git
+git clone --depth 1 https://github.com/AllenDowney/ThinkDSP.git
 ```
 
 Otherwise you can [download this Zip file](https://github.com/AllenDowney/ThinkDSP/archive/master.zip) and unzip it.
