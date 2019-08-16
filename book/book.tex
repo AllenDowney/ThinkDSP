@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{1.0.4}
+\newcommand{\theversion}{1.0.5}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -298,7 +298,7 @@ all the packages you'll need to run the code (and lots more).
 I found Anaconda easy to install.  By default it does a user-level
 installation, not system-level, so you don't need administrative
 privileges.  And it supports both Python 2 and Python 3.  You can
-download Anaconda from \url{http://continuum.io/downloads}.
+download Anaconda from \url{https://www.anaconda.com/distribution/}.
 \index{Anaconda}
 
 If you don't want to use Anaconda, you will need the following
@@ -4141,7 +4141,7 @@ second interpretation, we can see what happens when we multiply
 a complex amplitude by a complex sinusoid.  For each frequency, $f$,
 we have:
 %
-\[ A e^{i \phi_0} \cdot e^{i 2 \pi f t} = A e^{i 2 \pi f t + \phi_0} \]
+\[ A \exp{i \phi_0} \cdot \exp{i 2 \pi f t} = A \exp{i (2 \pi f t + \phi_0)} \]
 %
 Multiplying by $A e^{i \phi_0}$ multiplies the amplitude by $A$
 and adds the phase offset $\phi_0$.
@@ -5649,17 +5649,10 @@ differentiation).
 
 \section{Exercises}
 
+The notebook for this chapter is {\tt chap09.ipynb}.
+You might want to read through it and run the code.
+
 Solutions to these exercises are in {\tt chap09soln.ipynb}.
-
-\begin{exercise}
-The notebook for this chapter is {\tt chap08.ipynb}.
-Read through it and run the code.
-
-In Section~\ref{cumsum}, I mentioned that some of the
-examples don't work with non-periodic signals.  Try replacing the
-sawtooth wave, which is periodic, with the Facebook data, which is
-not, and see what goes wrong.
-\end{exercise}
 
 \begin{exercise}
 The goal of this exercise is to explore the effect of {\tt diff} and
