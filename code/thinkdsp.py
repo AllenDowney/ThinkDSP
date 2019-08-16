@@ -206,7 +206,7 @@ class _SpectrumParent:
         """The ratio of two spectrums.
 
         denom: Spectrum
-        thresh: values smaller than this are replaced 
+        thresh: values smaller than this are replaced
         val: with this value
 
         returns: new Wave
@@ -327,7 +327,7 @@ class Spectrum(_SpectrumParent):
         """Convolves two Spectrums.
 
         other: Spectrum
-        
+
         returns: Spectrum
         """
         assert all(self.fs == other.fs)
@@ -458,7 +458,7 @@ class IntegratedSpectrum:
     def plot_power(self, low=0, high=None, expo=False, **options):
         """Plots the integrated spectrum.
 
-        low: int index to start at 
+        low: int index to start at
         high: int index to end at
         """
         cs = self.cs[low:high]
@@ -707,7 +707,7 @@ class Wave:
         """Concatenates two waves.
 
         other: Wave
-        
+
         returns: new Wave
         """
         if self.framerate != other.framerate:
@@ -754,7 +754,7 @@ class Wave:
         has the timestamps of self.
 
         other: Wave or NumPy array
-        
+
         returns: Wave
         """
         if isinstance(other, Wave):
@@ -1258,7 +1258,7 @@ class SumSignal(Signal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1293,7 +1293,7 @@ class Sinusoid(Signal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1308,7 +1308,7 @@ def CosSignal(freq=440, amp=1.0, offset=0):
     freq: float frequency in Hz
     amp: float amplitude, 1.0 is nominal max
     offset: float phase offset in radians
-    
+
     returns: Sinusoid object
     """
     return Sinusoid(freq, amp, offset, func=np.cos)
@@ -1320,7 +1320,7 @@ def SinSignal(freq=440, amp=1.0, offset=0):
     freq: float frequency in Hz
     amp: float amplitude, 1.0 is nominal max
     offset: float phase offset in radians
-    
+
     returns: Sinusoid object
     """
     return Sinusoid(freq, amp, offset, func=np.sin)
@@ -1332,7 +1332,7 @@ def Sinc(freq=440, amp=1.0, offset=0):
     freq: float frequency in Hz
     amp: float amplitude, 1.0 is nominal max
     offset: float phase offset in radians
-    
+
     returns: Sinusoid object
     """
     return Sinusoid(freq, amp, offset, func=np.sinc)
@@ -1345,7 +1345,7 @@ class ComplexSinusoid(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1361,7 +1361,7 @@ class SquareSignal(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1378,7 +1378,7 @@ class SawtoothSignal(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1395,7 +1395,7 @@ class ParabolicSignal(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1413,7 +1413,7 @@ class CubicSignal(ParabolicSignal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ys = ParabolicSignal.evaluate(self, ts)
@@ -1429,7 +1429,7 @@ class GlottalSignal(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1447,7 +1447,7 @@ class TriangleSignal(Sinusoid):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ts = np.asarray(ts)
@@ -1484,7 +1484,7 @@ class Chirp(Signal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         freqs = np.linspace(self.start, self.end, len(ts) - 1)
@@ -1511,7 +1511,7 @@ class ExpoChirp(Chirp):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         start, end = np.log10(self.start), np.log10(self.end)
@@ -1526,7 +1526,7 @@ class SilentSignal(Signal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         return np.zeros(len(ts))
@@ -1543,7 +1543,7 @@ class Impulses(Signal):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ys = np.zeros(len(ts))
@@ -1578,7 +1578,7 @@ class UncorrelatedUniformNoise(_Noise):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ys = np.random.uniform(-self.amp, self.amp, len(ts))
@@ -1592,7 +1592,7 @@ class UncorrelatedGaussianNoise(_Noise):
         """Evaluates the signal at the given times.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         ys = np.random.normal(0, self.amp, len(ts))
@@ -1609,7 +1609,7 @@ class BrownianNoise(_Noise):
         a uniform random series.
 
         ts: float array of times
-        
+
         returns: float wave array
         """
         dys = np.random.uniform(-1, 1, len(ts))
@@ -1701,7 +1701,7 @@ def midi_to_freq(midi_num):
     """Converts MIDI note number to frequency.
 
     midi_num: int MIDI note number
-    
+
     returns: float frequency in Hz
     """
     x = (midi_num - 69) / 12.0
