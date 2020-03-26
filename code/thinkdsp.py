@@ -5,9 +5,6 @@ Copyright 2013 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
-from __future__ import print_function, division
-
-import array
 import copy
 import math
 
@@ -16,15 +13,13 @@ import random
 import scipy
 import scipy.stats
 import scipy.fftpack
-import struct
 import subprocess
-import thinkplot
 import warnings
 
 from fractions import gcd
 from wave import open as open_wave
 
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as plt
 
 try:
     from IPython.display import Audio
@@ -252,10 +247,10 @@ class _SpectrumParent:
         """
         if self.full:
             fs, amps = self.render_full(high)
-            thinkplot.plot(fs, amps, **options)
+            plt.plot(fs, amps, **options)
         else:
             i = None if high is None else find_index(high, self.fs)
-            thinkplot.plot(self.fs[:i], self.amps[:i], **options)
+            plt.plot(self.fs[:i], self.amps[:i], **options)
 
     def plot_power(self, high=None, **options):
         """Plots power vs frequency.
@@ -264,10 +259,10 @@ class _SpectrumParent:
         """
         if self.full:
             fs, amps = self.render_full(high)
-            thinkplot.plot(fs, amps ** 2, **options)
+            plt.plot(fs, amps ** 2, **options)
         else:
             i = None if high is None else find_index(high, self.fs)
-            thinkplot.plot(self.fs[:i], self.power[:i], **options)
+            plt.plot(self.fs[:i], self.power[:i], **options)
 
     def estimate_slope(self):
         """Runs linear regression on log power vs log frequency.
@@ -467,7 +462,7 @@ class IntegratedSpectrum:
         if expo:
             cs = np.exp(cs)
 
-        thinkplot.plot(fs, cs, **options)
+        plt.plot(fs, cs, **options)
 
     def estimate_slope(self, low=1, high=-12000):
         """Runs linear regression on log cumulative power vs log frequency.
@@ -585,7 +580,7 @@ class Spectrogram:
             spectrum = self.spec_map[t]
             array[:, j] = spectrum.amps[:i]
 
-        thinkplot.pcolor(ts, fs, array, **options)
+        plt.pcolor(ts, fs, array, **options)
 
     def make_wave(self):
         """Inverts the spectrogram and returns a Wave.
@@ -969,14 +964,14 @@ class Wave:
 
         """
         xfactor = self.get_xfactor(options)
-        thinkplot.plot(self.ts * xfactor, self.ys, **options)
+        plt.plot(self.ts * xfactor, self.ys, **options)
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples.
 
         """
         xfactor = self.get_xfactor(options)
-        thinkplot.vlines(self.ts * xfactor, 0, self.ys, **options)
+        plt.vlines(self.ts * xfactor, 0, self.ys, **options)
 
     def corr(self, other):
         """Correlation coefficient two waves.
@@ -1760,6 +1755,81 @@ def zero_pad(array, n):
     return res
 
 
+def decorate(**options):
+    """Decorate the current axes.
+
+    Call decorate with keyword arguments like
+
+    decorate(title='Title',
+             xlabel='x',
+             ylabel='y')
+
+    The keyword arguments can be any of the axis properties
+
+    https://matplotlib.org/api/axes_api.html
+
+    In addition, you can use `legend=False` to suppress the legend.
+
+    And you can use `loc` to indicate the location of the legend
+    (the default value is 'best')
+    """
+    loc = options.pop("loc", "best")
+    if options.pop("legend", True):
+        legend(loc=loc)
+
+    plt.gca().set(**options)
+    plt.tight_layout()
+
+
+def legend(**options):
+    """Draws a legend only if there is at least one labeled item.
+
+    options are passed to plt.legend()
+    https://matplotlib.org/api/_as_gen/matplotlib.plt.legend.html
+
+    """
+    underride(options, loc="best", frameon=False)
+
+    ax = plt.gca()
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend(handles, labels, **options)
+
+
+def remove_from_legend(bad_labels):
+    """Removes some labels from the legend.
+
+    bad_labels: sequence of strings
+    """
+    ax = plt.gca()
+    handles, labels = ax.get_legend_handles_labels()
+    handle_list, label_list = [], []
+    for handle, label in zip(handles, labels):
+        if label not in bad_labels:
+            handle_list.append(handle)
+            label_list.append(label)
+    ax.legend(handle_list, label_list)
+
+
+def underride(d, **options):
+    """Add key-value pairs to d only if key is not in d.
+
+    If d is None, create a new dictionary.
+
+    d: dictionary
+    options: keyword args to add to d
+    """
+    if d is None:
+        d = {}
+
+    for key, val in options.items():
+        d.setdefault(key, val)
+
+    return d
+
+
+
+
 def main():
 
     cos_basis = cos_wave(440)
@@ -1790,7 +1860,7 @@ def main():
 
     signal = GlottalSignal(440)
     signal.plot()
-    pyplot.show()
+    plt.show()
     return
 
     wfile = WavFileWriter()
