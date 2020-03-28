@@ -580,6 +580,7 @@ class Spectrogram:
             spectrum = self.spec_map[t]
             array[:, j] = spectrum.amps[:i]
 
+        underride(options, cmap='inferno_r')
         plt.pcolor(ts, fs, array, **options)
 
     def make_wave(self):
@@ -1547,7 +1548,7 @@ class Impulses(Signal):
         return ys
 
 
-class _Noise(Signal):
+class Noise(Signal):
     """Represents a noise signal (abstract parent class)."""
 
     def __init__(self, amp=1.0):
@@ -1566,7 +1567,7 @@ class _Noise(Signal):
         return ValueError("Non-periodic signal.")
 
 
-class UncorrelatedUniformNoise(_Noise):
+class UncorrelatedUniformNoise(Noise):
     """Represents uncorrelated uniform noise."""
 
     def evaluate(self, ts):
@@ -1580,7 +1581,7 @@ class UncorrelatedUniformNoise(_Noise):
         return ys
 
 
-class UncorrelatedGaussianNoise(_Noise):
+class UncorrelatedGaussianNoise(Noise):
     """Represents uncorrelated gaussian noise."""
 
     def evaluate(self, ts):
@@ -1594,7 +1595,7 @@ class UncorrelatedGaussianNoise(_Noise):
         return ys
 
 
-class BrownianNoise(_Noise):
+class BrownianNoise(Noise):
     """Represents Brownian noise, aka red noise."""
 
     def evaluate(self, ts):
@@ -1614,7 +1615,7 @@ class BrownianNoise(_Noise):
         return ys
 
 
-class PinkNoise(_Noise):
+class PinkNoise(Noise):
     """Represents Brownian noise, aka red noise."""
 
     def __init__(self, amp=1.0, beta=1.0):
