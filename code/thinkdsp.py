@@ -411,7 +411,9 @@ class Spectrum(_SpectrumParent):
         returns: new Spectrum
         """
         new = self.copy()
-        new.hs /= PI2 * 1j * new.fs
+        zero = (new.fs == 0)
+        new.hs[~zero] /= PI2 * 1j * new.fs[~zero]
+        new.hs[zero] = np.inf
         return new
 
     def make_integrated_spectrum(self):
@@ -899,6 +901,9 @@ class Wave:
 
     def make_spectrum(self, full=False):
         """Computes the spectrum using FFT.
+
+        full: boolean, whethere to compute a full FFT
+              (as opposed to a real FFT)
 
         returns: Spectrum
         """
