@@ -18,6 +18,7 @@ import warnings
 
 from fractions import gcd
 from wave import open as open_wave
+from scipy.io import wavfile
 
 import matplotlib.pyplot as plt
 
@@ -118,6 +119,27 @@ def read_wave(filename="sound.wav"):
     # if it's in stereo, just pull out the first channel
     if nchannels == 2:
         ys = ys[::2]
+
+    # ts = np.arange(len(ys)) / framerate
+    wave = Wave(ys, framerate=framerate)
+    wave.normalize()
+    return wave
+
+
+def read_wave_with_scipy(filename):
+    """Reads a wave file.
+
+    filename: string
+
+    returns: Wave
+    """
+    # TODO: Check back later and see if this works on 24-bit data,
+    # and runs without throwing warnings.
+    framerate, ys = wavfile.read(filename)
+
+    # if it's in stereo, just pull out the first channel
+    if ys.ndim == 2:
+        ys = ys[:, 0]
 
     # ts = np.arange(len(ys)) / framerate
     wave = Wave(ys, framerate=framerate)
@@ -968,9 +990,11 @@ class Wave:
     def plot(self, **options):
         """Plots the wave.
 
+        If the ys are complex, plots the real part.
+
         """
         xfactor = self.get_xfactor(options)
-        plt.plot(self.ts * xfactor, self.ys, **options)
+        plt.plot(self.ts * xfactor, np.real(self.ys), **options)
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples.
