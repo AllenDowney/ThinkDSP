@@ -25,8 +25,37 @@ The following two sections explain these options in detail.
 
 Note: I have heard from a few people who tried to run the code in Spyder.  Apparently there were problems, so I don't recommend it.
 
+### Option 1: Run on Colab
 
-### Option 1: Run on Binder
+I have recently updated most of the notebooks in this repository so they run on Colab.
+
+You can open any of them by clicking on the links below.  If you want to modify and save any of them, you can use Colab to save a copy in a Google Drive, your own GitHub repo, and other options.
+
+* [chap01.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01.ipynb)
+* [chap01soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01soln.ipynb)
+* [chap02.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap02.ipynb)
+* [chap02soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap02soln.ipynb)
+* [chap03.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap03.ipynb)
+* [chap03soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap03soln.ipynb)
+* [chap04.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap04.ipynb)
+* [chap04soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap04soln.ipynb)
+* [chap05.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap05.ipynb)
+* [chap05soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap05soln.ipynb)
+* [chap06.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap06.ipynb)
+* [chap06soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap06soln.ipynb)
+* [chap07.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap07.ipynb)
+* [chap07soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap07soln.ipynb)
+* [chap08.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap08.ipynb)
+* [chap08soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap08soln.ipynb)
+* [chap09.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap09.ipynb)
+* [chap09soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap09soln.ipynb)
+* [chap10.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10.ipynb)
+* [chap10soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10soln.ipynb)
+* [chap11.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap11.ipynb)
+* [chap11soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap11soln.ipynb)
+
+
+### Option 2: Run on Binder
 
 To run the code for this book on Binder, press this button:
 
@@ -35,7 +64,7 @@ To run the code for this book on Binder, press this button:
 It takes a minute or so to start up, but then you should see the Jupyter home page with a list of files.  Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
 
-### Option 2: Install Python+Jupyter
+### Option 3: Install Python+Jupyter
 
 First, download the files from this repository.  If you are a Git user, you can run
 
