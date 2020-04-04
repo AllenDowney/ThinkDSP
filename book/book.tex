@@ -31,7 +31,7 @@
 \author{Allen B. Downey}
 
 \newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{1.0.5}
+\newcommand{\theversion}{1.1.0}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -811,12 +811,9 @@ And {\tt Spectrum} provides {\tt plot}:
 
 \begin{verbatim}
     spectrum.plot()
-    thinkplot.show()
 \end{verbatim}
 
-{\tt thinkplot} is a module I wrote to provide wrappers around some of
-the functions in {\tt pyplot}.  It is included in the
-Git repository for this book (see Section~\ref{code}).
+%{\tt thinkplot} is a module I wrote to provide wrappers around some of the functions in {\tt pyplot}.  It is included in the Git repository for this book (see Section~\ref{code}).
 
 {\tt Spectrum} provides three methods that modify the spectrum:
 
@@ -2375,8 +2372,10 @@ and frequency on a log-log scale.  Here's the code:
 \begin{verbatim}
     spectrum = wave.make_spectrum()
     spectrum.plot_power(linewidth=1, alpha=0.5)
-    thinkplot.config(xscale='log', yscale='log')
+    plt.xscale('log')
+    plt.yscale('log')
 \end{verbatim}
+
 
 The result is in Figure~\ref{fig.rednoise3} (right).  The relationship between
 power and frequency is noisy, but roughly linear.
@@ -2993,8 +2992,9 @@ To show why that works, I'll plot two segments from the same
 recording.
 
 \begin{verbatim}
+import matplotlib.pyplot as plt
+
 def plot_shifted(wave, offset=0.001, start=0.2):
-    thinkplot.preplot(2)
     segment1 = wave.segment(start=start, duration=0.01)
     segment1.plot(linewidth=2, alpha=0.8)
 
@@ -3004,9 +3004,9 @@ def plot_shifted(wave, offset=0.001, start=0.2):
 
     corr = segment1.corr(segment2)
     text = r'$\rho =$ %.2g' % corr
-    thinkplot.text(segment1.start+0.0005, -0.8, text)
-    thinkplot.config(xlabel='Time (s)')
-\end{verbatim} 
+    plt.text(segment1.start+0.0005, -0.8, text)
+    plt.xlabel('Time (s)')
+\end{verbatim}
 
 One segment starts at 0.2 seconds; the other starts 0.0023 seconds
 later.  Figure~\ref{fig.autocorr7} shows the result.  The segments
@@ -3026,7 +3026,7 @@ the process, we can use the autocorrelation function.
 
 \begin{verbatim}
     lags, corrs = autocorr(segment)
-    thinkplot.plot(lags, corrs)
+    plt.plot(lags, corrs)
 \end{verbatim}
 
 Figure~\ref{fig.autocorr8} shows the autocorrelation function for
@@ -4074,8 +4074,8 @@ signal into its real and imaginary parts:
 
 \begin{verbatim}
     n = 500
-    thinkplot.plot(ts[:n], ys[:n].real, label='real')
-    thinkplot.plot(ts[:n], ys[:n].imag, label='imag')
+    plt.plot(ts[:n], ys[:n].real, label='real')
+    plt.plot(ts[:n], ys[:n].imag, label='imag')
 \end{verbatim}
 
 Figure~\ref{fig.dft1} shows a segment of the result.  The
@@ -4162,8 +4162,8 @@ $\phi_0 = 1.5$ for all frequency components:
     amps2 = amps * np.exp(1j * phi)
     ys2 = synthesize2(amps2, fs, ts)
 
-    thinkplot.plot(ts[:n], ys.real[:n])
-    thinkplot.plot(ts[:n], ys2.real[:n])
+    plt.plot(ts[:n], ys.real[:n])
+    plt.plot(ts[:n], ys2.real[:n])
 \end{verbatim}
 
 Since {\tt amps}
@@ -4484,9 +4484,7 @@ With this change, the range of frequencies is from 0 to the actual
 framerate, 10 kHz.  Now we can plot the spectrum:
 
 \begin{verbatim}
-    thinkplot.plot(fs, amps)
-    thinkplot.config(xlabel='frequency (Hz)', 
-                     ylabel='amplitude')
+    plt.plot(fs, amps)
 \end{verbatim}
 
 Figure~\ref{fig.dft3} shows the amplitude of the signal for each
@@ -4807,7 +4805,7 @@ compute the ratio of the two spectrums:
     amps2 = spectrum2.amps
     ratio = amps2 / amps    
     ratio[amps<560] = 0
-    thinkplot.plot(ratio)
+    plt.plot(ratio)
 \end{verbatim}
 
 {\tt ratio} is the ratio of the amplitude before and after 
@@ -4862,7 +4860,7 @@ we can compute the DFT of the window:
 \begin{verbatim}
     padded = zero_pad(window, N)
     dft_window = np.fft.rfft(padded)
-    thinkplot.plot(abs(dft_window))
+    plt.plot(abs(dft_window))
 \end{verbatim}
 
 {\tt padded} contains the window, padded with zeros to be the
