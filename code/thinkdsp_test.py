@@ -63,6 +63,18 @@ class Test(unittest.TestCase):
 
         self.assertAlmostEqual(result, -0.164353351475-1.09452637056j)
 
+    def testChirp(self):
+        signal = thinkdsp.Chirp(100, 200, 0.5)
+        result = signal.evaluate([0, 0.001, 0.002])
+        self.assertAlmostEqual(result[0], 0.5)
+        self.assertAlmostEqual(result[2], -0.29389263)
+
+    def testExpoChirp(self):
+        signal = thinkdsp.ExpoChirp(100, 200, 0.5)
+        result = signal.evaluate([0, 0.001, 0.002])
+        self.assertAlmostEqual(result[0], 0.5)
+        self.assertAlmostEqual(result[2], -0.27167286)
+
     def testWaveAdd(self):
         ys = np.array([1, 2, 3, 4])
         wave1 = thinkdsp.Wave(ys, framerate=1)

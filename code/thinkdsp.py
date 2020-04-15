@@ -1512,19 +1512,10 @@ class Chirp(Signal):
 
         returns: float wave array
         """
-        freqs = np.linspace(self.start, self.end, len(ts) - 1)
-        return self._evaluate(ts, freqs)
-
-    def _evaluate(self, ts, freqs):
-        """Helper function that evaluates the signal.
-
-        ts: float array of times
-        freqs: float array of frequencies during each interval
-        """
-        dts = np.diff(ts)
+        freqs = np.linspace(self.start, self.end, len(ts))
+        dts = np.diff(ts, prepend=0)
         dps = PI2 * freqs * dts
         phases = np.cumsum(dps)
-        phases = np.insert(phases, 0, 0)
         ys = self.amp * np.cos(phases)
         return ys
 
@@ -1540,8 +1531,12 @@ class ExpoChirp(Chirp):
         returns: float wave array
         """
         start, end = np.log10(self.start), np.log10(self.end)
-        freqs = np.logspace(start, end, len(ts) - 1)
-        return self._evaluate(ts, freqs)
+        freqs = np.logspace(start, end, len(ts))
+        dts = np.diff(ts, prepend=0)
+        dps = PI2 * freqs * dts
+        phases = np.cumsum(dps)
+        ys = self.amp * np.cos(phases)
+        return ys
 
 
 class SilentSignal(Signal):
