@@ -1,8 +1,9 @@
 % LaTeX source for ``Think DSP: Digital Signal Processing for Programmers''
 % Copyright 2014  Allen B. Downey.
 
-% License: Creative Commons Attribution-NonCommercial 3.0 Unported License.
-% http://creativecommons.org/licenses/by-nc/3.0/
+% License: Creative Commons 
+% Attribution-NonCommercial-ShareAlike 4.0 International
+% http://creativecommons.org/licenses/by-nc-sa/4.0/
 %
 
 \documentclass[12pt]{book}
@@ -12,26 +13,35 @@
 % for some of these packages, you might have to install
 % texlive-latex-extra (in Ubuntu)
 
-\usepackage[T1]{fontenc}
-\usepackage{textcomp}
-\usepackage{mathpazo}
+%\usepackage[T1]{fontenc}
+%\usepackage{textcomp}
+%\usepackage{mathpazo}
+%\usepackage{pslatex}
+
 \usepackage{url}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{amsmath}
 \usepackage{amsthm}
+%\usepackage{amssymb}
 \usepackage{makeidx}
 \usepackage{setspace}
-\usepackage{hevea}                           
+\usepackage{hevea}
 \usepackage{upquote}
-\usepackage{fancyhdr}
-\usepackage[bookmarks]{hyperref}
+
+% include this so we can compile without hyperref
+% https://tex.stackexchange.com/questions/44088/when-do-i-need-to-invoke-phantomsection
+\providecommand\phantomsection{}
+
 
 \title{Think DSP}
 \author{Allen B. Downey}
 
-\newcommand{\thetitle}{Think DSP: Digital Signal Processing in Python}
-\newcommand{\theversion}{1.1.0}
+\newcommand{\thetitle}{Think DSP}
+\newcommand{\thesubtitle}{Digital Signal Processing in Python}
+\newcommand{\theversion}{1.1.2}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -40,9 +50,9 @@
 
 % change the arrows in the HTML version
 \setlinkstext
-  {\imgsrc[ALT="Previous"]{back.png}}
-  {\imgsrc[ALT="Up"]{up.png}}
-  {\imgsrc[ALT="Next"]{next.png}} 
+  {\imgsrc[alt="Previous"]{back.png}}
+  {\imgsrc[alt="Up"]{up.png}}
+  {\imgsrc[alt="Next"]{next.png}}
 
 \makeindex
 
@@ -53,16 +63,26 @@
 
 \frontmatter
 
-\ifplastex
 
-\else
-\fi
 
 \ifplastex
     \usepackage{localdef}
     \maketitle
 
+\newcount\anchorcnt
+\newcommand*{\Anchor}[1]{%
+  \@bsphack%
+    \Hy@GlobalStepCount\anchorcnt%
+    \edef\@currentHref{anchor.\the\anchorcnt}% 
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}% 
+    \M@gettitle{}\label{#1}% 
+    \@esphack%
+}
+
+
 \else
+
+%%% EXERCISE
 
 \newtheoremstyle{exercise}% name of the style to be used
   {\topsep}% measure of space to leave above the theorem. E.g.: 3pt
@@ -93,8 +113,8 @@
 \vspace*{2.0in}
 
 \begin{spacing}{3}
-{\huge Think DSP}\\
-{\Large Digital Signal Processing in Python}
+{\huge \thetitle}\\
+{\Large \thesubtitle}
 \end{spacing}
 
 \vspace{0.25in}
@@ -118,8 +138,8 @@ Version \theversion
 \vspace*{2.0in}
 
 \begin{spacing}{3}
-{\huge Think DSP}\\
-{\Large Digital Signal Processing in Python}
+{\huge \thetitle}\\
+{\Large \thesubtitle}
 \end{spacing}
 
 \vspace{0.25in}
@@ -161,8 +181,14 @@ Needham MA 02492
 \end{flushleft}
 
 Permission is granted to copy, distribute, and/or modify this document
-under the terms of the Creative Commons Attribution-NonCommercial 3.0 Unported
-License, which is available at \url{http://creativecommons.org/licenses/by-nc/3.0/}.
+under the terms of the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License, which
+is available at
+\url{http://creativecommons.org/licenses/by-nc-sa/4.0/}.
+
+
+The \LaTeX\ source for this book is available from
+\url{http://think-dsp.com}.
 
 \vspace{0.2in}
 
@@ -175,7 +201,7 @@ License, which is available at \url{http://creativecommons.org/licenses/by-nc/3.
 
 % TITLE PAGE FOR HTML VERSION
 
-{\Large \thetitle}
+{\Large \thetitle: \thesubtitle}
 
 {\large Allen B. Downey}
 
@@ -183,14 +209,15 @@ Version \theversion
 
 \vspace{0.25in}
 
-Copyright 2012 Allen B. Downey
+Copyright 2014 Allen B. Downey
 
 \vspace{0.25in}
 
 Permission is granted to copy, distribute, and/or modify this document
-under the terms of the Creative Commons Attribution-NonCommercial 3.0
+under the terms of the Creative Commons 
+Attribution-NonCommercial-ShareAlike 4.0 International
 Unported License, which is available at
-\url{http://creativecommons.org/licenses/by-nc/3.0/}.
+\url{http://creativecommons.org/licenses/by-nc-sa/4.0/}.
 
 \setcounter{chapter}{-1}
 
@@ -381,7 +408,7 @@ Good luck, and have fun!
 
 \section*{Contributor List}
 
-If you have a suggestion or correction, please send email to 
+If you have a suggestion or correction, please send email to
 {\tt downey@allendowney.com}.  If I make a change based on your
 feedback, I will add you to the contributor list
 (unless you ask to be omitted).
@@ -618,7 +645,7 @@ The lowest frequency component is called the {\bf fundamental
 In this signal the fundamental frequency has the largest amplitude,
 so it is also the {\bf dominant frequency}.
 Normally the perceived pitch of a sound is determined by the
-fundamental frequency, even if it is not dominant. 
+fundamental frequency, even if it is not dominant.
 
 The other spikes in the spectrum are at frequencies 880, 1320, 1760, and
 2200, which are integer multiples of the fundamental.
@@ -627,14 +654,14 @@ musically harmonious with the fundamental:
 
 \begin{itemize}
 
-\item 880 is the frequency of A5, one octave higher than the fundamental.  
+\item 880 is the frequency of A5, one octave higher than the fundamental.
 An {\bf octave} is a doubling in frequency.
 
 \item 1320 is approximately E6, which is a major fifth above A5.
   If you are not familiar with musical intervals like "major fifth'', see
   \url{https://en.wikipedia.org/wiki/Interval_(music)}.
 
-\item 1760 is A6, two octaves above the fundamental. 
+\item 1760 is A6, two octaves above the fundamental.
 
 \item 2200 is approximately C$\sharp$7, which is a major third
 above A6.
@@ -648,7 +675,7 @@ adjusted for {\bf equal temperament} (see
  \url{http://en.wikipedia.org/wiki/Equal_temperament}).
 
 Given the harmonics and their amplitudes, you can reconstruct the
-signal by adding up sinusoids.  
+signal by adding up sinusoids.
 Next we'll see how.
 
 
@@ -721,7 +748,7 @@ number of frames per second, which is also the number of samples
 per second.
 
 11,025 frames per second is one of several framerates commonly used in
-audio file formats, including Waveform Audio File (WAV) and mp3. 
+audio file formats, including Waveform Audio File (WAV) and mp3.
 
 This example evaluates the signal from {\tt t=0} to {\tt t=0.5} at
 5,513 equally-spaced frames (because 5,513 is half of 11,025).
@@ -887,7 +914,7 @@ For example:
 \begin{verbatim}
 wave.ys *= 2
 wave.ts += 1
-\end{verbatim} 
+\end{verbatim}
 
 The first line scales the wave by a factor of 2, making
 it louder.  The second line shifts the wave in time, making it
@@ -899,7 +926,7 @@ For example, the same two transformations could be written:
 \begin{verbatim}
 wave.scale(2)
 wave.shift(1)
-\end{verbatim} 
+\end{verbatim}
 
 You can read the documentation of these methods and others at
 \url{http://greenteapress.com/thinkdsp.html}.
@@ -918,7 +945,7 @@ definition:
 
 \begin{verbatim}
 class Sinusoid(Signal):
-    
+
     def __init__(self, freq=440, amp=1.0, offset=0, func=np.sin):
         Signal.__init__(self)
         self.freq = freq
@@ -968,7 +995,7 @@ per second.
 {\tt n} is the number of samples, and {\tt ts} is a NumPy array
 of sample times.
 
-To compute the {\tt ys}, \verb"make_wave" invokes {\tt evaluate}, 
+To compute the {\tt ys}, \verb"make_wave" invokes {\tt evaluate},
 is provided by {\tt Sinusoid}:
 
 \begin{verbatim}
@@ -1097,7 +1124,7 @@ To generate a triangle wave, you can use {\tt thinkdsp.TriangleSignal}:
 
 \begin{verbatim}
 class TriangleSignal(Sinusoid):
-    
+
     def evaluate(self, ts):
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = np.modf(cycles)
@@ -1195,7 +1222,7 @@ a square signal.  Here's the class definition:
 
 \begin{verbatim}
 class SquareSignal(Sinusoid):
-    
+
     def evaluate(self, ts):
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = np.modf(cycles)
@@ -1203,7 +1230,7 @@ class SquareSignal(Sinusoid):
         return ys
 \end{verbatim}
 
-Like {\tt TriangleSignal}, {\tt SquareSignal} inherits 
+Like {\tt TriangleSignal}, {\tt SquareSignal} inherits
 \verb"__init__" from {\tt Sinusoid}, so it takes the same
 parameters.
 
@@ -1364,7 +1391,7 @@ numbers that represents the amplitude and phase offset of each
 frequency component in the wave.
 
 The result of {\tt rfftfreq}, which I call {\tt fs}, is an array that
-contains frequencies corresponding to the {\tt hs}. 
+contains frequencies corresponding to the {\tt hs}.
 
 To understand the values in {\tt hs}, consider these two ways to think
 about complex numbers:
@@ -1452,7 +1479,7 @@ structure compare to triangle and square waves?
 Make a square signal at 1100 Hz and make a wave that samples it
 at 10000 frames per second.  If you plot the spectrum, you can
 see that most of the harmonics are aliased.
-When you listen to the wave, can you hear the aliased harmonics?  
+When you listen to the wave, can you hear the aliased harmonics?
 \end{exercise}
 
 
@@ -1485,7 +1512,7 @@ have on the waveform?
 Write a function that takes a Spectrum as a parameter and modifies
 it by dividing each element of {\tt hs} by the corresponding frequency
 from {\tt fs}.  Hint: since division by zero is undefined, you
-might want to set {\tt spectrum.hs[0] = 0}.  
+might want to set {\tt spectrum.hs[0] = 0}.
 
 Test your function using a square, triangle, or sawtooth wave.
 
@@ -1566,7 +1593,7 @@ is the class definition:
 
 \begin{verbatim}
 class Chirp(Signal):
-    
+
     def __init__(self, start=440, end=880, amp=1.0):
         self.start = start
         self.end = end
@@ -1608,7 +1635,7 @@ that does the rest of the math\footnote{Beginning a method name
 \end{verbatim}
 
 {\tt np.diff} computes the difference between adjacent elements
-of {\tt ts}, returning the length of each interval in seconds.  
+of {\tt ts}, returning the length of each interval in seconds.
 If the elements of {\tt ts} are equally spaced,
 the {\tt dts} are all the same.
 
@@ -1667,7 +1694,7 @@ to go from frequency to phase, we were approximating integration.
 When you listen to this chirp, you might notice that the pitch
 rises quickly at first and then slows down.
 The chirp spans two octaves, but it only takes 2/3 s to span
-the first octave, and twice as long to span the second.  
+the first octave, and twice as long to span the second.
 
 The reason is that our perception of pitch depends on the logarithm of
 frequency.  As a result, the {\bf interval} we hear between two notes
@@ -1691,7 +1718,7 @@ Here's the code that makes one:
 
 \begin{verbatim}
 class ExpoChirp(Chirp):
-    
+
     def evaluate(self, ts):
         start, end = np.log10(self.start), np.log10(self.end)
         freqs = np.logspace(start, end, len(ts)-1)
@@ -1712,7 +1739,7 @@ that makes one:
 \end{verbatim}
 
 You can listen to these examples in {\tt chap03.ipynb} and compare
-the linear and exponential chirps.  
+the linear and exponential chirps.
 
 
 \section{Spectrum of a chirp}
@@ -2095,7 +2122,7 @@ length of the tube gets longer, and the resulting pitch is inversely
 proportional to length.
 
 Assuming that the player moves the slide at a constant speed, how
-does frequency vary with time?  
+does frequency vary with time?
 
 Write a class called {\tt TromboneGliss} that extends {\tt Chirp} and
 provides {\tt evaluate}.  Make a wave that simulates a trombone
@@ -2126,7 +2153,7 @@ the other to be noise.
 
 \item ``Noise'' also refers to a signal that contains components at
 many frequencies, so it lacks the harmonic structure of the periodic
-signals we saw in previous chapters.  
+signals we saw in previous chapters.
 
 \end{enumerate}
 
@@ -2270,7 +2297,7 @@ spectrum so it runs from 0 to 1.
 The result is an IntegratedSpectrum.  Here is the class definition:
 
 \begin{verbatim}
-class IntegratedSpectrum(object):    
+class IntegratedSpectrum(object):
     def __init__(self, cs, fs):
         self.cs = cs
         self.fs = fs
@@ -2309,7 +2336,7 @@ is the sum of the previous value and a random ``step''.
 It is called ``Brownian'' by analogy with Brownian motion, in which a
 particle suspended in a fluid moves apparently at random, due to
 unseen interactions with the fluid.  Brownian motion is often
-described using a {\bf random walk}, which is a mathematical model 
+described using a {\bf random walk}, which is a mathematical model
 of a path where the distance between steps is characterized by a
 random distribution.
 
@@ -2517,7 +2544,7 @@ operation divides the power at
 each component by $f^\beta$.  It treats the component
 at $f=0$ as a special case, partly to avoid dividing by 0, and partly
 because this element represents the bias of the signal,
-which we are going to set to 0 anyway. 
+which we are going to set to 0 anyway.
 
 Figure~\ref{fig.pinknoise0} shows the resulting waveform.  Like
 Brownian noise, it wanders up and down in a way that suggests
@@ -2650,7 +2677,7 @@ Does it resemble white, pink, or Brownian noise?
 \begin{exercise}
 A Geiger counter is a device that detects radiation.
 When an ionizing particle strikes the detector, it outputs a surge of
-current.  The total output at a point in time can be modeled as 
+current.  The total output at a point in time can be modeled as
 uncorrelated Poisson (UP) noise, where each sample is
 a random quantity from a Poisson distribution, which corresponds to the
 number of particles detected during an interval.
@@ -2793,7 +2820,7 @@ At that point we have come full circle and the correlation is 1.
 
 Figure~\ref{fig.autocorr2} shows the relationship between correlation and
 phase offset for a sine wave.  The shape of that curve should look
-familiar; it is a cosine.  
+familiar; it is a cosine.
 
 {\tt thinkdsp} provides a simple interface for computing the
 correlation between waves:
@@ -3341,7 +3368,7 @@ Let's see how it works:
 \end{enumerate}
 
 Figure~\ref{fig.synthesis} shows the structure of this computation.
-Each row of the matrix, {\tt M}, corresponds to a time 
+Each row of the matrix, {\tt M}, corresponds to a time
 from 0.0 to 1.0 seconds; $t_n$ is the time of the $n$th row.
 Each column corresponds to a frequency from
 100 to 400 Hz; $f_k$ is the frequency of the $k$th column.
@@ -3466,7 +3493,7 @@ On the right side, we can replace $M^{-1}M$ with $I$:
 %
 \[ M^{-1}y = I a \]
 %
-If we multiply $I$ by any vector $a$, the result is $a$, so  
+If we multiply $I$ by any vector $a$, the result is $a$, so
 %
 \[ M^{-1}y = a \]
 %
@@ -3485,7 +3512,7 @@ Again, a matrix is orthogonal if its transpose is also its inverse;
 that is, $M^T = M^{-1}$.  That implies that $M^TM = I$, which means we
 can check whether a matrix is orthogonal by computing $M^TM$.
 
-So let's see what the matrix looks like in {\tt synthesize2}.  In 
+So let's see what the matrix looks like in {\tt synthesize2}.  In
 the previous example, $M$ has 11,025 rows, so it might be a good idea
 to work with a smaller example:
 
@@ -3726,14 +3753,14 @@ max(abs(wave.ys-wave2.ys))
 The biggest difference between {\tt ys1} and {\tt ys2} is about {\tt
   1e-16}, which is what we expect due to floating-point errors.
 
-\verb"make_wave" uses {\tt scipy.fftpack.idct}: 
+\verb"make_wave" uses {\tt scipy.fftpack.idct}:
 
 \begin{verbatim}
 # class Dct
     def make_wave(self):
         n = len(self.hs)
         ys = scipy.fftpack.idct(self.hs, type=2) / 2 / n
-        return Wave(ys, framerate=self.framerate) 
+        return Wave(ys, framerate=self.framerate)
 \end{verbatim}
 
 Be default, the inverse DCT doesn't normalize the result, so we have
@@ -3798,7 +3825,7 @@ read about at
 In the repository for this book you will find a Jupyter notebook
 called \verb"phase.ipynb" that explores the effect of phase on sound
 perception.
-Read through this notebook and run the examples.  
+Read through this notebook and run the examples.
 Choose another segment of sound and run the same experiments.
 Can you find any general relationships between the phase structure
 of a sound and how we perceive it?
@@ -3824,7 +3851,7 @@ same progression as in Chapter~\ref{dct}:
 
 \item We'll start with the synthesis
   problem: given a set of frequency components and their amplitudes,
-  how can we construct a signal?  The synthesis problem is 
+  how can we construct a signal?  The synthesis problem is
   equivalent to the inverse DFT.
 
 \item Then I'll rewrite the synthesis problem in the form of matrix
@@ -3913,7 +3940,7 @@ so {\tt 1j} is just $i$.
 When the argument to {\tt np.exp} is imaginary or complex, the
 result is a complex number; specifically, a {\tt np.complex128},
 which is represented by two 64-bit floating-point numbers.
-In this example, the result is {\tt 0.0707+0.997j}.  
+In this example, the result is {\tt 0.0707+0.997j}.
 
 Complex numbers have attributes {\tt real} and {\tt imag}:
 
@@ -3970,7 +3997,7 @@ $\phi_0$, yielding
 
 \begin{verbatim}
 class ComplexSinusoid(Sinusoid):
- 
+
    def evaluate(self, ts):
         phases = PI2 * self.freq * ts + self.offset
         ys = self.amp * np.exp(1j * phases)
@@ -4090,7 +4117,7 @@ phase offsets).
 \label{synthmat}
 
 As we saw in Section~\ref{synthesis}, we can also express the synthesis
-problem in terms of matrix multiplication: 
+problem in terms of matrix multiplication:
 
 \begin{verbatim}
 PI2 = np.pi * 2
@@ -4237,7 +4264,7 @@ Since {\tt M} is complex, we need it to be {\bf unitary}, rather
 than orthogonal, which means that the inverse of {\tt M} is
 the conjugate transpose of {\tt M}, which we can compute by
 transposing the matrix and negating the imaginary part of each
-element.  See \url{http://en.wikipedia.org/wiki/Unitary_matrix}. 
+element.  See \url{http://en.wikipedia.org/wiki/Unitary_matrix}.
 
 The NumPy methods {\tt conj} and {\tt transpose} do what we
 want.  Here's the code that computes {\tt M} for $N=4$ components:
@@ -4310,7 +4337,7 @@ def synthesis_matrix(N):
     return M
 \end{verbatim}
 
-Then I'll write the function that takes {\tt ys} and returns 
+Then I'll write the function that takes {\tt ys} and returns
 {\tt amps}:
 
 \begin{verbatim}
@@ -4602,7 +4629,7 @@ Smoothing is an operation that tries to remove short-term variations
 from a signal in order to reveal long-term trends.  For example, if
 you plot daily changes in the price of a stock, it would look noisy;
 a smoothing operator might make it easier to see whether the price
-was generally going up or down over time.  
+was generally going up or down over time.
 
 A common smoothing algorithm is a moving average, which computes
 the mean of the previous $n$ values, for some value of $n$.
@@ -4803,12 +4830,12 @@ compute the ratio of the two spectrums:
 \begin{verbatim}
     amps = spectrum.amps
     amps2 = spectrum2.amps
-    ratio = amps2 / amps    
+    ratio = amps2 / amps
     ratio[amps<560] = 0
     plt.plot(ratio)
 \end{verbatim}
 
-{\tt ratio} is the ratio of the amplitude before and after 
+{\tt ratio} is the ratio of the amplitude before and after
 smoothing.  When {\tt amps} is small, this ratio can be big
 and noisy, so for simplicity I set the ratio to 0 except
 where the harmonics are.
@@ -4927,7 +4954,7 @@ from the previous example, which is sometimes called a
 I ran the computations from the previous sections again
 with this curve, and generated Figure~\ref{fig.convolution8},
 which shows the ratio of the spectrums before and after
-smoothing, along with the DFT of the Gaussian window. 
+smoothing, along with the DFT of the Gaussian window.
 
 As a low-pass filter, Gaussian smoothing is better than a simple
 moving average.  After the ratio drops off, it stays low, with almost
@@ -4963,8 +4990,8 @@ both ways.  As an example, I'll apply it to the BitCoin data
 shown in Figure~\ref{fig.convolution1}.
 
 \begin{verbatim}
-    df = pandas.read_csv('coindesk-bpi-USD-close.csv', 
-                         nrows=1625, 
+    df = pandas.read_csv('coindesk-bpi-USD-close.csv',
+                         nrows=1625,
                          parse_dates=[0])
     ys = df.Close.values
 \end{verbatim}
@@ -5041,19 +5068,19 @@ corrs = np.correlate(close, close, mode='same')
 \end{verbatim}
 
 With {\tt mode='same'}, the result has the same length as {\tt close},
-corresponding to lags from $-N/2$ to $N/2-1$.  
+corresponding to lags from $-N/2$ to $N/2-1$.
 The gray line in Figure~\ref{fig.convolution9} shows the result.
 Except at {\tt lag=0}, there are no peaks, so there is no apparent
 periodic behavior in this signal.  However, the autocorrelation
 function drops off slowly, suggesting that this signal resembled
 pink noise, as we saw in Section~\ref{autopink}.
 
-To compute autocorrelation using convolution, 
-have to zero-pad the signal to double the length. 
+To compute autocorrelation using convolution,
+have to zero-pad the signal to double the length.
 This trick is necessary because the FFT is based
 on the assumption that the signal is periodic; that is, that it wraps
 around from the end to the beginning.  With time-series data like
-this, that assumption is invalid.  Adding zeros, and then trimming 
+this, that assumption is invalid.  Adding zeros, and then trimming
 the results, removes the bogus values.
 
 Also, remember that convolution reverse the direction of the window.
@@ -5183,7 +5210,7 @@ This example uses Pandas to read the CSV file; the
 result is a DataFrame, {\tt df}, with columns for the opening
 price, closing price, and high and low prices.  I select the closing
 prices and save them in a Wave object.
-The framerate is 1 sample per day.  
+The framerate is 1 sample per day.
 
 Figure~\ref{fig.diff_int1} shows
 this time series and its spectrum.
@@ -5232,7 +5259,7 @@ remember that convolution reverses the window before applying it
 to the signal.
 
 We can see the effect of this operation in the frequency domain
-by computing the DFT of the window.  
+by computing the DFT of the window.
 
 \begin{verbatim}
     diff_window = np.array([1.0, -1.0])
@@ -5321,7 +5348,7 @@ a scalar.  That is, $\op g = \lambda g$.
 corresponds to the eigenfunction $g$.
 
 \item A given operator might have many eigenfunctions, each with
-a corresponding eigenvalue. 
+a corresponding eigenvalue.
 
 \end{itemize}
 
@@ -5387,7 +5414,7 @@ the boundaries.
 
 To summarize, we have shown:
 
-\begin{itemize} 
+\begin{itemize}
 
 \item Computing the difference between successive values in a signal
   can be expressed as convolution with a simple window.  The result is
@@ -5556,7 +5583,7 @@ that corresponds to the {\tt diff} operation, and then invert the
 Figure~\ref{fig.diff_int8} shows the filters corresponding to
 cumulative sum and integration.  The cumulative sum is a good
 approximation of integration except at the highest frequencies,
-where it drops off a little faster. 
+where it drops off a little faster.
 
 To confirm that this is the correct filter for the cumulative
 sum, we can compare it to the ratio of the spectrum
@@ -5819,7 +5846,7 @@ spectrum should not be confused with white noise, which has the same
 average.
 
 When you test a system by inputting
-an impulse, you are testing the response of the 
+an impulse, you are testing the response of the
 system at all frequencies.  And you can test them all at the same
 time because the system is linear, so simultaneous tests don't
 interfere with each other.
@@ -6191,7 +6218,7 @@ I'll proceed in two steps:
 
 \item I'll show that in the special case where $f$ is a complex
 exponential, convolution with $g$ has the effect of multiplying
-$f$ by a scalar.  
+$f$ by a scalar.
 
 \item In the more general case where $f$ is not a complex exponential,
 we can use the DFT to express it as a sum of exponential components,
@@ -6369,9 +6396,9 @@ wave.normalize()
 And I'll construct a wave with four impulses:
 
 \begin{verbatim}
-imp_sig = thinkdsp.Impulses([0.005, 0.3, 0.6,  0.9], 
+imp_sig = thinkdsp.Impulses([0.005, 0.3, 0.6,  0.9],
                        amps=[1,     0.5, 0.25, 0.1])
-impulses = imp_sig.make_wave(start=0, duration=1.0, 
+impulses = imp_sig.make_wave(start=0, duration=1.0,
                              framerate=wave.framerate)
 \end{verbatim}
 
@@ -6441,7 +6468,7 @@ And here's the carrier:
 
 \begin{verbatim}
 carrier_sig = thinkdsp.CosSignal(freq=10000)
-carrier_wave = carrier_sig.make_wave(duration=wave.duration, 
+carrier_wave = carrier_sig.make_wave(duration=wave.duration,
                                      framerate=wave.framerate)
 \end{verbatim}
 
@@ -6595,7 +6622,7 @@ sampling process as multiplication with a series of impulses.  Instead
 of using {\tt sample} to select every fourth element, we could use
 this function to make a series of impulses, sometimes called an
 {\bf impulse train}:
- 
+
 \begin{verbatim}
 def make_impulses(wave, factor):
     ys = np.zeros(len(wave))
@@ -6605,7 +6632,7 @@ def make_impulses(wave, factor):
 \end{verbatim}
 
 And then multiply the original wave by the impulse train:
- 
+
 \begin{verbatim}
 impulses = make_impulses(wave, 4)
 sampled = wave * impulses
@@ -6616,7 +6643,7 @@ we understand why.  Multiplication in the time domain corresponds
 to convolution in the frequency domain.  When we multiply
 by an impulse train, we are convolving with the DFT of an
 impulse train.  As it turns out, the DFT of an impulse
-train is also an impulse train. 
+train is also an impulse train.
 
 Figure~\ref{fig.sampling9} shows two examples.  The top row is
 the impulse train in the example, with frequency 11,025 Hz.
@@ -6660,7 +6687,7 @@ not to be a perfect solution.
 
 Figure~\ref{fig.sampling4} shows why not.  The top row is the spectrum
 of the drum solo.  It contains high frequency components that extend
-past 10 kHz.  When we sample this wave, we convolve the spectrum 
+past 10 kHz.  When we sample this wave, we convolve the spectrum
 with the impulse train (second row), which makes copies of the spectrum
 (third row).  The bottom row shows the result after applying a low-pass
 filter with a cutoff at the folding frequency, 5512 Hz.
@@ -6691,7 +6718,7 @@ If the spectral copies overlap after sampling, we lose information
 about the spectrum, and we won't be able to recover it.
 
 But if the copies don't overlap, things work out pretty well.  As
-a second example, I loaded a recording of a bass guitar solo. 
+a second example, I loaded a recording of a bass guitar solo.
 
 Figure~\ref{fig.sampling5} shows its spectrum (top row), which contains
 no visible energy above 5512 Hz.  The second row shows the spectrum of
@@ -6729,7 +6756,7 @@ least a discrete approximation of it (see
 
 When we apply the low-pass filter, we are convolving with a sinc
 function.  We can think of this convolution as the sum of shifted,
-scaled copies of the sinc function.  
+scaled copies of the sinc function.
 
 The value of sinc is 1 at 0 and 0 at every other integer
 value of $x$.  When we shift the sinc function, we move the zero point.
@@ -6766,7 +6793,7 @@ But if the signal is ``bandwidth limited''; that is, it contains no
 energy above 5512 Hz, the spectral copies don't overlap, we don't lose
 information, and we can recover the original signal exactly.
 
-This result is known as the Nyquist-Shannon sampling theorem (see 
+This result is known as the Nyquist-Shannon sampling theorem (see
 \url{https://en.wikipedia.org/wiki/Nyquist-Shannon_sampling_theorem}).
 
 This example does not prove the Sampling Theorem, but I hope it
@@ -6778,7 +6805,7 @@ would be the same if the original had been sampled at a higher
 frequency, or even if the original had been a continuous analog
 signal: if we sample at framerate $f$, we can recover the original
 signal exactly, as long as it contains no energy at frequencies
-above $f/2$.  
+above $f/2$.
 
 
 \section{Exercises}

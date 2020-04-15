@@ -1,32 +1,23 @@
-LATEX = latex
-
-DVIPS = dvips
-
 PDFFLAGS = -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress \
            -dCompressPages=true -dUseFlateCompression=true  \
            -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 
 
-%.dvi: %.tex
-	$(LATEX) $<
-
-%.ps: %.dvi
-	$(DVIPS) -o $@ $<
-
-%.pdf: %.ps
-	ps2pdf $(PDFFLAGS) $<
-
 all:	book.tex
 	pdflatex book
 	makeindex book.idx
-	mv book.pdf thinkdsp.pdf
-	evince thinkdsp.pdf
+	pdflatex book
+	mv book.pdf thinkstats2.pdf
+	evince thinkstats2.pdf
+
+HEVEABUILDLOG=build.log
+
 
 hevea:
 	sed 's/\(figs\/[^.]*\).\(pdf\|png\)/\1.eps/' book.tex > thinkdsp.tex
 	rm -rf html
 	mkdir html
-	hevea -O -e latexonly htmlonly thinkdsp
+	hevea macros.hva -O -e latexonly htmlonly thinkdsp 2>&1 | tee ${HEVEABUILDLOG}
 # the following greps are a kludge to prevent imagen from seeing
 # the definitions in latexonly, and to avoid headers on the images
 	grep -v latexonly thinkdsp.image.tex > a; mv a thinkdsp.image.tex
@@ -34,22 +25,18 @@ hevea:
 	imagen -png thinkdsp
 	hacha thinkdsp.html
 	cp up.png next.png back.png html
-	mv index.html thinkdsp.css thinkdsp*.html  html
-	mv thinkdsp*.png *motif.gif html
+	cp custom.css thinkdsp.css
+	mv index.html thinkdsp.css thinkdsp*.html thinkdsp*.png *motif.gif html
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
 distrib:
 	rm -rf dist
-	mkdir dist dist/tex dist/tex/figs
+	mkdir dist
 	rsync -a thinkdsp.pdf html dist
-	rsync -a Makefile book.tex latexonly htmlonly dist/tex
-	# rsync -a figs/*.fig figs/*.eps dist/tex/figs
-	cd dist; zip -r thinkdsp.tex.zip tex
-	cd dist; zip -r thinkdsp.html.zip html
 	rsync -a dist/* $(DEST)
 	chmod -R o+r $(DEST)/*
-	cd /home/downey/public_html/greent; sh back
+	cd $(DEST)/..; sh back
 
 plastex:
 	# Before running plastex, we need the current directory in PYTHONPATH
@@ -76,6 +63,3 @@ oreilly:
 
 clean:
 	rm -f *~ *.aux *.log *.dvi *.idx *.ilg *.ind *.toc
-
-
-
