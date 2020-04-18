@@ -60,14 +60,13 @@ class Test(unittest.TestCase):
     def testComplexSinusoid(self):
         signal = thinkdsp.ComplexSinusoid(440, 0.7, 1.1)
         result = signal.evaluate(2.1) * complex(-1.5, -0.5)
-
         self.assertAlmostEqual(result, -0.164353351475-1.09452637056j)
 
     def testChirp(self):
         signal = thinkdsp.Chirp(100, 200, 0.5)
-        result = signal.evaluate([0, 0.001, 0.002])
+        result = signal.evaluate([1.001, 1.002, 1.005])
         self.assertAlmostEqual(result[0], 0.5)
-        self.assertAlmostEqual(result[2], -0.29389263)
+        self.assertAlmostEqual(result[2], -0.49384417)
 
     def testExpoChirp(self):
         signal = thinkdsp.ExpoChirp(100, 200, 0.5)

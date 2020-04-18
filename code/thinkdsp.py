@@ -1482,6 +1482,7 @@ class TriangleSignal(Sinusoid):
         ys = normalize(unbias(ys), self.amp)
         return ys
 
+from scipy.integrate import cumtrapz
 
 class Chirp(Signal):
     """Represents a signal with variable frequency."""
@@ -1508,14 +1509,33 @@ class Chirp(Signal):
     def evaluate(self, ts):
         """Evaluates the signal at the given times.
 
+        Note: This version is a little more complicated than the one
+        in the book because it handles the case where the ts are
+        not equally spaced.
+
         ts: float array of times
 
         returns: float wave array
         """
-        freqs = np.linspace(self.start, self.end, len(ts))
-        dts = np.diff(ts, prepend=0)
-        dps = PI2 * freqs * dts
-        phases = np.cumsum(dps)
+        def interpolate(ts, f0, f1):
+            t0, t1 = ts[0], ts[-1]
+            return f0 + (f1 - f0) * (ts - t0) / (t1 - t0)
+
+        # compute the frequencies
+        ts = np.asarray(ts)
+        freqs = interpolate(ts, self.start, self.end)
+
+        # compute the time intervals
+        dts = np.diff(ts, append=ts[-1])
+
+        # compute the changes in phase
+        dphis = PI2 * freqs * dts
+        dphis = np.roll(dphis, 1)
+
+        # compute phase
+        phases = np.cumsum(dphis)
+
+        # compute the amplitudes
         ys = self.amp * np.cos(phases)
         return ys
 
@@ -1530,11 +1550,11 @@ class ExpoChirp(Chirp):
 
         returns: float wave array
         """
-        start, end = np.log10(self.start), np.log10(self.end)
-        freqs = np.logspace(start, end, len(ts))
+        f0, f1 = np.log10(self.start), np.log10(self.end)
+        freqs = np.logspace(f0, f1, len(ts))
         dts = np.diff(ts, prepend=0)
-        dps = PI2 * freqs * dts
-        phases = np.cumsum(dps)
+        dphis = PI2 * freqs * dts
+        phases = np.cumsum(dphis)
         ys = self.amp * np.cos(phases)
         return ys
 
