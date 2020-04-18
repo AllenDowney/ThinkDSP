@@ -1,9 +1,9 @@
 name: ThinkDSP
 
 dependencies:
-  - python=3.7
+  - python>=3.6
   - jupyter
-  - numpy
+  - numpy>=1.16
   - matplotlib
   - seaborn
   - pandas
