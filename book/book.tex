@@ -996,7 +996,7 @@ per second.
 of sample times.
 
 To compute the {\tt ys}, \verb"make_wave" invokes {\tt evaluate},
-is provided by {\tt Sinusoid}:
+which is provided by {\tt Sinusoid}:
 
 \begin{verbatim}
     def evaluate(self, ts):
@@ -1018,7 +1018,7 @@ Let's unwind this function one step at time:
   phase as ``cycles since the start time'' expressed in radians.  Each
   cycle is $2 \pi$ radians.
 
-\item {\tt self.offset} is the phase when $t=0$.
+\item {\tt self.offset} is the phase when $t$ is {\tt ts[0]}.
   It has the effect of shifting the signal left or right in time.
 
 \item If {\tt self.func} is {\tt np.sin} or {\tt np.cos}, the result is a
@@ -1607,32 +1607,18 @@ Here is the function that evaluates the signal:
 
 \begin{verbatim}
     def evaluate(self, ts):
-        freqs = np.linspace(self.start, self.end, len(ts)-1)
-        return self._evaluate(ts, freqs)
+        freqs = np.linspace(self.start, self.end, len(ts))
+        dts = np.diff(ts, prepend=0)
+        dphis = PI2 * freqs * dts
+        phases = np.cumsum(dphis)
+        ys = self.amp * np.cos(phases)
+        return ys
 \end{verbatim}
 
 {\tt ts} is the sequence of points in time where the signal should be
 evaluated; to keep this function simple, I assume they are equally-spaced.
 
-If the length of {\tt ts} is $n$, you can think of it as a sequence of
-$n-1$ intervals of time.  To compute the frequency during each
-interval, I use {\tt np.linspace}, which returns a NumPy array of
-$n-1$ values between {\tt start} and {\tt end}.
-
-\verb"_evaluate" is a private method
-that does the rest of the math\footnote{Beginning a method name
-  with an underscore makes it ``private'', indicating that it is not
-  part of the API that should be used outside the class definition.}:
-
-\begin{verbatim}
-    def _evaluate(self, ts, freqs):
-        dts = np.diff(ts)
-        dphis = PI2 * freqs * dts
-        phases = np.cumsum(dphis)
-        phases = np.insert(phases, 0, 0)
-        ys = self.amp * np.cos(phases)
-        return ys
-\end{verbatim}
+To compute the frequency at each point in time, I use {\tt np.linspace}, which returns a NumPy array of $n$ values between {\tt start} and {\tt end}.
 
 {\tt np.diff} computes the difference between adjacent elements
 of {\tt ts}, returning the length of each interval in seconds.
@@ -2397,6 +2383,8 @@ To see the shape of the spectrum more clearly, we can plot power
 and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
+	import matplotlib.pyplot as plt
+	
     spectrum = wave.make_spectrum()
     spectrum.plot_power(linewidth=1, alpha=0.5)
     plt.xscale('log')
