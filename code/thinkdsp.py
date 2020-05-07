@@ -606,7 +606,28 @@ class Spectrogram:
 
         underride(options, cmap='inferno_r')
         plt.pcolor(ts, fs, array, **options)
+        
+    def get_data(self, high=None, **options):
+        """Returns spectogram as 2D numpy array 
 
+        high: highest frequency component to return
+        """
+        fs = self.frequencies()
+        i = None if high is None else find_index(high, fs)
+        fs = fs[:i]
+        ts = self.times()
+
+        # make the array
+        size = len(fs), len(ts)
+        array = np.zeros(size, dtype=np.float)
+
+        # copy amplitude from each spectrum into a column of the array
+        for j, t in enumerate(ts):
+            spectrum = self.spec_map[t]
+            array[:, j] = spectrum.amps[:i]
+
+        return array
+    
     def make_wave(self):
         """Inverts the spectrogram and returns a Wave.
 
