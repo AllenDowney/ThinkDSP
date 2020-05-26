@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tmx SYSTEM "tmx11.dtd">
+<tmx version="1.1">
+  <header creationtool="OmegaT" o-tmf="OmegaT TMX" adminlang="EN-US" datatype="plaintext" creationtoolversion="4.3.2_0_6a661c5e" segtype="paragraph" srclang="EN-US"/>
+  <body>
+<!-- Default translations -->
+    <tu>
+      <tuv lang="EN-US">
+        <seg>But unless you studied electrical or mechanical engineering, you probably haven't had a chance to learn about signal processing. The problem is that most books (and the classes that use them) present the material bottom-up, starting with mathematical abstractions like phasors. And they tend to be theoretical, with few applications and little apparent relevance.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T181730Z" creationid="userone" creationdate="20200526T181051Z">
+        <seg>But unless you studied electrical or mechanical engineering, you probably haven't had a chance to learn about signal processing. The problem is that most books (and the classes that use them) present the material bottom-up, starting with mathematical abstractions like phasors. And they tend to be theoretical, with few applications and little apparent relevance.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>Signal processing is one of my favorite topics. It is useful in many areas of science and engineering, and if you understand the fundamental ideas, it provides insight into many things we see in the world, and especially the things we hear.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T180913Z" creationid="userone" creationdate="20200526T180913Z">
+        <seg>신호 처리는 내가 가장 좋아하는 주제 중 하나입니다. 그것은 많은 과학 및 공학 분야에서 유용하며, 기본 아이디어를 이해하면 세계에서 우리가 보는 많은 것들, 특히 우리가 듣는 것들에 대한 통찰력을 제공합니다.</seg>
+      </tuv>
+    </tu>
+<!-- Alternative translations -->
+  </body>
+</tmx>

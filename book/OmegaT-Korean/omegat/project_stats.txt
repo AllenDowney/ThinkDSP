@@ -1,0 +1,14 @@
+5/27/20 5:00 AM
+Project Statistics
+
+                 	Segments	Words	Characters (without spaces)	Characters (including spaces)	#Files	
+Total:           	    1486	31857	                     165934	                       196880	     1	
+Remaining:       	    1439	30597	                     159702	                       189445	     1	
+Unique:          	    1462	31799	                     165510	                       196409	     1	
+Unique Remaining:	    1415	30539	                     159278	                       188974	     1	
+
+
+Individual File Statistics:
+
+File Name   	Total Segments	Remaining Segments	Unique Segments	Unique Remaining Segments	Total Words	Remaining Words	Unique Words	Unique Remaining Words	Total Characters (without spaces)	Remaining Characters (without spaces)	Unique Characters (without spaces)	Unique Remaining Characters (without spaces)	Total Characters (including spaces)	Remaining Characters (including spaces)	Unique Characters (including spaces)	Unique Remaining Characters (including spaces)	
+book-kor.tex	          1486	              1439	           1462	                     1415	      31857	          30597	       31799	                 30539	                           165934	                               159702	                            165510	                                      159278	                             196880	                                 189445	                              196409	                                        188974	

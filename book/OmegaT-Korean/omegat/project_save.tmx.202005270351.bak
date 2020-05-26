@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tmx SYSTEM "tmx11.dtd">
+<tmx version="1.1">
+  <header creationtool="OmegaT" o-tmf="OmegaT TMX" adminlang="EN-US" datatype="plaintext" creationtoolversion="4.3.2_0_6a661c5e" segtype="paragraph" srclang="EN-US"/>
+  <body>
+<!-- Default translations -->
+    <tu>
+      <tuv lang="EN-US">
+        <seg>But unless you studied electrical or mechanical engineering, you probably haven't had a chance to learn about signal processing. The problem is that most books (and the classes that use them) present the material bottom-up, starting with mathematical abstractions like phasors. And they tend to be theoretical, with few applications and little apparent relevance.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182251Z" creationid="userone" creationdate="20200526T181051Z">
+        <seg>그러나 전기 공학이나 기계 공학을 공부하지 않았다면 아마도 신호 처리에 대해 배울 기회가 없었을 것입니다. 문제는 바로 대부분의 서적(그리고 이를 사용하는 수업)이 페이저와 같은 수학적 추상화로 시작하여 내용을 아래에서 위로 배운다는 것입니다. 그리고 응용이나 명백한 관련성이 거의 없고 이론적으로 가르치는 경향이 있습니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>I assume that the reader knows basic mathematics, including complex numbers. You don't need much calculus; if you understand the concepts of integration and differentiation, that will do. I use some linear algebra, but I will explain it as we go along.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183750Z" creationid="userone" creationdate="20200526T183734Z">
+        <seg>여기서는 독자가 복소수를 포함한 기본 수학을 알고 있다고 가정합니다. 많은 미적분이 필요하지 않습니다. 미분과 적분의 개념을 이해한다면 그걸로 될 것입니다. 선형대수학도 이용하지만, 관련 내용을 다룰 때 설명할 것입니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>I use NumPy and SciPy extensively. If you are familiar with them already, that's great, but I will also explain the functions and data structures I use.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183623Z" creationid="userone" creationdate="20200526T183508Z">
+        <seg>이 책에서는 NumPy와 SciPy를 광범위하게 사용합니다. 이미 잘 알고 있다면 훌륭합니다. 그렇지만 사용하는 함수와 데이터 구조에 대해서도 설명하겠습니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>If you are not already familiar with Python, you might want to start with my other book, {&lt;u0&gt; Think Python}, which is an introduction to Python for people who have never programmed, or Mark Lutz's {&lt;u1&gt; Learning Python}, which might be better for people with programming experience.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183438Z" creationid="userone" creationdate="20200526T183154Z">
+        <seg>아직 Python에 익숙하지 않은 경우 저의 다른 책 {&lt;u0&gt; Think Python}, (프로그래밍을 해 본 적이 없는 사람들을 위한 Python 기초)  또는 Mark Lutz의 {&lt;u1&gt; Learning Python} (프로그래밍 경험이있는 사람들에게 더욱 좋음)으로 시작해 보는 것도 좋습니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>In this chapter I claim that {&lt;u0&gt; analyze1} takes time proportional to $n^3$ and {&lt;u1&gt; analyze2} takes time proportional to $n^2$. To see if that's true, run them on a range of input sizes and time them. In Jupyter, you can use the ``magic command'' &lt;u2&gt;"</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T184316Z" creationid="userone" creationdate="20200526T184126Z">
+        <seg>이 장에서 우리는 {&lt;u0&gt; analytics1}은 $ n ^ 3 $ 에 비례하고 {&lt;u1&gt; analyze2}는 시간이 $ n ^ 2 $에 비례한다고 볼 것입니다. 이것이 사실인지 확인하려면 입력 크기 범위에서 실행하고 시간을 지정하십시오. Jupyter에서는``magic command ''를 사용할 수 있습니다 &lt;u2&gt;"</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>Signal processing is one of my favorite topics. It is useful in many areas of science and engineering, and if you understand the fundamental ideas, it provides insight into many things we see in the world, and especially the things we hear.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182232Z" creationid="userone" creationdate="20200526T180913Z">
+        <seg>신호 처리는 제가 가장 좋아하는 주제 중 하나입니다. 그것은 많은 과학 및 공학 분야에서 유용하며, 기본 아이디어를 이해하면 세계에서 우리가 보는 많은 것들, 특히 우리가 듣는 것들에 대한 통찰력을 제공합니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>The code and sound samples used in this book are available from &lt;u0&gt;{https://github.com/AllenDowney/ThinkDSP}. Git is a version control system that allows you to keep track of the files that make up a project. A collection of files under Git's control is called a ``repository''. GitHub is a hosting service that provides storage for Git repositories and a convenient web interface.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T185143Z" creationid="userone" creationdate="20200526T185143Z">
+        <seg>이 책에 사용 된 코드 및 사운드 샘플은 &lt;u0&gt;{https://github.com/AllenDowney/ThinkDSP}에 있습니다. Git은 프로젝트를 구성하는 파일을 추적할 수 있는 버전 관리 시스템입니다. Git이 제어하는 파일 모음을``저장소 ''라고합니다. GitHub는 Git 리포지토리를위한 스토리지와 편리한 웹 인터페이스를 제공하는 호스팅 서비스입니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>The examples and supporting code for this book are in Python. You should know core Python and you should be familiar with object-oriented features, at least using objects if not defining your own.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182919Z" creationid="userone" creationdate="20200526T182919Z">
+        <seg>이 책의 예제와 지원 코드는 Python입니다. 핵심적인 Python에 대해 알고 있어야 하며, 객체를 정의하지 않더라도 어느 정도 객체 지향적 기능들에 익숙해야 합니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>The premise of this book is that if you know how to program, you can use that skill to learn other things, and have fun doing it.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182459Z" creationid="userone" creationdate="20200526T182459Z">
+        <seg>이 책의 전제는 프로그래밍을 할 줄 안다면 그 기술을 이용해서 다른 것을 배우는 데 쓸 수 있게 되는 것이고, 그렇게 하는데 즐거움을 느끼는 것입니다 .</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>This approach is more practical and, I hope you'll agree, more fun.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183610Z" creationid="userone" creationdate="20200526T182731Z">
+        <seg>이 방법은 더 실용적입니다. 그리고, 더 재미있다고 느끼기를 바랍니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>Using the code</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183758Z" creationid="userone" creationdate="20200526T183758Z">
+        <seg>코드 사용하기</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>Who is this book for?</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182741Z" creationid="userone" creationdate="20200526T182741Z">
+        <seg>누구를 위한 책인가요?</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>With a programming-based approach, I can present the most important ideas right away. By the end of the first chapter, you can analyze sound recordings and other signals, and generate new sounds. Each chapter introduces a new technique and an application you can apply to real signals. At each step you learn how to use a technique first, and then how it works.</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T182704Z" creationid="userone" creationdate="20200526T182704Z">
+        <seg>프로그래밍 기반 접근 방식을 통해서, 이 책은 가장 중요한 아이디어들을 바로 보여줄 수 있습니다. 첫 장이 끝날 무렵에는 녹음된 소리와 기타 신호를 분석하고 새로운 소리를 생성할 수 있게 될 것입니다. 각 장에서는 실제 신호에 적용할 수있는 새로운 테크닉과 그 응용을 소개합니다. 각 단계에서 먼저 테크닉을 이용하는 방법과 그 원리를 배웁니다.</seg>
+      </tuv>
+    </tu>
+    <tu>
+      <tuv lang="EN-US">
+        <seg>repository</seg>
+      </tuv>
+      <tuv lang="KO" changeid="userone" changedate="20200526T183850Z" creationid="userone" creationdate="20200526T183850Z">
+        <seg>repository(저장소)</seg>
+      </tuv>
+    </tu>
+<!-- Alternative translations -->
+  </body>
+</tmx>

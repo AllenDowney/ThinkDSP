@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<omegat>
+    <project version="1.0">
+        <source_dir>__DEFAULT__</source_dir>
+        <source_dir_excludes>
+            <mask>**/.svn/**</mask>
+            <mask>**/CVS/**</mask>
+            <mask>**/.cvs/**</mask>
+            <mask>**/desktop.ini</mask>
+            <mask>**/Thumbs.db</mask>
+            <mask>**/.DS_Store</mask>
+        </source_dir_excludes>
+        <target_dir>..</target_dir>
+        <tm_dir>__DEFAULT__</tm_dir>
+        <glossary_dir>__DEFAULT__</glossary_dir>
+        <glossary_file>__DEFAULT__</glossary_file>
+        <dictionary_dir>__DEFAULT__</dictionary_dir>
+        <source_lang>EN-US</source_lang>
+        <target_lang>KO</target_lang>
+        <source_tok>org.omegat.tokenizer.LuceneEnglishTokenizer</source_tok>
+        <target_tok>org.omegat.tokenizer.LuceneCJKTokenizer</target_tok>
+        <sentence_seg>false</sentence_seg>
+        <support_default_translations>true</support_default_translations>
+        <remove_tags>false</remove_tags>
+        <external_command></external_command>
+    </project>
+</omegat>
