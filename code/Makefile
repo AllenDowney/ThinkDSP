@@ -1,6 +1,6 @@
-DOCS = thinkdsp.html thinkplot.html
+DOCS = thinkdsp.html
 
-DOCPY = thinkdsp.py thinkplot.py
+DOCPY = thinkdsp.py
 
 DEST = /home/downey/public_html/greent/thinkdsp
 
@@ -88,3 +88,64 @@ docs: $(DOCPY)
 $(DOCPY):
 	pydoc -w ./$@
 
+
+NOTEBOOKS = \
+cacophony.ipynb \
+chap01.ipynb \
+chap01preview.ipynb \
+chap01soln.ipynb \
+chap02.ipynb \
+chap02soln.ipynb \
+chap03.ipynb \
+chap03soln.ipynb \
+chap04.ipynb \
+chap04soln.ipynb \
+chap05.ipynb \
+chap05soln.ipynb \
+chap06.ipynb \
+chap06soln.ipynb \
+chap07.ipynb \
+chap07soln.ipynb \
+chap08.ipynb \
+chap08soln.ipynb \
+chap09.ipynb \
+chap09soln.ipynb \
+chap10.ipynb \
+chap10preview.ipynb \
+chap10soln.ipynb \
+chap11.ipynb \
+chap11soln.ipynb \
+cumsum_example.ipynb \
+dft_example.ipynb \
+diff_int.ipynb \
+phase.ipynb \
+saxophone.ipynb \
+scipy2015_demo.ipynb \
+voss.ipynb \
+
+SCRIPTS = $(NOTEBOOKS:ipynb=py)
+
+make_scripts:
+	for notebook in $(NOTEBOOKS) ; do \
+		jupyter nbconvert --to script $$notebook ; \
+	done
+
+clean_scripts:
+	# remove magic command and help functions so scripts
+	# can run without interaction
+	for script in $(SCRIPTS) ; do \
+		grep -v "'matplotlib'" $$script > temp ; \
+		mv temp $$script ; \
+		sed -i s/get_ipython/\#get_ipython/ $$script ; \
+		sed -i s/\^help/\#help/ $$script ; \
+		sed -i s/\#\ In/from\ clf\ import\ clf\;clf\(\)\#\ In/ $$script ; \
+	done
+
+
+run_scripts:
+	# remove magic command and help functions so scripts
+	# can run without interaction
+	for script in $(SCRIPTS) ; do \
+	    echo $$script ; \
+		ipython $$script ; \
+	done
