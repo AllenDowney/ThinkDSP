@@ -30,9 +30,9 @@ Option 1: Run the notebooks on Google Colab.
 
 Option 2: Run the notebooks on Binder.
 
-Option 3: Install Jupyter on your computer and run the notebooks locally.
+Option 3: Use Conda to install the libraries you need and run the notebooks on your computer.
 
-Option 4: Use poetry to manage the project on your computer or notebook locally.
+Option 4: Use poetry to install the libraries you need and run the notebooks on your computer.
 
 The following sections explain these options in detail.
 
@@ -111,6 +111,33 @@ conda env create -f environment.yml
 conda activate ThinkDSP
 ```
 
+
+### Option 4: Use poetry to manage the project on your computer or notebook locally.
+
+First, download the files from this repository.  If you are a Git user, you can run
+
+```
+git clone --depth 1 https://github.com/AllenDowney/ThinkDSP.git
+```
+
+Then, assuming you have [poetry](https://python-poetry.org) installed on your machine, run
+
+```
+cd ThinkDSP
+poetry install
+```
+
+to install the libraries you need in a virtual environment.  To activate the environment, run
+
+```
+poetry shell
+```
+
+Then you can run Jupyter.
+
+
+## Run Jupyter 
+
 To start Jupyter, run:
 
 ```
@@ -142,38 +169,6 @@ package manager, or install Anaconda.
 
 If you run into problems with these instructions, let me know and I will make corrections.  Good luck!
 
-### Option 4: Use poetry to manage the project on your computer or notebook locally.
-
-Assuming you have [poetry](https://python-poetry.org) running on your machine:
-
-First, download the files from this repository.  If you are a Git user, you can run
-
-```
-git clone --depth 1 https://github.com/AllenDowney/ThinkDSP.git
-```
-
-Then
-
-```
-poetry install
-```
-
-to install all the dependencies in a virtual environment.
-
-After this simply start it with
-
-```
-poetry shell # activate environment
-jupyter notebook # run jupyter and play :)
-```
-
-And, when you are done, you can simply
-
-```
-exit
-```
-
-your virtual environment.
 
 
 ## Freesound
