@@ -24,13 +24,15 @@ And if you want to see where were headed, here's a preview of Chapter 10:
 Most of the code for this book is in Jupyter notebooks.
 If you are not familiar with Jupyter, you can run a tutorial by [clicking here](https://jupyter.org/try).  Then select "Try Classic Notebook".  It will open a notebook with instructions for getting started.
 
-To run the ThinkDSP code, you have three options:
+To run the ThinkDSP code, you have several options:
 
 Option 1: Run the notebooks on Google Colab.
 
 Option 2: Run the notebooks on Binder.
 
 Option 3: Install Jupyter on your computer and run the notebooks locally.
+
+Option 4: Use poetry to manage the project on your computer or notebook locally.
 
 The following sections explain these options in detail.
 
@@ -99,7 +101,7 @@ To install them by hand run
 
 ```
 conda install jupyter numpy scipy pandas matplotlib seaborn
-``` 
+```
 
 Or, to create a conda environment, run
 
@@ -126,19 +128,52 @@ If not, the Jupyter server should print a URL you can use.  For example, when I 
 [I 10:03:20.115 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
 ```
 
-In this case, the URL is [http://localhost:8888](http://localhost:8888).  
+In this case, the URL is [http://localhost:8888](http://localhost:8888).
 When you start your server, you might get a different URL.
 Whatever it is, if you paste it into a browser, you should should see a home page with a list of directories.
 
 Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
 Select the cell with the import statements and press "Shift-Enter" to run the code in the cell.
-If it works and you get no error messages, **you are all set**.  
+If it works and you get no error messages, **you are all set**.
 
 If you get error messages about missing packages, you can install the packages you need using your
 package manager, or install Anaconda.
 
 If you run into problems with these instructions, let me know and I will make corrections.  Good luck!
+
+### Option 4: Use poetry to manage the project on your computer or notebook locally.
+
+Assuming you have [poetry](https://python-poetry.org) running on your machine:
+
+First, download the files from this repository.  If you are a Git user, you can run
+
+```
+git clone --depth 1 https://github.com/AllenDowney/ThinkDSP.git
+```
+
+Then
+
+```
+poetry install
+```
+
+to install all the dependencies in a virtual environment.
+
+After this simply start it with
+
+```
+poetry shell # activate environment
+jupyter notebook # run jupyter and play :)
+```
+
+And, when you are done, you can simply
+
+```
+exit
+```
+
+your virtual environment.
 
 
 ## Freesound
