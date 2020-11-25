@@ -101,7 +101,7 @@ To install them by hand run
 
 ```
 conda install jupyter numpy scipy pandas matplotlib seaborn
-``` 
+```
 
 Or, to create a conda environment, run
 
@@ -128,14 +128,14 @@ If not, the Jupyter server should print a URL you can use.  For example, when I 
 [I 10:03:20.115 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
 ```
 
-In this case, the URL is [http://localhost:8888](http://localhost:8888).  
+In this case, the URL is [http://localhost:8888](http://localhost:8888).
 When you start your server, you might get a different URL.
 Whatever it is, if you paste it into a browser, you should should see a home page with a list of directories.
 
 Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
 Select the cell with the import statements and press "Shift-Enter" to run the code in the cell.
-If it works and you get no error messages, **you are all set**.  
+If it works and you get no error messages, **you are all set**.
 
 If you get error messages about missing packages, you can install the packages you need using your
 package manager, or install Anaconda.
