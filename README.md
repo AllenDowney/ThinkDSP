@@ -24,13 +24,15 @@ And if you want to see where were headed, here's a preview of Chapter 10:
 Most of the code for this book is in Jupyter notebooks.
 If you are not familiar with Jupyter, you can run a tutorial by [clicking here](https://jupyter.org/try).  Then select "Try Classic Notebook".  It will open a notebook with instructions for getting started.
 
-To run the ThinkDSP code, you have three options:
+To run the ThinkDSP code, you have several options:
 
 Option 1: Run the notebooks on Google Colab.
 
 Option 2: Run the notebooks on Binder.
 
 Option 3: Install Jupyter on your computer and run the notebooks locally.
+
+Option 4: Use poetry to manage the project on your computer or notebook locally.
 
 The following sections explain these options in detail.
 
@@ -139,6 +141,39 @@ If you get error messages about missing packages, you can install the packages y
 package manager, or install Anaconda.
 
 If you run into problems with these instructions, let me know and I will make corrections.  Good luck!
+
+### Option 4: Use poetry to manage the project on your computer or notebook locally.
+
+Assuming you have [poetry](https://python-poetry.org) running on your machine:
+
+First, download the files from this repository.  If you are a Git user, you can run
+
+```
+git clone --depth 1 https://github.com/AllenDowney/ThinkDSP.git
+```
+
+Then
+
+```
+poetry install
+```
+
+to install all the dependencies in a virtual environment.
+
+After this simply start it with
+
+```
+poetry shell # activate environment
+jupyter notebook # run jupyter and play :)
+```
+
+And, when you are done, you can simply
+
+```
+exit
+```
+
+your virtual environment.
 
 
 ## Freesound
