@@ -189,7 +189,7 @@ def plot_diff_filters(wave):
 
 def main():
     names = ['date', 'open', 'high', 'low', 'close', 'volume']
-    df = pd.read_csv('fb.csv', header=0, names=names, parse_dates=[0])
+    df = pd.read_csv('fb_1.csv', header=0, names=names, parse_dates=[0])
     ys = df.close.values[::-1]
     close = thinkdsp.Wave(ys, framerate=1)
     plot_wave_and_spectrum(close, root='diff_int1')
