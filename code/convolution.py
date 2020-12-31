@@ -48,7 +48,7 @@ def plot_facebook():
     """Plot Facebook prices and a smoothed time series.
     """
     names = ['date', 'open', 'high', 'low', 'close', 'volume']
-    df = pd.read_csv('fb.csv', header=0, names=names, parse_dates=[0])
+    df = pd.read_csv('fb_1.csv', header=0, names=names, parse_dates=[0])
     close = df.close.values[::-1]
     dates = df.date.values[::-1]
     days = (dates - dates[0]) / np.timedelta64(1,'D')
@@ -223,7 +223,7 @@ def plot_fft_convolve():
     """Makes a plot showing that FFT-based convolution works.
     """
     names = ['date', 'open', 'high', 'low', 'close', 'volume']
-    df = pd.read_csv('fb.csv',
+    df = pd.read_csv('fb_1.csv',
                      header=0, names=names, parse_dates=[0])
     close = df.close.values[::-1]
 

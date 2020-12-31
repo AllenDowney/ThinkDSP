@@ -5188,7 +5188,7 @@ spectrum.
 import pandas as pd
 
 names = ['date', 'open', 'high', 'low', 'close', 'volume']
-df = pd.read_csv('fb.csv', header=0, names=names)
+df = pd.read_csv('fb_1.csv', header=0, names=names)
 ys = df.close.values[::-1]
 close = thinkdsp.Wave(ys, framerate=1)
 spectrum = wave.make_spectrum()
