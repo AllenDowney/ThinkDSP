@@ -3,7 +3,7 @@
 # Then convert the spectrum back to a wave and listen to it.
 # How does the sound relate to the changes you made in the spectrum? 
 
-from code.thinkdsp import decorate, play_wave, read_wave
+from code.thinkdsp import play_wave, read_wave
 
 
 SOUND_FILE = 'exercises/ch_01/SIG_126_A_Retro_Synth.wav'
@@ -12,12 +12,16 @@ TEMP_FILE = 'temp.wav'
 AUDIO_PLAYER = 'afplay'
 
 
-def _play_spectrum(spectrum):
-    wave = spectrum.make_wave()
+def _process_wave(wave):
     # Normalize values to be -1..1
     wave.normalize()
     # Taper envelope at start and end of wave to avoid click when playing/looping
     wave.apodize()
+
+
+def _play_spectrum(spectrum):
+    wave = spectrum.make_wave()
+    _process_wave(wave)
     wave.write(TEMP_FILE)
     play_wave(TEMP_FILE, player=AUDIO_PLAYER)
 
