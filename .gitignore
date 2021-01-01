@@ -1,1 +1,4 @@
 .ipynb_checkpoints/
+code/__pycache__/
+**.wav
+poetry.lock
