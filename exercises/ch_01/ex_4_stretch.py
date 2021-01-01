@@ -32,4 +32,6 @@ def run():
 
 
 if __name__ == '__main__':
+    print("\nChapter 1: ex_4_stretch.py")
+    print("****************************")
     run()

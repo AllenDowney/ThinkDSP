@@ -32,4 +32,6 @@ def run():
 
 
 if __name__ == '__main__':
+    print("\nChapter 1: ex_3_compound_signal.py")
+    print("****************************")
     run()

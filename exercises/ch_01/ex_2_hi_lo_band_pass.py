@@ -47,4 +47,6 @@ def run():
 
 
 if __name__ == '__main__':
+    print("\nChapter 1: ex_2_hi_lo_band_pass.py")
+    print("****************************")
     run()

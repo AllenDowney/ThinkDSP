@@ -1084,7 +1084,7 @@ class Wave:
 
         filename: string
         """
-        print("Writing", filename)
+        # print("Writing", filename)
         wfile = WavFileWriter(filename, self.framerate)
         wfile.write(self)
         wfile.close()
