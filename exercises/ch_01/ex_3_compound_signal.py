@@ -27,7 +27,7 @@ def run():
     dissonant_sig = SinSignal(freq=FREQ_A5 - 25, amp=0.5, offset=0)
     compound_sig += dissonant_sig
     wave = compound_sig.make_wave(start=0, duration=duration_secs, framerate=FRAMERATE)
-    print('Playing compound sin + cos signal + dissonant_sig')
+    print('Playing compound sin + cos signal + dissonant signal')
     play_wave(wave)
 
 
