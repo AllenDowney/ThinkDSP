@@ -2,3 +2,4 @@
 code/__pycache__/
 **.wav
 poetry.lock
+**.swp
