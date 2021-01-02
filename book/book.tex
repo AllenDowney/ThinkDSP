@@ -6731,7 +6731,7 @@ The low pass filter I used in the last step is a so-called {\bf brick
 as if they hit a brick wall.
 
 Figure~\ref{fig.sampling6} (right) shows what this filter looks like.
-Of course, multiplication by the this filter, in the frequency domain,
+Of course, multiplication by this filter, in the frequency domain,
 corresponds to convolution with a window in the time domain.  We can
 find out what that window is by computing the inverse DFT of the
 filter, which is shown in Figure~\ref{fig.sampling6} (left).
@@ -6755,12 +6755,12 @@ between the sampled points.
 \begin{figure}
 % sampling.py
 \centerline{\includegraphics[height=2.5in]{figs/sampling8.pdf}}
-\caption{.}
+\caption{Example of interpolation by adding shifted, scaled copies of a sinc function.}
 \label{fig.sampling8}
 \end{figure}
 
 Figure~\ref{fig.sampling8} shows how that works using a short segment
-of the bass guitar solo.  The line across the to is the original
+of the bass guitar solo.  The line across the top is the original
 wave.  The vertical gray lines show the sampled values.  The thin
 curves are the shifted, scaled copies of the sinc function.
 The sum of these sinc functions is identical to the original wave.
