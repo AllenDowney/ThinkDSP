@@ -26,6 +26,7 @@ def run():
     print(f'spectrum.hs[0] = {spectrum.hs[0]}')
 
     spectrum.hs[0] = 100.
+    print(f'After changing, spectrum.hs[0] = {spectrum.hs[0]}')
     wave = spectrum.make_wave()
     wave.plot()
     decorate(xlabel='Time (s)')
