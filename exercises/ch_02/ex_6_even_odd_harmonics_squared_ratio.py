@@ -54,6 +54,6 @@ def run():
 
 
 if __name__ == '__main__':
-    print("\nChapter 2: ex_5_modify_spectrum_by_frequency.py")
+    print("\nChapter 2: ex_6_even_odd_harmonics_squared_ratio.py")
     print("****************************")
     run()
