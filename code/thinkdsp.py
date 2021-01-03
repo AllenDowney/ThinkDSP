@@ -20,9 +20,7 @@ from fractions import gcd
 from wave import open as open_wave
 from scipy.io import wavfile
 
-import matplotlib
-matplotlib.use('Qt5Agg')
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 try:
     from IPython.display import Audio
