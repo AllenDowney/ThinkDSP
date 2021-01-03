@@ -20,7 +20,9 @@ from fractions import gcd
 from wave import open as open_wave
 from scipy.io import wavfile
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Qt5Agg')
+from matplotlib import pyplot as plt
 
 try:
     from IPython.display import Audio
@@ -1016,6 +1018,7 @@ class Wave:
         """
         xfactor = self.get_xfactor(options)
         plt.plot(self.ts * xfactor, np.real(self.ys), **options)
+        plt.show()
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples.

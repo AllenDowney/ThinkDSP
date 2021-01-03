@@ -4,7 +4,7 @@
 # Compute its Spectrum and plot it.
 # What happens if you add frequency components that are not multiples of the fundamental?
 
-from code.thinkdsp import read_wave, SinSignal, CosSignal
+from code.thinkdsp import SinSignal, CosSignal
 from exercises.lib.lib import play_wave
 
 FREQ_A4 = 440

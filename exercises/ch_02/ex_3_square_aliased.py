@@ -2,7 +2,7 @@
 # If you plot the spectrum, you can see that most of the harmonics are aliased.
 # When you listen to the wave, can you hear the aliased harmonics?
 
-from code.thinkdsp import read_wave, SquareSignal
+from code.thinkdsp import SquareSignal
 from exercises.lib.lib import play_wave
 
 SIGNAL_FREQ = 1100.
@@ -35,4 +35,3 @@ if __name__ == '__main__':
     print("\nChapter 2: ex_3_square_aliased.py")
     print("****************************")
     run()
-
