@@ -18,6 +18,9 @@ FRAMERATE = 22500
 
 
 def modify_spectrum_by_frequency(spectrum):
+    # hs is an array of numpy complex numbers, where the real part represents amplitude
+    #  and the imaginary part represents phase offset in radians.
+    # fs is a corresponding numpy array of signal frequencies
     spectrum.hs /= np.where(spectrum.fs > 0.0, spectrum.fs, 1.)
 
 
@@ -49,4 +52,3 @@ if __name__ == '__main__':
     print("\nChapter 2: ex_5_modify_spectrum_by_frequency.py")
     print("****************************")
     run()
-
