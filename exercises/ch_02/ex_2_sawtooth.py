@@ -55,20 +55,25 @@ class SawtoothSignal(Sinusoid):
         cycles = self.freq * ts + self.offset / PI2
         frac, _ = np.modf(cycles)
         frac -= 0.5
-        frac = unbias(frac)
         # Map negative offsets to -1, like the negative half of a square wave
         # Just unbias positive values, making the positive half of the square wave behave
         #  like the triangle wave
         # Use the resulting mapping of all offsets to scale amp for the signal instance
-        ys = np.where(frac >= 0.0, normalize(frac, self.amp), -1.0 * self.amp)
+        ys = np.where(frac > 0.0, unbias(frac), -0.5)
+        ys = normalize(ys, self.amp)
         return ys
 
 
 def run():
     start = 0.
     duration_secs = 1.
-    sawtooth_sig = SawtoothSignal(freq=FREQ_A4, amp=1.0, offset=0)
+    sawtooth_sig = SawtoothSignal(freq=FREQ_A4, amp=0.5, offset=0)
+    # Note this actually just plots three periods of the wave
+    print('Plotting sawtooth signal. Verify the waveform.')
+    sawtooth_sig.plot(num_periods=10)
     wave = sawtooth_sig.make_wave(start=0, duration=duration_secs, framerate=FRAMERATE)
+    print('Plotting sawtooth wave. Verify the waveform.')
+    wave.plot()
     print('Playing sawtooth wave')
     play_wave(wave)
 

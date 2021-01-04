@@ -1237,14 +1237,14 @@ class Signal:
         """
         return 0.1
 
-    def plot(self, framerate=11025):
+    def plot(self, framerate=11025, num_periods=3):
         """Plots the signal.
 
         The default behavior is to plot three periods.
 
         framerate: samples per second
         """
-        duration = self.period * 3
+        duration = self.period * num_periods 
         wave = self.make_wave(duration, start=0, framerate=framerate)
         wave.plot()
 

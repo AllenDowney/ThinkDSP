@@ -7,7 +7,6 @@
 #  corresponds to the Spectrum.
 
 from code.thinkdsp import TriangleSignal, decorate
-from exercises.lib.lib import play_wave
 
 FREQ_A4 = 440
 FRAMERATE = 22500
