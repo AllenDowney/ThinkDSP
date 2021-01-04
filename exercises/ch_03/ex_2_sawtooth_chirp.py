@@ -6,7 +6,6 @@
 import numpy as np
 
 from code.thinkdsp import PI2, Sinusoid, normalize, unbias
-from exercises.ch_02.ex_2_sawtooth import SawtoothSignal
 from exercises.lib.lib import play_wave
 
 FREQ_A4 = 440
@@ -41,13 +40,14 @@ class SawtoothSignal(Sinusoid):
 
 # Chirp implementation From thinkdsp
 class SawtoothChirpSignal(Sinusoid):
-    def __init__(self, chirp_start_freq, chirp_end_freq, sawtooth_freq, **options):
+    def __init__(self, chirp_start_freq, chirp_end_freq, sawtooth_freq,
+                 framerate=None, **options):
         super(SawtoothChirpSignal, self).__init__(**options)
         self._chirp_start_freq = chirp_start_freq
         self._chirp_end_freq = chirp_end_freq
         self._sawtooth_sig = SawtoothSignal(freq=sawtooth_freq, amp=AMP, offset=OFFSET)
         self._sawtooth_sig.make_wave(start=START, duration=DURATION_SECS,
-                                     framerate=FRAMERATE)
+                                     framerate=framerate or FRAMERATE)
 
     def evaluate(self, ts):
         # Sample frequencies at even intervals from start to end
