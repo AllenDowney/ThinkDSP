@@ -3,7 +3,7 @@
 # Then convert the spectrum back to a wave and listen to it.
 # How does the sound relate to the changes you made in the spectrum? 
 
-from code.thinkdsp import play_wave, read_wave
+from code.thinkdsp import read_wave
 from exercises.lib.lib import play_wave
 
 SOUND_FILE = 'exercises/ch_01/SIG_126_A_Retro_Synth.wav'
