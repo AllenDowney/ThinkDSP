@@ -18,7 +18,6 @@ AMP = 0.5
 def run():
     sawtooth_chirp_sig = SawtoothChirpSignal(CHIRP_START_FREQ, CHIRP_END_FREQ, FREQ_A4,
                                              framerate=FRAMERATE)
-    # Note this actually just plots three periods of the wave
     wave = sawtooth_chirp_sig.make_wave(start=START, duration=DURATION_SECS, framerate=FRAMERATE)
     print('Plotting sawtooth chirp wave with very low framerate. Verify the waveform.')
     wave.plot()
