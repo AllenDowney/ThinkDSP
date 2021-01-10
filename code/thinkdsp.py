@@ -273,6 +273,7 @@ class _SpectrumParent:
         else:
             i = None if high is None else find_index(high, self.fs)
             plt.plot(self.fs[:i], self.amps[:i], **options)
+        plt.show()
 
     def plot_power(self, high=None, **options):
         """Plots power vs frequency.
@@ -285,6 +286,7 @@ class _SpectrumParent:
         else:
             i = None if high is None else find_index(high, self.fs)
             plt.plot(self.fs[:i], self.power[:i], **options)
+        plt.show()
 
     def estimate_slope(self):
         """Runs linear regression on log power vs log frequency.

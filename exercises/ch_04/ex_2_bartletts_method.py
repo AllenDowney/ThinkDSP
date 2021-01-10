@@ -17,7 +17,7 @@
 
 import matplotlib.pyplot as plt
 from code.thinkdsp import UncorrelatedGaussianNoise, read_wave
-from exercises.lib.lib import play_wave
+
 
 SOUND_FILE = 'exercises/ch_01/SIG_126_A_Retro_Synth.wav'
 FRAMERATE = 22050
@@ -29,9 +29,6 @@ def bartletts(wave, num_segments):
     start = 0
     end = start + step
     while end < len(wave.ys):
-
-        # import pdb; pdb.set_trace()
-
         segment = wave.slice(start, end)
         # Spectrum is a DFT of the wave
         spectrum = segment.make_spectrum()
