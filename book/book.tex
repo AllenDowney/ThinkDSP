@@ -1,7 +1,7 @@
 % LaTeX source for ``Think DSP: Digital Signal Processing for Programmers''
 % Copyright 2014  Allen B. Downey.
 
-% License: Creative Commons 
+% License: Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International
 % http://creativecommons.org/licenses/by-nc-sa/4.0/
 %
@@ -73,9 +73,9 @@
 \newcommand*{\Anchor}[1]{%
   \@bsphack%
     \Hy@GlobalStepCount\anchorcnt%
-    \edef\@currentHref{anchor.\the\anchorcnt}% 
-    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}% 
-    \M@gettitle{}\label{#1}% 
+    \edef\@currentHref{anchor.\the\anchorcnt}%
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+    \M@gettitle{}\label{#1}%
     \@esphack%
 }
 
@@ -214,9 +214,9 @@ Copyright 2014 Allen B. Downey
 \vspace{0.25in}
 
 Permission is granted to copy, distribute, and/or modify this document
-under the terms of the Creative Commons 
-Attribution-NonCommercial-ShareAlike 4.0 International
-Unported License, which is available at
+under the terms of the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License,
+which is available at
 \url{http://creativecommons.org/licenses/by-nc-sa/4.0/}.
 
 \setcounter{chapter}{-1}
@@ -371,7 +371,7 @@ the command line, like this:
 $ jupyter notebook
 \end{verbatim}
 
-If it's not installed, you can install it in Anaconda like this
+If it's not installed, you can install it in Anaconda like this:
 
 \begin{verbatim}
 $ conda install jupyter
@@ -2384,7 +2384,7 @@ and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
 	import matplotlib.pyplot as plt
-	
+
     spectrum = wave.make_spectrum()
     spectrum.plot_power(linewidth=1, alpha=0.5)
     plt.xscale('log')
@@ -2733,7 +2733,7 @@ The magnitude of $\rho$ indicates the strength of the correlation.  If
 $\rho$ is 1 or -1, the variables are perfectly correlated, which means
 that if you know one, you can make a perfect prediction about the
 other.  If $\rho$ is near zero, the correlation is probably weak, so
-if you know one, it doesn't tell you much about the others,
+if you know one, it doesn't tell you much about the others.
 
 I say ``probably weak'' because it is also possible that there is
 a nonlinear relationship that is not captured by the coefficient
@@ -3642,7 +3642,7 @@ figure them out based on {\tt N}, the length of {\tt ys}.
 
 If we've got it right, this function should solve the analysis
 problem; that is, given {\tt ys} it should be able to recover
-{\tt amps}.  We can test it like this.
+{\tt amps}.  We can test it like this:
 
 \begin{verbatim}
 amps = np.array([0.6, 0.25, 0.1, 0.05])
@@ -4007,8 +4007,8 @@ The result is a NumPy array of complex numbers:
 [ 0.324+0.505j -0.505+0.324j -0.324-0.505j  0.505-0.324j]
 \end{verbatim}
 
-The frequency of this signal is 1 cycle per second; the amplitude
-is 0.6 (in unspecified units); and the phase offset is 1 radian.
+The frequency of this signal is 1 cycle per second, the amplitude
+is 0.6 (in unspecified units), and the phase offset is 1 radian.
 
 This example evaluates the signal at 4 places equally spaced between
 0 and 1 second.  The resulting samples are complex numbers.
@@ -5959,7 +5959,7 @@ function} because it contains information about how the system transfers
 the input to the output.
 
 Now we can simulate the effect this room would have on the sound
-of a violin.  Here is the violin recording we used in Section~\ref{violin}
+of a violin.  Here is the violin recording we used in Section~\ref{violin}:
 
 \begin{verbatim}
     violin = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
