@@ -603,8 +603,8 @@ class Spectrogram:
             spectrum = self.spec_map[t]
             array[:, j] = spectrum.amps[:i]
 
-        underride(options, cmap='inferno_r')
-        plt.pcolor(ts, fs, array, **options)
+        underride(options, cmap='inferno_r', shading='auto')
+        plt.pcolormesh(ts, fs, array, **options)
 
     def get_data(self, high=None, **options):
         """Returns spectogram as 2D numpy array

@@ -7,8 +7,8 @@ all:	book.tex
 	pdflatex book
 	makeindex book.idx
 	pdflatex book
-	mv book.pdf thinkstats2.pdf
-	evince thinkstats2.pdf
+	mv book.pdf thinkdsp.pdf
+	evince thinkdsp.pdf
 
 HEVEABUILDLOG=build.log
 
@@ -28,7 +28,7 @@ hevea:
 	cp custom.css thinkdsp.css
 	mv index.html thinkdsp.css thinkdsp*.html thinkdsp*.png *motif.gif html
 
-DEST = /home/downey/public_html/greent/thinkdsp
+DEST = /home/downey/web/greent/thinkdsp
 
 distrib:
 	rm -rf dist
