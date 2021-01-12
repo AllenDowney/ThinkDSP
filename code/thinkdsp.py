@@ -16,7 +16,6 @@ import scipy.fftpack
 import subprocess
 import warnings
 
-from fractions import gcd
 from wave import open as open_wave
 from scipy.io import wavfile
 
@@ -606,9 +605,9 @@ class Spectrogram:
 
         underride(options, cmap='inferno_r')
         plt.pcolor(ts, fs, array, **options)
-        
+
     def get_data(self, high=None, **options):
-        """Returns spectogram as 2D numpy array 
+        """Returns spectogram as 2D numpy array
 
         high: highest frequency component to return
         """
@@ -627,7 +626,7 @@ class Spectrogram:
             array[:, j] = spectrum.amps[:i]
 
         return array
-    
+
     def make_wave(self):
         """Inverts the spectrogram and returns a Wave.
 
