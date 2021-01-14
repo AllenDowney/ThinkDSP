@@ -15,8 +15,7 @@ FRAMERATE = 22050
 
 def estimate_fundemental(wave):
     def compute_and_normalize_correlation(wave):
-        # Compute sequency of correlation coefficients for each pair of segments in the wave
-        # Pairs are the wave up to time interval t and from t to the end, for each interval in lags
+        # Pass wave as both args to correlate to get auto-correlation
         correlation = np.correlate(wave.ys, wave.ys, mode='same')
         # Normalize the correlation
         # np.correlate uses the unstandardized definition of correlation; as the lag gets bigger,
