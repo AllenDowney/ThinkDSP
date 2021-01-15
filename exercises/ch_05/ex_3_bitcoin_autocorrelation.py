@@ -49,7 +49,6 @@ def autocorr(ys):
     return lags, corrs
 
 
-
 def _get_data():
     price_data = None
     with open(DATA) as f:

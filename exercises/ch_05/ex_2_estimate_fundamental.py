@@ -13,6 +13,20 @@ from exercises.lib.lib import play_wave
 FREQ_A4 = 440
 FRAMERATE = 22050
 
+# Selects the second half of the output of np.correlate, which corresponds
+# to positive lags, and normalizes the results
+def autocorr2(segment):
+    lags = range(len(segment.ys)//2)
+    corrs = np.correlate(segment.ys, segment.ys, mode='same')
+    N = len(corrs)
+    lengths = range(N, N//2, -1)
+
+    half = corrs[N//2:].copy()
+    half /= lengths
+    half /= half[0]
+    return lags, half
+
+
 def corrcoef(xs, ys):
     """Coefficient of correlation.
 
@@ -69,7 +83,11 @@ def _find_first_period_peak(correlation):
 
 
 def estimate_fundemental(wave):
-    lags, corrs = autocorr(wave)
+    # autocorr() is the code found in thinkdsp.autocorr.py. It works but
+    #  the autocorr2() uses np.correlate() which is faster so this is preferred.
+    # Both give identical output.
+    # lags, corrs = autocorr(wave)
+    lags, corrs = autocorr2(wave)
     plt.plot(lags, corrs)
     plt.show()
     lag, _ = _find_first_period_peak(corrs)
