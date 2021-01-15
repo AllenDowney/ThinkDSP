@@ -4,6 +4,7 @@
  # To see how well it works, try superimposing your pitch estimates on a spectrogram
  #  of the recording.
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from exercises.ch_02.ex_2_sawtooth import SawtoothSignal
@@ -12,57 +13,68 @@ from exercises.lib.lib import play_wave
 FREQ_A4 = 440
 FRAMERATE = 22050
 
+def corrcoef(xs, ys):
+    """Coefficient of correlation.
+
+    ddof=0 indicates that we should normalize by N, not N-1.
+
+    xs: sequence
+    ys: sequence
+
+    returns: float
+    """
+    return np.corrcoef(xs, ys, ddof=0)[0, 1]
+
+
+def serial_corr(wave, lag=1):
+    """Computes serial correlation with given lag.
+
+    wave: Wave
+    lag: integer, how much to shift the wave
+
+    returns: float correlation coefficient
+    """
+    n = len(wave)
+    y1 = wave.ys[lag:]
+    y2 = wave.ys[:n-lag]
+    corr = corrcoef(y1, y2)
+    return corr
+
+
+def autocorr(wave):
+    """Computes and plots the autocorrelation function.
+
+    wave: Wave
+    """
+    lags = range(len(wave.ys)//2)
+    corrs = [serial_corr(wave, lag) for lag in lags]
+    return lags, corrs
+
+
+def _is_peak(prev_val, cur_val, next_val):
+    if any(val <= 0. for val in [prev_val, cur_val, next_val]):
+        return False
+    return prev_val < cur_val > next_val
+
+
+def _find_first_period_peak(correlation):
+    prev_val = correlation[0]
+    cur_val = 0
+    for i in range(len(correlation) - 1):
+        cur_val = correlation[i]
+        next_val = correlation[i + 1]
+        if _is_peak(prev_val, cur_val, next_val):
+            return i, cur_val
+        prev_val = cur_val
+
 
 def estimate_fundemental(wave):
-    def compute_and_normalize_correlation(wave):
-        # Pass wave as both args to correlate to get auto-correlation
-        correlation = np.correlate(wave.ys, wave.ys, mode='same')
-        # Normalize the correlation
-        # np.correlate uses the unstandardized definition of correlation; as the lag gets bigger,
-        #  the number of points in the overlap between the two signals gets smaller,
-        #  so the magnitude of the correlations decreases.
-        # We can correct that by dividing through by the lengths
-        n = len(correlation)
-        lengths = list(range(n, n // 2, -1))
-        pos_half = correlation[n // 2:]
-        # normalize so correlation with lag == 0 is 1
-        pos_half /= pos_half[0]
-        return pos_half
-
-    def find_period_peaks(correlation):
-        # Find first and second peak in the correlations, this is the period of the wave
-        # Use first and second because first is arbitrarily offset from the start of the wave
-        #  but if the wave is periodic and a high enough frequency to have at least one complete
-        #  cycle this algorithm finds that first comlete cycle (the first two peaks). The distance
-        #  between them is the distance of the period, i.e. the inverse of the frequency.
-        first_peak = None
-        second_peak = None
-        prev_val = correlation[0]
-        cur_val = 0
-        for i in range(len(correlation) - 1):
-            cur_val = correlation[i]
-            next_val = correlation[i + 1]
-            if first_peak is None and prev_val < cur_val < next_val:
-                first_peak = cur_val
-            elif second_peak is None and prev_val < cur_val < next_val:
-                second_peak = cur_val
-                break
-            prev_val = cur_val
-        if first_peak is None or second_peak is None:
-            print("Failed to find peaks in correlations. Cannot estimate fundamental")
-            return None
-        return first_peak, second_peak
-
-    def compute_frequency(first_peak, second_peak):
-        lag_diff = second_peak - first_peak
-        period = lag_diff / wave.framerate
-        return 1 / period
-
-    correlation = compute_and_normalize_correlation(wave)
-    first_peak, second_peak = find_period_peaks(correlation)
-    frequency = compute_frequency(first_peak, second_peak)
-
-    return frequency
+    lags, corrs = autocorr(wave)
+    plt.plot(lags, corrs)
+    plt.show()
+    lag, _ = _find_first_period_peak(corrs)
+    period = lag / wave.framerate
+    return 1 / period
 
 
 def run():
@@ -72,7 +84,7 @@ def run():
     wave = sawtooth_sig.make_wave(start=0, duration=duration_secs, framerate=FRAMERATE)
     fundamental = estimate_fundemental(wave)
     if fundamental is not None:
-        print(f'Est. fundamental freq of A440 wave is {(fundamental / 1000):.2f} Hz')
+        print(f'Est. fundamental freq of A440 wave is {fundamental:.2f} Hz')
 
 
 if __name__ == '__main__':
