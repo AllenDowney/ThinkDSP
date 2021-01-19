@@ -94,4 +94,3 @@ if __name__ == '__main__':
     print("\nChapter 6: ex_1_dct_analyze_run_time.py")
     print("****************************")
     run()
-

@@ -10,9 +10,12 @@
 # like white noise. Compute and plot the power spectrum to see whether it looks
 # like white noise.
 
+import matplotlib.pyplot as plt
 import numpy as np
+
 import code.thinkplot as thinkplot
 from code.thinkdsp import Noise
+
 from exercises.lib.lib import play_wave
 
 FRAMERATE = 22050
