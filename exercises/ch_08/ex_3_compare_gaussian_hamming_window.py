@@ -10,7 +10,6 @@ from code.thinkdsp import read_wave, zero_pad
 import code.thinkplot as thinkplot
 
 SOUND_FILE = 'exercises/ch_01/SIG_126_A_Retro_Synth.wav'
-FRAMERATE = 22050
 
 
 def smooth(ys, window):
