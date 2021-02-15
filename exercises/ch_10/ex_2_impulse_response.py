@@ -45,6 +45,7 @@ def run():
     output = (source_spectrum * transfer_function).make_wave()
     print('Plotting wave of source modified by transfer function')
     output.plot()
+    output.normalize()
     print('Playing wave of source modified by transfer function')
     play_wave(output)
 
@@ -55,6 +56,7 @@ def run():
     convolved_output = Wave(convolved, framerate=FRAMERATE)
     print('Plotting wave of convolved output')
     convolved_output.plot()
+    convolved_output.normalize()
     print('Playing wave of convolved output')
     play_wave(convolved_output)
 
