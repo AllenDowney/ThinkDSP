@@ -338,7 +338,7 @@ class Spectrum(_SpectrumParent):
 
         returns: new Spectrum
         """
-        assert all(self.fs == other.fs)
+        # assert all(self.fs == other.fs)
         hs = self.hs * other.hs
         return Spectrum(hs, self.fs, self.framerate, self.full)
 
