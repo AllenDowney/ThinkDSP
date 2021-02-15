@@ -338,6 +338,9 @@ class Spectrum(_SpectrumParent):
 
         returns: new Spectrum
         """
+        # NOTE: Commented out by marksweiss. This is assert is broken and fails
+        # all spectrum multilications of two non-identical spectrums, e.g. when
+        # modifying a source spectrum by an impulse response spectrum.
         # assert all(self.fs == other.fs)
         hs = self.hs * other.hs
         return Spectrum(hs, self.fs, self.framerate, self.full)

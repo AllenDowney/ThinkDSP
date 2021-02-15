@@ -2,7 +2,9 @@
 # computed two ways: by convolving the recording with the impulse response and by computing
 # the filter that corresponds to the impulse response and multiplying by the DFT of the
 # recording.
-from code.thinkdsp import read_wave
+import numpy as np
+
+from code.thinkdsp import read_wave, Wave
 
 from exercises.lib.lib import play_wave
 
@@ -45,6 +47,16 @@ def run():
     output.plot()
     print('Playing wave of source modified by transfer function')
     play_wave(output)
+
+    # We can perform the same operation as a convolution in the time domain, over the source
+    # signal as a wave and with the impulse wave as the convolution window
+    window = impulse_response.ys
+    convolved = np.convolve(source.ys, window)
+    convolved_output = Wave(convolved, framerate=FRAMERATE)
+    print('Plotting wave of convolved output')
+    convolved_output.plot()
+    print('Playing wave of convolved output')
+    play_wave(convolved_output)
 
 
 if __name__ == '__main__':
