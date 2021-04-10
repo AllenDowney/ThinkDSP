@@ -157,7 +157,7 @@ If not, the Jupyter server should print a URL you can use.  For example, when I 
 
 In this case, the URL is [http://localhost:8888](http://localhost:8888).
 When you start your server, you might get a different URL.
-Whatever it is, if you paste it into a browser, you should should see a home page with a list of directories.
+Whatever it is, if you paste it into a browser, you should see a home page with a list of directories.
 
 Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
