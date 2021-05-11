@@ -37,7 +37,7 @@ def corrcoef(xs, ys):
 
     returns: float
     """
-    return np.corrcoef(xs, ys, ddof=0)[0, 1]
+    return np.corrcoef(xs, ys)[0, 1]
 
 
 def plot_sines():
@@ -64,7 +64,7 @@ def plot_sines():
         wave2 = make_sine(offset)
         corr = corrcoef(wave1.ys, wave2.ys)
         corrs.append(corr)
-    
+
     thinkplot.plot(offsets, corrs)
     thinkplot.save(root='autocorr2',
                    xlabel='Offset (radians)',
@@ -125,7 +125,7 @@ def plot_serial_corr():
 
     thinkplot.plot(betas, corrs)
     thinkplot.config(xlabel=r'Pink noise parameter, $\beta$',
-                     ylabel='Serial correlation', 
+                     ylabel='Serial correlation',
                      ylim=[0, 1.05])
     thinkplot.save(root='autocorr3')
 
@@ -162,9 +162,9 @@ def plot_autocorr():
         label = r'$\beta$ = %.1f' % beta
         plot_pink_autocorr(beta, label)
 
-    thinkplot.config(xlabel='Lag', 
-                     ylabel='Correlation', 
-                     xlim=[-5, 1000], 
+    thinkplot.config(xlabel='Lag',
+                     ylabel='Correlation',
+                     xlim=[-5, 1000],
                      ylim=[-0.05, 1.05])
     thinkplot.save(root='autocorr4')
 
@@ -185,8 +185,8 @@ def plot_singing_chirp():
     # plot the autocorrelation function
     lags, corrs = autocorr(segment)
     thinkplot.plot(lags, corrs)
-    thinkplot.config(xlabel='Lag (index)', 
-                     ylabel='Correlation', 
+    thinkplot.config(xlabel='Lag (index)',
+                     ylabel='Correlation',
                      ylim=[-1.05, 1.05],
                      xlim=[0, 225])
     thinkplot.save(root='autocorr8')
@@ -195,12 +195,12 @@ def plot_singing_chirp():
     gram = wave.make_spectrogram(seg_length=1024)
     gram.plot(high=4200)
 
-    thinkplot.config(xlabel='Time (s)', 
+    thinkplot.config(xlabel='Time (s)',
                      ylabel='Frequency (Hz)',
                      xlim=[0, 1.4],
                      ylim=[0, 4200])
     thinkplot.save(root='autocorr5')
-    
+
     # plot the spectrum of one segment
     spectrum = segment.make_spectrum()
     spectrum.plot(high=1000)
@@ -221,8 +221,8 @@ def plot_correlate():
     corrs2 = np.correlate(segment.ys, segment.ys, mode='same')
     lags = np.arange(-N//2, N//2)
     thinkplot.plot(lags, corrs2)
-    thinkplot.config(xlabel='Lag', 
-                     ylabel='Correlation', 
+    thinkplot.config(xlabel='Lag',
+                     ylabel='Correlation',
                      xlim=[-N//2, N//2])
     thinkplot.save(root='autocorr9')
 
