@@ -1,7 +1,7 @@
 % LaTeX source for ``Think DSP: Digital Signal Processing for Programmers''
 % Copyright 2014  Allen B. Downey.
 
-% License: Creative Commons 
+% License: Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International
 % http://creativecommons.org/licenses/by-nc-sa/4.0/
 %
@@ -72,9 +72,9 @@
 \newcommand*{\Anchor}[1]{%
   \@bsphack%
     \Hy@GlobalStepCount\anchorcnt%
-    \edef\@currentHref{anchor.\the\anchorcnt}% 
-    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}% 
-    \M@gettitle{}\label{#1}% 
+    \edef\@currentHref{anchor.\the\anchorcnt}%
+    \Hy@raisedlink{\hyper@anchorstart{\@currentHref}\hyper@anchorend}%
+    \M@gettitle{}\label{#1}%
     \@esphack%
 }
 \else
@@ -209,9 +209,9 @@ Copyright 2014 Allen B. Downey
 \vspace{0.25in}
 
 Permission is granted to copy, distribute, and/or modify this document
-under the terms of the Creative Commons 
-Attribution-NonCommercial-ShareAlike 4.0 International
-Unported License, which is available at
+under the terms of the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License,
+which is available at
 \url{http://creativecommons.org/licenses/by-nc-sa/4.0/}.
 
 \setcounter{chapter}{-1}
@@ -366,7 +366,7 @@ the command line, like this:
 $ jupyter notebook
 \end{verbatim}
 
-If it's not installed, you can install it in Anaconda like this
+If it's not installed, you can install it in Anaconda like this:
 
 \begin{verbatim}
 $ conda install jupyter
@@ -652,8 +652,8 @@ musically harmonious with the fundamental:
 \item 880 is the frequency of A5, one octave higher than the fundamental.
 An {\bf octave} is a doubling in frequency.
 
-\item 1320 is approximately E6, which is a major fifth above A5.
-  If you are not familiar with musical intervals like "major fifth'', see
+\item 1320 is approximately E6, which is a perfect fifth above A5.
+  If you are not familiar with musical intervals like "perfect fifth'', see
   \url{https://en.wikipedia.org/wiki/Interval_(music)}.
 
 \item 1760 is A6, two octaves above the fundamental.
@@ -2379,7 +2379,7 @@ and frequency on a log-log scale.  Here's the code:
 
 \begin{verbatim}
 	import matplotlib.pyplot as plt
-	
+
     spectrum = wave.make_spectrum()
     spectrum.plot_power(linewidth=1, alpha=0.5)
     plt.xscale('log')
@@ -2728,7 +2728,7 @@ The magnitude of $\rho$ indicates the strength of the correlation.  If
 $\rho$ is 1 or -1, the variables are perfectly correlated, which means
 that if you know one, you can make a perfect prediction about the
 other.  If $\rho$ is near zero, the correlation is probably weak, so
-if you know one, it doesn't tell you much about the others,
+if you know one, it doesn't tell you much about the others.
 
 I say ``probably weak'' because it is also possible that there is
 a nonlinear relationship that is not captured by the coefficient
@@ -3637,7 +3637,7 @@ figure them out based on {\tt N}, the length of {\tt ys}.
 
 If we've got it right, this function should solve the analysis
 problem; that is, given {\tt ys} it should be able to recover
-{\tt amps}.  We can test it like this.
+{\tt amps}.  We can test it like this:
 
 \begin{verbatim}
 amps = np.array([0.6, 0.25, 0.1, 0.05])
@@ -4002,8 +4002,8 @@ The result is a NumPy array of complex numbers:
 [ 0.324+0.505j -0.505+0.324j -0.324-0.505j  0.505-0.324j]
 \end{verbatim}
 
-The frequency of this signal is 1 cycle per second; the amplitude
-is 0.6 (in unspecified units); and the phase offset is 1 radian.
+The frequency of this signal is 1 cycle per second, the amplitude
+is 0.6 (in unspecified units), and the phase offset is 1 radian.
 
 This example evaluates the signal at 4 places equally spaced between
 0 and 1 second.  The resulting samples are complex numbers.
@@ -5183,7 +5183,7 @@ spectrum.
 import pandas as pd
 
 names = ['date', 'open', 'high', 'low', 'close', 'volume']
-df = pd.read_csv('fb.csv', header=0, names=names)
+df = pd.read_csv('fb_1.csv', header=0, names=names)
 ys = df.close.values[::-1]
 close = thinkdsp.Wave(ys, framerate=1)
 spectrum = wave.make_spectrum()
@@ -5954,7 +5954,7 @@ function} because it contains information about how the system transfers
 the input to the output.
 
 Now we can simulate the effect this room would have on the sound
-of a violin.  Here is the violin recording we used in Section~\ref{violin}
+of a violin.  Here is the violin recording we used in Section~\ref{violin}:
 
 \begin{verbatim}
     violin = thinkdsp.read_wave('92002__jcveliz__violin-origional.wav')
@@ -6726,7 +6726,7 @@ The low pass filter I used in the last step is a so-called {\bf brick
 as if they hit a brick wall.
 
 Figure~\ref{fig.sampling6} (right) shows what this filter looks like.
-Of course, multiplication by the this filter, in the frequency domain,
+Of course, multiplication by this filter, in the frequency domain,
 corresponds to convolution with a window in the time domain.  We can
 find out what that window is by computing the inverse DFT of the
 filter, which is shown in Figure~\ref{fig.sampling6} (left).
@@ -6750,12 +6750,12 @@ between the sampled points.
 \begin{figure}
 % sampling.py
 \centerline{\includegraphics[height=2.5in]{figs/sampling8.pdf}}
-\caption{.}
+\caption{Example of interpolation by adding shifted, scaled copies of a sinc function.}
 \label{fig.sampling8}
 \end{figure}
 
 Figure~\ref{fig.sampling8} shows how that works using a short segment
-of the bass guitar solo.  The line across the to is the original
+of the bass guitar solo.  The line across the top is the original
 wave.  The vertical gray lines show the sampled values.  The thin
 curves are the shifted, scaled copies of the sinc function.
 The sum of these sinc functions is identical to the original wave.
