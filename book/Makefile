@@ -12,7 +12,6 @@ all:	book.tex
 
 HEVEABUILDLOG=build.log
 
-
 hevea:
 	sed 's/\(figs\/[^.]*\).\(pdf\|png\)/\1.eps/' book.tex > thinkdsp.tex
 	rm -rf html
@@ -47,7 +46,6 @@ plastex:
 
 xxe:
 	xmlcopyeditor ~/ThinkDSP/book/book/book.xml &
-	#~/Downloads/xxe-perso-4_8_0/bin/xxe book/book.xml
 
 lint:
 	xmllint -noout book/book.xml
@@ -63,3 +61,26 @@ oreilly:
 
 clean:
 	rm -f *~ *.aux *.log *.dvi *.idx *.ilg *.ind *.toc
+
+
+pdfpextr = \
+    gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
+       -dFirstPage=$(1) \
+       -dLastPage=$(2) \
+       -sOutputFile=$(4) \
+       $(3)
+
+split:
+	$(call pdfpextr,5,7,thinkos.pdf,chap00.pdf)
+	$(call pdfpextr,13,20,thinkos.pdf,chap01.pdf)
+	$(call pdfpextr,21,26,thinkos.pdf,chap02.pdf)
+	$(call pdfpextr,27,34,thinkos.pdf,chap03.pdf)
+	$(call pdfpextr,35,42,thinkos.pdf,chap04.pdf)
+	$(call pdfpextr,43,50,thinkos.pdf,chap05.pdf)
+	$(call pdfpextr,51,56,thinkos.pdf,chap06.pdf)
+	$(call pdfpextr,57,68,thinkos.pdf,chap07.pdf)
+	$(call pdfpextr,69,74,thinkos.pdf,chap08.pdf)
+	$(call pdfpextr,75,82,thinkos.pdf,chap09.pdf)
+	$(call pdfpextr,83,94,thinkos.pdf,chap10.pdf)
+	$(call pdfpextr,95,101,thinkos.pdf,chap11.pdf)
+
