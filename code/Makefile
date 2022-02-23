@@ -1,8 +1,4 @@
-DOCS = thinkdsp.html
-
-DOCPY = thinkdsp.py
-
-DEST = /home/downey/public_html/greent/thinkdsp
+DEST = /home/downey/web/greenteapress
 
 FIGS = \
 sounds1.pdf sounds1.eps  \
@@ -73,20 +69,19 @@ sampling9.pdf sampling9.eps \
 
 FIGDEST = ../book/figs
 
-%.html: %.py
-	pydoc -w $<
-
 figs:
 	rsync -a $(FIGS) $(FIGDEST)
 
-.PHONY: docs $(DOCPY)
 
-docs: $(DOCPY)
-	rsync -a $(DOCS) /home/downey/public_html/greent
-	cd /home/downey/public_html/greent; sh back
+.PHONY: docs
+
+docs:
+	pydoc -w thinkdsp
+	rsync -a thinkdsp.html $(DEST)/thinkdsp
+	#cd $(DEST); sh back
 
 $(DOCPY):
-	pydoc -w ./$@
+
 
 
 NOTEBOOKS = \
