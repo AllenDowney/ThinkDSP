@@ -1,3 +1,13 @@
+# instructions
+
+# Currently the staging area for greenteapress.com is on bob at
+# /home/downey/web/greenteapress
+
+# To build and sync a new release:
+# make
+# make hevea
+# make distrib
+
 PDFFLAGS = -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress \
            -dCompressPages=true -dUseFlateCompression=true  \
            -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
@@ -27,7 +37,7 @@ hevea:
 	cp custom.css thinkdsp.css
 	mv index.html thinkdsp.css thinkdsp*.html thinkdsp*.png *motif.gif html
 
-DEST = /home/downey/web/greent/thinkdsp
+DEST = /home/downey/web/greenteapress/thinkdsp
 
 distrib:
 	rm -rf dist
@@ -83,4 +93,3 @@ split:
 	$(call pdfpextr,75,82,thinkos.pdf,chap09.pdf)
 	$(call pdfpextr,83,94,thinkos.pdf,chap10.pdf)
 	$(call pdfpextr,95,101,thinkos.pdf,chap11.pdf)
-
