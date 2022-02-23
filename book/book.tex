@@ -40,7 +40,7 @@
 
 \newcommand{\thetitle}{Think DSP}
 \newcommand{\thesubtitle}{Digital Signal Processing in Python}
-\newcommand{\theversion}{1.1.3}
+\newcommand{\theversion}{1.1.4}
 
 % these styles get translated in CSS for the HTML version
 \newstyle{a:link}{color:black;}
@@ -3366,7 +3366,7 @@ of products:
 \[ e = 0.6 a + 0.25 b + 0.1 c + 0.05 d \]
 %
 And likewise with the other elements of {\tt ys}.  So each element
-of {\tt y} is the sum of four frequency components, evaluated at
+of {\tt ys} is the sum of four frequency components, evaluated at
 a point in time, and multiplied by the corresponding amplitudes.
 And that's exactly what we wanted.
 
@@ -4306,7 +4306,7 @@ arithmetic.
 
 As a function, {\tt analyze2} would be hard to use because it
 only works if {\tt fs} and {\tt ts} are chosen correctly.
-Instead, I will rewrite it to take just {\tt ys} and compute {\tt freq}
+Instead, I will rewrite it to take just {\tt ys} and compute {\tt fs}
 and {\tt ts} itself.
 
 First, I'll make a function to compute the synthesis matrix, $M$:
@@ -4365,11 +4365,11 @@ The inverse DFT is almost the same, except we don't have to transpose
 and conjugate $M$, and {\em now} we have to divide through by N:
 
 \begin{verbatim}
-def idft(ys):
-    N = len(ys)
+def idft(amps):
+    N = len(amps)
     M = synthesis_matrix(N)
-    amps = M.dot(ys) / N
-    return amps
+    ys = M.dot(amps) / N
+    return ys
 \end{verbatim}
 
 Finally, we can confirm that {\tt dft(idft(amps))} yields {\tt amps}.
@@ -4454,7 +4454,7 @@ frequency.
 \label{fig.dft3}
 \end{figure}
 
-The Spectrum class in {\tt thinkdsp} is based on {\tt np.ftt.rfft},
+The Spectrum class in {\tt thinkdsp} is based on {\tt np.fft.rfft},
 which computes the ``real DFT''; that is, it works with real signals.
 But the DFT as presented in this chapter is more general than that; it
 works with complex signals.
@@ -4659,7 +4659,8 @@ multiplying the window by the wave array:
 \end{verbatim}
 
 {\tt padded} is a version of the window with zeros added to
-the end so it has the same length as {\tt segment.ys}
+the end so it has the same length as {\tt segment.ys}.
+
 {\tt prod} is the product of the window and the wave array.
 
 The sum of the elementwise products is the average of the first 11
@@ -4888,7 +4889,7 @@ exactly the amplitudes in \verb"dft_window".  Mathematically:
 In this context, the DFT of a window is called a {\bf filter}.
 For any convolution window in the time domain, there is a
 corresponding filter in the frequency domain.  And for any
-filter than can be expressed by element-wise multiplication in
+filter that can be expressed by element-wise multiplication in
 the frequency domain, there is a corresponding window.
 
 
@@ -5059,7 +5060,7 @@ function drops off slowly, suggesting that this signal resembled
 pink noise, as we saw in Section~\ref{autopink}.
 
 To compute autocorrelation using convolution,
-have to zero-pad the signal to double the length.
+we have to zero-pad the signal to double the length.
 This trick is necessary because the FFT is based
 on the assumption that the signal is periodic; that is, that it wraps
 around from the end to the beginning.  With time-series data like
@@ -5138,7 +5139,7 @@ effect of the Hamming window, and some of the other windows provided
 by NumPy, on spectral leakage.  We can get some insight into the
 effect of these windows by looking at their DFTs.
 
-In addition to the Gaussian window we used in this window, create a
+In addition to the Gaussian window we used in this chapter, create a
 Hamming window with the same size.  Zero pad the windows and plot
 their DFTs.  Which window acts as a better low-pass filter?  You might
 find it useful to plot the DFTs on a log-$y$ scale.
@@ -5186,7 +5187,7 @@ names = ['date', 'open', 'high', 'low', 'close', 'volume']
 df = pd.read_csv('fb_1.csv', header=0, names=names)
 ys = df.close.values[::-1]
 close = thinkdsp.Wave(ys, framerate=1)
-spectrum = wave.make_spectrum()
+spectrum = close.make_spectrum()
 \end{verbatim}
 
 This example uses Pandas to read the CSV file; the
@@ -5879,7 +5880,7 @@ and we wanted to characterize this system.  We would do that by
 inputting an impulse and measuring the impulse response.
 
 In this example, we can compute the impulse response by multiplying
-spectrum of the impulse and the filter, and then converting the result
+the spectrum of the impulse and the filter, and then converting the result
 from a spectrum to a wave:
 
 \begin{verbatim}
@@ -6354,7 +6355,7 @@ This chapter explores the effect of sampling and presents the
 Sampling Theorem, which explains aliasing and the folding frequency.
 
 I'll start by exploring the effect of convolution with impulses;
-I'll uses that to explain amplitude modulation (AM), which
+then I'll use that effect to explain amplitude modulation (AM), which
 turns out to be useful for understanding the Sampling Theorem.
 
 The code for this chapter is in {\tt chap11.ipynb}, which is in the
@@ -6530,7 +6531,7 @@ the result anyway, another factor of 2 is not an issue.
 
 I explained amplitude modulation in part because it is interesting, but
 mostly because it will help us understand sampling.  ``Sampling'' is
-the process of measuring an analog signal at an series of points in
+the process of measuring an analog signal at a series of points in
 time, usually with equal spacing.
 
 For example, the WAV files we have used as examples were
