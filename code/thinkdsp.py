@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 try:
     from IPython.display import Audio
-except:
+except ImportError:
     warnings.warn(
         "Can't import Audio from IPython.display; " "Wave.make_audio() will not work."
     )
