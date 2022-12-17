@@ -74,6 +74,13 @@ class WavFileWriter:
         wave: Wave
         """
         zs = wave.quantize(self.bound, self.dtype)
+        
+        if wave.ts[0] > 0:
+            front = np.zeros([int(wave.ts[0] * self.framerate)], dtype=self.dtype)
+            zs = np.append(front, zs)
+        elif wave.ts[0] < 0:
+            zs = zs[-int(wave.ts[0]) * self.framerate:]
+        
         self.fp.writeframes(zs.tostring())
 
     def close(self, duration=0):
