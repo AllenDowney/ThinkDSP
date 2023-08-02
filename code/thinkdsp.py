@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 try:
     from IPython.display import Audio
-except:
+except ImportError:
     warnings.warn(
         "Can't import Audio from IPython.display; " "Wave.make_audio() will not work."
     )
@@ -596,7 +596,7 @@ class Spectrogram:
 
         # make the array
         size = len(fs), len(ts)
-        array = np.zeros(size, dtype=np.float)
+        array = np.zeros(size, dtype=float)
 
         # copy amplitude from each spectrum into a column of the array
         for j, t in enumerate(ts):
@@ -618,7 +618,7 @@ class Spectrogram:
 
         # make the array
         size = len(fs), len(ts)
-        array = np.zeros(size, dtype=np.float)
+        array = np.zeros(size, dtype=float)
 
         # copy amplitude from each spectrum into a column of the array
         for j, t in enumerate(ts):
@@ -649,7 +649,7 @@ class Spectrogram:
         low = min(starts)
         high = max(ends)
 
-        ys = np.zeros(high - low, np.float)
+        ys = np.zeros(high - low, dtype=float)
         for start, end, wave in res:
             ys[start:end] = wave.ys
 
@@ -1502,7 +1502,6 @@ class TriangleSignal(Sinusoid):
         ys = normalize(unbias(ys), self.amp)
         return ys
 
-from scipy.integrate import cumtrapz
 
 class Chirp(Signal):
     """Represents a signal with variable frequency."""
@@ -1893,8 +1892,6 @@ def underride(d, **options):
     return d
 
 
-
-
 def main():
 
     cos_basis = cos_wave(440)
@@ -1947,7 +1944,7 @@ def main():
     sig2 = CosSignal(freq=523.25)
     sig3 = CosSignal(freq=660)
     sig4 = CosSignal(freq=880)
-    sig5 = CosSignal(freq=987)
+    # sig5 = CosSignal(freq=987)
     sig = sig1 + sig2 + sig3 + sig4
 
     # wave = Wave(sig, duration=0.02)
