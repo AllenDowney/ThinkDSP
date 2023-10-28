@@ -18,7 +18,7 @@ Here's a notebook that previews what you will see in Chapter 1:
 
 * [chap01preview.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01preview.ipynb)
 
-And if you want to see where were headed, here's a preview of Chapter 10:
+And if you want to see where we are headed, here's a preview of Chapter 10:
 
 * [chap10preview.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10preview.ipynb)
 
