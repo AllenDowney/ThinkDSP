@@ -3294,7 +3294,7 @@ We can test this function like this:
 
     ts = np.linspace(0, 1, framerate)
     ys = synthesize1(amps, fs, ts)
-    wave = thinkdsp.Wave(ys, framerate)
+    wave = thinkdsp.Wave(ys, ts, framerate)
 \end{verbatim}
 
 This example makes a signal that contains a fundamental frequency at
