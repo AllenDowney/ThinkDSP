@@ -1007,6 +1007,7 @@ class Wave:
         """
         xfactor = self.get_xfactor(options)
         plt.plot(self.ts * xfactor, np.real(self.ys), **options)
+        plt.show()
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples."""
