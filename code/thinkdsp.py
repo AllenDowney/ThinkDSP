@@ -271,6 +271,7 @@ class _SpectrumParent:
         else:
             i = None if high is None else find_index(high, self.fs)
             plt.plot(self.fs[:i], self.amps[:i], **options)
+        plt.show()
 
     def plot_power(self, high=None, **options):
         """Plots power vs frequency.
