@@ -271,6 +271,7 @@ class _SpectrumParent:
         else:
             i = None if high is None else find_index(high, self.fs)
             plt.plot(self.fs[:i], self.amps[:i], **options)
+        plt.show()
 
     def plot_power(self, high=None, **options):
         """Plots power vs frequency.
@@ -1007,6 +1008,7 @@ class Wave:
         """
         xfactor = self.get_xfactor(options)
         plt.plot(self.ts * xfactor, np.real(self.ys), **options)
+        plt.show()
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples."""
