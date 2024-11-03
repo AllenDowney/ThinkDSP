@@ -6,7 +6,6 @@ License: MIT License (https://opensource.org/licenses/MIT)
 """
 
 import copy
-import math
 
 import numpy as np
 import random
@@ -28,7 +27,7 @@ except ImportError:
         "Can't import Audio from IPython.display; " "Wave.make_audio() will not work."
     )
 
-PI2 = math.pi * 2
+PI2 = np.pi * 2
 
 
 def random_seed(x):
@@ -1050,8 +1049,8 @@ class Wave:
         returns: float covariance
         """
         n = len(self.ys)
-        factor = math.pi * k / n
-        ys = [math.cos(factor * (i + 0.5)) for i in range(n)]
+        factor = np.pi * k / n
+        ys = [np.cos(factor * (i + 0.5)) for i in range(n)]
         total = 2 * sum(self.ys * ys)
         return total
 
@@ -1886,7 +1885,7 @@ def main():
     cos_basis = cos_wave(440)
     sin_basis = sin_wave(440)
 
-    wave = cos_wave(440, offset=math.pi / 2)
+    wave = cos_wave(440, offset=np.pi / 2)
     cos_cov = cos_basis.cov(wave)
     sin_cov = sin_basis.cov(wave)
     print(cos_cov, sin_cov, mag((cos_cov, sin_cov)))
