@@ -13,7 +13,7 @@ import numpy
 import thinkdsp
 import thinkplot
 
-PI2 = math.pi * 2
+PI2 = np.pi * 2
 
 
 def synthesize1(amps, freqs, ts):

@@ -18,7 +18,7 @@ import matplotlib.pyplot as pyplot
 import warnings
 warnings.filterwarnings('ignore')
 
-PI2 = math.pi * 2
+PI2 = np.pi * 2
 
 
 def linear_chirp_evaluate(ts, low=440, high=880, amp=1.0):
