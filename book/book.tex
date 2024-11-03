@@ -3294,7 +3294,7 @@ We can test this function like this:
 
     ts = np.linspace(0, 1, framerate)
     ys = synthesize1(amps, fs, ts)
-    wave = thinkdsp.Wave(ys, framerate)
+    wave = thinkdsp.Wave(ys, ts, framerate)
 \end{verbatim}
 
 This example makes a signal that contains a fundamental frequency at
@@ -5932,7 +5932,7 @@ at \url{http://tinyurl.com/thinkdsp10}.
 Here's the gunshot:
 
 \begin{verbatim}
-    response = thinkdsp.read_wave('180961__kleeb__gunshots.wav')
+    response = thinkdsp.read_wave('180960__kleeb__gunshots.wav')
     response = response.segment(start=0.26, duration=5.0)
     response.normalize()
     response.plot()
