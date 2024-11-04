@@ -8,7 +8,6 @@ License: MIT License (https://opensource.org/licenses/MIT)
 import copy
 
 import numpy as np
-import random
 import scipy
 import scipy.stats
 import scipy.fftpack
@@ -29,14 +28,6 @@ except ImportError:
 
 PI2 = np.pi * 2
 
-
-def random_seed(x):
-    """Initialize the random and np.random generators.
-
-    x: int seed
-    """
-    random.seed(x)
-    np.random.seed(x)
 
 
 class UnimplementedMethodException(Exception):
@@ -189,12 +180,12 @@ class _SpectrumParent:
     @property
     def amps(self):
         """Returns a sequence of amplitudes (read-only property)."""
-        return np.absolute(self.hs)
+        return np.abs(self.hs)
 
     @property
     def power(self):
         """Returns a sequence of powers (read-only property)."""
-        return self.amps**2
+        return np.abs(self.hs)**2
 
     def copy(self):
         """Makes a copy.
@@ -241,6 +232,7 @@ class _SpectrumParent:
 
     @property
     def freq_res(self):
+        """Frequency resolution in Hz."""
         return self.framerate / 2 / (len(self.fs) - 1)
 
     def render_full(self, high=None):
@@ -368,7 +360,7 @@ class Spectrum(_SpectrumParent):
 
     @property
     def angles(self):
-        """Returns a sequence of angles (read-only property)."""
+        """Returns the angles of the hs (read-only property)."""
         return np.angle(self.hs)
 
     def scale(self, factor):
@@ -489,8 +481,6 @@ class IntegratedSpectrum:
 
         returns: slope, inter, r2, p, stderr
         """
-        # print self.fs[low:high]
-        # print self.cs[low:high]
         x = np.log(self.fs[low:high])
         y = np.log(self.cs[low:high])
         t = scipy.stats.linregress(x, y)
@@ -586,24 +576,11 @@ class Spectrogram:
 
         high: highest frequency component to plot
         """
-        fs = self.frequencies()
-        i = None if high is None else find_index(high, fs)
-        fs = fs[:i]
-        ts = self.times()
-
-        # make the array
-        size = len(fs), len(ts)
-        array = np.zeros(size, dtype=float)
-
-        # copy amplitude from each spectrum into a column of the array
-        for j, t in enumerate(ts):
-            spectrum = self.spec_map[t]
-            array[:, j] = spectrum.amps[:i]
-
+        ts, fs, array = self.get_data(high=high)
         underride(options, cmap="inferno_r", shading="auto")
         plt.pcolormesh(ts, fs, array, **options)
 
-    def get_data(self, high=None, **options):
+    def get_data(self, high=None):
         """Returns spectogram as 2D numpy array
 
         high: highest frequency component to return
@@ -622,7 +599,7 @@ class Spectrogram:
             spectrum = self.spec_map[t]
             array[:, j] = spectrum.amps[:i]
 
-        return array
+        return ts, fs, array
 
     def make_wave(self):
         """Inverts the spectrogram and returns a Wave.
@@ -725,7 +702,7 @@ class Wave:
             dt = 1 / wave.framerate
             if (diff / dt) > 0.1:
                 warnings.warn(
-                    "Can't add these waveforms; their " "time arrays don't line up."
+                    "Can't add these waveforms; their time arrays don't line up."
                 )
 
             j = i + len(wave)
@@ -785,8 +762,9 @@ class Wave:
     def convolve(self, other):
         """Convolves two waves.
 
-        Note: this operation ignores the timestamps; the result
-        has the timestamps of self.
+        Note: this operation ignores the timestamps;
+        the timestamps in the result depend on the length
+        of the result and the framerate of self.
 
         other: Wave or NumPy array
 
@@ -799,7 +777,6 @@ class Wave:
             window = other
 
         ys = np.convolve(self.ys, window, mode="full")
-        # ts = np.arange(len(ys)) / self.framerate
         return Wave(ys, framerate=self.framerate)
 
     def diff(self):
@@ -936,7 +913,7 @@ class Wave:
     def make_spectrum(self, full=False):
         """Computes the spectrum using FFT.
 
-        full: boolean, whethere to compute a full FFT
+        full: boolean, whether to compute a full FFT
               (as opposed to a real FFT)
 
         returns: Spectrum
@@ -990,30 +967,24 @@ class Wave:
 
         return Spectrogram(spec_map, seg_length)
 
-    def get_xfactor(self, options):
-        try:
-            xfactor = options["xfactor"]
-            options.pop("xfactor")
-        except KeyError:
-            xfactor = 1
-        return xfactor
-
     def plot(self, **options):
         """Plots the wave.
 
         If the ys are complex, plots the real part.
 
         """
-        xfactor = self.get_xfactor(options)
+        # see if a time-scaling factor is provided
+        xfactor = options.pop('xfactor', 1)
+
         plt.plot(self.ts * xfactor, np.real(self.ys), **options)
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples."""
-        xfactor = self.get_xfactor(options)
+        xfactor = options.pop('xfactor', 1)
         plt.vlines(self.ts * xfactor, 0, self.ys, **options)
 
     def corr(self, other):
-        """Correlation coefficient two waves.
+        """Correlation coefficient of two waves.
 
         other: Wave
 
@@ -1211,6 +1182,15 @@ class Signal:
 
     __radd__ = __add__
 
+    def __call__(self, ts):
+        """Evaluates the signal at the given times.
+
+        ts: float array of times
+
+        returns: float wave array
+        """
+        return self.evaluate(ts)
+
     @property
     def period(self):
         """Period of the signal in seconds (property).
@@ -1247,21 +1227,6 @@ class Signal:
         ts = start + np.arange(n) / framerate
         ys = self.evaluate(ts)
         return Wave(ys, ts, framerate=framerate)
-
-
-def infer_framerate(ts):
-    """Given ts, find the framerate.
-
-    Assumes that the ts are equally spaced.
-
-    ts: sequence of times in seconds
-
-    returns: frames per second
-    """
-    # TODO: confirm that this is never used and remove it
-    dt = ts[1] - ts[0]
-    framerate = 1.0 / dt
-    return framerate
 
 
 class SumSignal(Signal):
@@ -1785,16 +1750,6 @@ def cos_wave(freq, duration=1, offset=0):
     return wave
 
 
-def mag(a):
-    """Computes the magnitude of a numpy array.
-
-    a: numpy array
-
-    returns: float
-    """
-    return np.sqrt(np.dot(a, a))
-
-
 def zero_pad(array, n):
     """Extends an array with zeros.
 
@@ -1881,70 +1836,3 @@ def underride(d, **options):
     return d
 
 
-def main():
-    cos_basis = cos_wave(440)
-    sin_basis = sin_wave(440)
-
-    wave = cos_wave(440, offset=np.pi / 2)
-    cos_cov = cos_basis.cov(wave)
-    sin_cov = sin_basis.cov(wave)
-    print(cos_cov, sin_cov, mag((cos_cov, sin_cov)))
-    return
-
-    wfile = WavFileWriter()
-    for sig_cons in [
-        SinSignal,
-        TriangleSignal,
-        SawtoothSignal,
-        GlottalSignal,
-        ParabolicSignal,
-        SquareSignal,
-    ]:
-        print(sig_cons)
-        sig = sig_cons(440)
-        wave = sig.make_wave(1)
-        wave.apodize()
-        wfile.write(wave)
-    wfile.close()
-    return
-
-    signal = GlottalSignal(440)
-    signal.plot()
-    plt.show()
-    return
-
-    wfile = WavFileWriter()
-    for m in range(60, 0, -1):
-        wfile.write(make_note(m, 0.25))
-    wfile.close()
-    return
-
-    wave1 = make_note(69, 1)
-    wave2 = make_chord([69, 72, 76], 1)
-    wave = wave1 | wave2
-
-    wfile = WavFileWriter()
-    wfile.write(wave)
-    wfile.close()
-    return
-
-    sig1 = CosSignal(freq=440)
-    sig2 = CosSignal(freq=523.25)
-    sig3 = CosSignal(freq=660)
-    sig4 = CosSignal(freq=880)
-    # sig5 = CosSignal(freq=987)
-    sig = sig1 + sig2 + sig3 + sig4
-
-    # wave = Wave(sig, duration=0.02)
-    # wave.plot()
-
-    wave = sig.make_wave(duration=1)
-    # wave.normalize()
-
-    wfile = WavFileWriter(wave)
-    wfile.write()
-    wfile.close()
-
-
-if __name__ == "__main__":
-    main()
