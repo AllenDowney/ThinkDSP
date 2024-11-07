@@ -6,13 +6,15 @@ License: MIT License (https://opensource.org/licenses/MIT)
 """
 
 import copy
+import re
 
 import numpy as np
 import scipy
-import scipy.stats
-import scipy.fftpack
 import subprocess
 import warnings
+
+from IPython.core.magic import register_cell_magic
+from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
 from wave import open as open_wave
 from scipy.io import wavfile
@@ -27,7 +29,6 @@ except ImportError:
     )
 
 PI2 = np.pi * 2
-
 
 
 class UnimplementedMethodException(Exception):
@@ -185,7 +186,7 @@ class _SpectrumParent:
     @property
     def power(self):
         """Returns a sequence of powers (read-only property)."""
-        return np.abs(self.hs)**2
+        return np.abs(self.hs) ** 2
 
     def copy(self):
         """Makes a copy.
@@ -974,13 +975,13 @@ class Wave:
 
         """
         # see if a time-scaling factor is provided
-        xfactor = options.pop('xfactor', 1)
+        xfactor = options.pop("xfactor", 1)
 
         plt.plot(self.ts * xfactor, np.real(self.ys), **options)
 
     def plot_vlines(self, **options):
         """Plots the wave with vertical lines for samples."""
-        xfactor = options.pop('xfactor', 1)
+        xfactor = options.pop("xfactor", 1)
         plt.vlines(self.ts * xfactor, 0, self.ys, **options)
 
     def corr(self, other):
@@ -1203,14 +1204,14 @@ class Signal:
         """
         return 0.1
 
-    def plot(self, framerate=11025):
+    def plot(self, num_periods=3, framerate=11025):
         """Plots the signal.
 
         The default behavior is to plot three periods.
 
         framerate: samples per second
         """
-        duration = self.period * 3
+        duration = self.period * num_periods
         wave = self.make_wave(duration, start=0, framerate=framerate)
         wave.plot()
 
@@ -1626,7 +1627,6 @@ class BrownianNoise(Noise):
         returns: float wave array
         """
         dys = np.random.uniform(-1, 1, len(ts))
-        # ys = scipy.integrate.cumtrapz(dys, ts)
         ys = np.cumsum(dys)
         ys = normalize(unbias(ys), self.amp)
         return ys
@@ -1662,6 +1662,28 @@ class PinkNoise(Noise):
         wave2.unbias()
         wave2.normalize(self.amp)
         return wave2
+
+
+def normal_probability_plot(sample, **options):
+    """Makes a normal probability plot with a fitted line.
+
+    sample: sequence of numbers
+    options: passed to plot
+    """
+    n = len(sample)
+    ps = (np.arange(n) + 0.5) / n
+    xs = scipy.stats.norm.ppf(ps)
+    ys = np.sort(sample)
+
+    results = scipy.stats.linregress(xs, ys)
+    intercept, slope = results.intercept, results.slope
+
+    fit_xs = np.linspace(-3, 3)
+    fit_ys = intercept + slope * fit_xs
+
+    plt.plot(fit_xs, fit_ys, color="gray", alpha=0.5)
+    plt.plot(xs, ys, **options)
+    decorate(xlabel="Standard normal")
 
 
 def rest(duration):
@@ -1789,6 +1811,31 @@ def decorate(**options):
     plt.tight_layout()
 
 
+def decorate_time(**options):
+    """Decorate a figure in the time domain."""
+    decorate(xlabel="Time (s)", ylabel="Amplitude", **options)
+
+
+def decorate_freq(**options):
+    """Decorate a figure showing magnitude in the frequency domain."""
+    decorate(xlabel="Frequency (Hz)", ylabel="Magnitude", **options)
+
+
+def decorate_power(**options):
+    """Decorate a figure showing power in the frequency domain."""
+    decorate(xlabel="Frequency (Hz)", ylabel="Power", **options)
+
+
+def decorate_gram(**options):
+    """Decorate a figure that shows a spectrogram."""
+    decorate(xlabel="Time (s)", ylabel="Frequency (Hz)", **options)
+
+
+def decorate_corr(**options):
+    """Decorate a figure that shows an autocorrelation function"""
+    decorate(xlabel="Lag", ylabel="Correlation", **options)
+
+
 def legend(**options):
     """Draws a legend only if there is at least one labeled item.
 
@@ -1836,3 +1883,81 @@ def underride(d, **options):
     return d
 
 
+def extract_function_name(text):
+    """Find a function definition and return its name.
+
+    text: String
+
+    returns: String or None
+    """
+    pattern = r"def\s+(\w+)\s*\("
+    match = re.search(pattern, text)
+    if match:
+        func_name = match.group(1)
+        return func_name
+    else:
+        return None
+
+
+@register_cell_magic
+def add_method_to(args, cell):
+
+    # get the name of the function defined in this cell
+    func_name = extract_function_name(cell)
+    if func_name is None:
+        return f"This cell doesn't define any new functions."
+
+    # get the class we're adding it to
+    namespace = get_ipython().user_ns
+    class_name = args
+    cls = namespace.get(class_name, None)
+    if cls is None:
+        return f"Class '{class_name}' not found."
+
+    # save the old version of the function if it was already defined
+    old_func = namespace.get(func_name, None)
+    if old_func is not None:
+        del namespace[func_name]
+
+    # Execute the cell to define the function
+    get_ipython().run_cell(cell)
+
+    # get the newly defined function
+    new_func = namespace.get(func_name, None)
+    if new_func is None:
+        return f"This cell didn't define {func_name}."
+
+    # add the function to the class and remove it from the namespace
+    setattr(cls, func_name, new_func)
+    del namespace[func_name]
+
+    # restore the old function to the namespace
+    if old_func is not None:
+        namespace[func_name] = old_func
+
+
+@register_cell_magic
+def expect_error(line, cell):
+    try:
+        get_ipython().run_cell(cell)
+    except Exception as e:
+        get_ipython().run_cell("%tb")
+
+
+@magic_arguments()
+@argument("exception", help="Type of exception to catch")
+@register_cell_magic
+def expect(line, cell):
+    args = parse_argstring(expect, line)
+    exception = eval(args.exception)
+    try:
+        get_ipython().run_cell(cell)
+    except exception as e:
+        get_ipython().run_cell("%tb")
+
+
+# Make the figures smaller to save some screen real estate.
+# The figures generated for the book have DPI 400, so scaling
+# them by a factor of 4 restores them to the size in the notebooks.
+plt.rcParams["figure.dpi"] = 75
+plt.rcParams["figure.figsize"] = [6, 3.5]
