@@ -13,9 +13,6 @@ import scipy
 import subprocess
 import warnings
 
-from IPython.core.magic import register_cell_magic
-from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
-
 from wave import open as open_wave
 from scipy.io import wavfile
 
@@ -179,6 +176,11 @@ class _SpectrumParent:
         return self.framerate / 2
 
     @property
+    def mags(self):
+        """Returns a sequence of magnitudes (read-only property)."""
+        return np.abs(self.hs)
+
+    @property
     def amps(self):
         """Returns a sequence of amplitudes (read-only property)."""
         return np.abs(self.hs)
@@ -219,7 +221,7 @@ class _SpectrumParent:
         """
         ratio_spectrum = self.copy()
         ratio_spectrum.hs /= denom.hs
-        ratio_spectrum.hs[denom.amps < thresh] = val
+        ratio_spectrum.hs[denom.mags < thresh] = val
         return ratio_spectrum
 
     def invert(self):
@@ -241,28 +243,28 @@ class _SpectrumParent:
 
         high: cutoff frequency
 
-        returns: fs, amps
+        returns: fs, mags
         """
         hs = np.fft.fftshift(self.hs)
-        amps = np.abs(hs)
+        mags = np.abs(hs)
         fs = np.fft.fftshift(self.fs)
         i = 0 if high is None else find_index(-high, fs)
         j = None if high is None else find_index(high, fs) + 1
-        return fs[i:j], amps[i:j]
+        return fs[i:j], mags[i:j]
 
     def plot(self, high=None, **options):
-        """Plots amplitude vs frequency.
+        """Plots magnitude vs frequency.
 
         Note: if this is a full spectrum, it ignores low and high
 
         high: frequency to cut off at
         """
         if self.full:
-            fs, amps = self.render_full(high)
-            plt.plot(fs, amps, **options)
+            fs, mags = self.render_full(high)
+            plt.plot(fs, mags, **options)
         else:
             i = None if high is None else find_index(high, self.fs)
-            plt.plot(self.fs[:i], self.amps[:i], **options)
+            plt.plot(self.fs[:i], self.mags[:i], **options)
 
     def plot_power(self, high=None, **options):
         """Plots power vs frequency.
@@ -270,8 +272,8 @@ class _SpectrumParent:
         high: frequency to cut off at
         """
         if self.full:
-            fs, amps = self.render_full(high)
-            plt.plot(fs, amps**2, **options)
+            fs, mags = self.render_full(high)
+            plt.plot(fs, mags**2, **options)
         else:
             i = None if high is None else find_index(high, self.fs)
             plt.plot(self.fs[:i], self.power[:i], **options)
@@ -291,7 +293,7 @@ class _SpectrumParent:
 
         returns: sorted list of (amplitude, frequency) pairs
         """
-        t = list(zip(self.amps, self.fs))
+        t = list(zip(self.mags, self.fs))
         t.sort(reverse=True)
         return t
 
@@ -492,10 +494,10 @@ class Dct(_SpectrumParent):
     """Represents the spectrum of a signal using discrete cosine transform."""
 
     @property
-    def amps(self):
-        """Returns a sequence of amplitudes (read-only property).
+    def mags(self):
+        """Returns a sequence of magnitudes (read-only property).
 
-        Note: for DCTs, amps are positive or negative real.
+        Note: for DCTs, magsnitudes are positive or negative real.
         """
         return self.hs
 
@@ -598,7 +600,7 @@ class Spectrogram:
         # copy amplitude from each spectrum into a column of the array
         for j, t in enumerate(ts):
             spectrum = self.spec_map[t]
-            array[:, j] = spectrum.amps[:i]
+            array[:, j] = spectrum.mags[:i]
 
         return ts, fs, array
 
@@ -1547,7 +1549,7 @@ class SilentSignal(Signal):
 
 
 class Impulses(Signal):
-    """Represents silence."""
+    """Represents a sequence of impulses."""
 
     def __init__(self, locations, amps=1):
         self.locations = np.asanyarray(locations)
@@ -1899,62 +1901,71 @@ def extract_function_name(text):
         return None
 
 
-@register_cell_magic
-def add_method_to(args, cell):
+# the functions that define cell magic commands are only defined
+# if we're running in Jupyter.
 
-    # get the name of the function defined in this cell
-    func_name = extract_function_name(cell)
-    if func_name is None:
-        return f"This cell doesn't define any new functions."
+try:
+    from IPython.core.magic import register_cell_magic
+    from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
-    # get the class we're adding it to
-    namespace = get_ipython().user_ns
-    class_name = args
-    cls = namespace.get(class_name, None)
-    if cls is None:
-        return f"Class '{class_name}' not found."
 
-    # save the old version of the function if it was already defined
-    old_func = namespace.get(func_name, None)
-    if old_func is not None:
+    @register_cell_magic
+    def add_method_to(args, cell):
+
+        # get the name of the function defined in this cell
+        func_name = extract_function_name(cell)
+        if func_name is None:
+            return f"This cell doesn't define any new functions."
+
+        # get the class we're adding it to
+        namespace = get_ipython().user_ns
+        class_name = args
+        cls = namespace.get(class_name, None)
+        if cls is None:
+            return f"Class '{class_name}' not found."
+
+        # save the old version of the function if it was already defined
+        old_func = namespace.get(func_name, None)
+        if old_func is not None:
+            del namespace[func_name]
+
+        # Execute the cell to define the function
+        get_ipython().run_cell(cell)
+
+        # get the newly defined function
+        new_func = namespace.get(func_name, None)
+        if new_func is None:
+            return f"This cell didn't define {func_name}."
+
+        # add the function to the class and remove it from the namespace
+        setattr(cls, func_name, new_func)
         del namespace[func_name]
 
-    # Execute the cell to define the function
-    get_ipython().run_cell(cell)
-
-    # get the newly defined function
-    new_func = namespace.get(func_name, None)
-    if new_func is None:
-        return f"This cell didn't define {func_name}."
-
-    # add the function to the class and remove it from the namespace
-    setattr(cls, func_name, new_func)
-    del namespace[func_name]
-
-    # restore the old function to the namespace
-    if old_func is not None:
-        namespace[func_name] = old_func
+        # restore the old function to the namespace
+        if old_func is not None:
+            namespace[func_name] = old_func
 
 
-@register_cell_magic
-def expect_error(line, cell):
-    try:
-        get_ipython().run_cell(cell)
-    except Exception as e:
-        get_ipython().run_cell("%tb")
+    @register_cell_magic
+    def expect_error(line, cell):
+        try:
+            get_ipython().run_cell(cell)
+        except Exception as e:
+            get_ipython().run_cell("%tb")
 
 
-@magic_arguments()
-@argument("exception", help="Type of exception to catch")
-@register_cell_magic
-def expect(line, cell):
-    args = parse_argstring(expect, line)
-    exception = eval(args.exception)
-    try:
-        get_ipython().run_cell(cell)
-    except exception as e:
-        get_ipython().run_cell("%tb")
-
+    @magic_arguments()
+    @argument("exception", help="Type of exception to catch")
+    @register_cell_magic
+    def expect(line, cell):
+        args = parse_argstring(expect, line)
+        exception = eval(args.exception)
+        try:
+            get_ipython().run_cell(cell)
+        except exception as e:
+            get_ipython().run_cell("%tb")
+except (ImportError, NameError):
+    print("Warning: IPython is not available, cell magic not defined.")
 
 # Make the figures smaller to save some screen real estate.
 # The figures generated for the book have DPI 400, so scaling
