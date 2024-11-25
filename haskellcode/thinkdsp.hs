@@ -3,14 +3,32 @@ import Data.Array (Array, listArray)
 import Data.Complex (Complex(..), magnitude)
 import Data.List (sortOn)
 
--- Define a custom exception
-data UnimplementedMethodException = UnimplementedMethodException deriving Show
-
 -- Define a data type for Wave
 data Wave = Wave {
     ys :: [Double],
     framerate :: Int
 } deriving Show
+
+-- Function to generate a sine wave
+sineWave :: Double -> Double -> Int -> Double -> Wave
+sineWave freq amp framerate duration =
+    let ts = [0.0, 1.0 / fromIntegral framerate .. duration]
+        ys = map (\t -> amp * sin (2 * pi * freq * t)) ts
+    in Wave ys framerate
+
+-- Function to generate a square wave
+squareWave :: Double -> Double -> Int -> Double -> Wave
+squareWave freq amp framerate duration =
+    let ts = [0.0, 1.0 / fromIntegral framerate .. duration]
+        ys = map (\t -> if sin (2 * pi * freq * t) >= 0 then amp else -amp) ts
+    in Wave ys framerate
+
+-- Function to generate a sawtooth wave
+sawtoothWave :: Double -> Double -> Int -> Double -> Wave
+sawtoothWave freq amp framerate duration =
+    let ts = [0.0, 1.0 / fromIntegral framerate .. duration]
+        ys = map (\t -> amp * (2 * (t * freq - fromIntegral (floor (t * freq + 0.5))))) ts
+    in Wave ys framerate
 
 -- Function to initialize random seed
 randomSeed :: Int -> IO ()
