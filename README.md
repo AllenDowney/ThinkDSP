@@ -1,5 +1,7 @@
 #TODO
 Rewrite thinkdsp -> thinkdspH
+Goal 1) Rewrite thinkdsp.py -> thinkdsp.hs.  That way we have a basis to work with when we
+Goal 2) Rewrite Chapter by Chapter examples, touching neccessary aux code when needed.
 
 # ThinkDSP
 
