@@ -18,3 +18,8 @@ scipy = "^1.5.4"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+# Point pytest at master's monolithic module in code/ (not v2's src/ package layout).
+[tool.pytest.ini_options]
+pythonpath = ["code"]
+testpaths = ["tests"]
