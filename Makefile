@@ -17,5 +17,7 @@ requirements:
 
 
 tests:
+	# Unit tests for code/thinkdsp.py (ported from v2 tests/test_thinkdsp.py)
+	pytest tests/
 	# looks like we can't test chapters with interactives
 	cd code; pytest --nbmake chap0[2346789].ipynb
