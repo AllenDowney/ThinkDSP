@@ -29,6 +29,9 @@ import thinkdsp
 Notebooks for the current edition live under `nb/`. The first-edition
 tree (`code/` layout) is archived on the `edition-1` branch.
 
+Shared datasets (CSV, WAV) live under `data/`. Notebooks download missing
+files into the working directory when you run them.
+
 Here's a notebook that previews what you will see in Chapter 1:
 
 * [chap01.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap01.ipynb)
@@ -41,17 +44,13 @@ And if you want to see where we are headed, here's a preview of Chapter 10:
 ## Running the code
 
 Most of the code for this book is in Jupyter notebooks.
-If you are not familiar with Jupyter, you can run a tutorial by [clicking here](https://jupyter.org/try).  Then select "Try Classic Notebook".  It will open a notebook with instructions for getting started.
-
+If you are not familiar with Jupyter, you can run a tutorial by [clicking here](https://jupyter.org/try).
 To run the ThinkDSP code, you have several options:
 
-Option 1: Run the notebooks on Google Colab.
-
-Option 2: Run the notebooks on Binder.
-
-Option 3: Use Conda to install the libraries you need and run the notebooks on your computer.
-
-Option 4: Use poetry to install the libraries you need and run the notebooks on your computer.
+1. **Google Colab** — Best for a quick start: no local install, works in a browser, free.
+2. **Conda on your computer** — Best for a stable local setup and offline work.
+   Downsides: larger download and a bit more setup than Colab.
+3. **Poetry on your computer** — Best if you already use Poetry / prefer a project-local virtualenv.
 
 The following sections explain these options in detail.
 
@@ -59,7 +58,7 @@ Note: I have heard from a few people who tried to run the code in Spyder.  Appar
 
 ### Option 1: Run on Colab
 
-I have recently updated most of the notebooks in this repository so they run on Colab.
+Most of the notebooks in this repository so run on Colab. If you find one that doesn't, let me know and I will update it.
 
 You can open any of them by clicking on the links below.  If you want to modify and save any of them, you can use Colab to save a copy in a Google Drive or your own GitHub repo, or on your computer.
 
@@ -87,16 +86,7 @@ You can open any of them by clicking on the links below.  If you want to modify 
 * [chap11soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap11soln.ipynb)
 
 
-### Option 2: Run on Binder
-
-To run the code for this book on Binder, press this button:
-
-[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/AllenDowney/ThinkDSP)
-
-It takes a minute or so to start up, but then you should see the Jupyter home page with a list of files.  Click on `nb` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
-
-
-### Option 3: Install Python+Jupyter
+### Option 2: Install Python+Jupyter with Conda
 
 First, download the files from this repository.  If you are a Git user, you can run
 
@@ -131,7 +121,7 @@ conda activate ThinkDSP
 ```
 
 
-### Option 4: Use poetry to manage the project on your computer or notebook locally.
+### Option 3: Use Poetry locally
 
 First, download the files from this repository.  If you are a Git user, you can run
 
