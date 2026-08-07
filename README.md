@@ -26,17 +26,16 @@ Then in Python:
 import thinkdsp
 ```
 
-The installable package is maintained on the `v2` branch (GitHub’s default
-`master` still has the first-edition `code/` layout and Colab links). After
-`v2` becomes the default branch, this note can go away.
+Notebooks for the current edition live under `nb/`. The first-edition
+tree (`code/` layout) is archived on the `edition-1` branch.
 
 Here's a notebook that previews what you will see in Chapter 1:
 
-* [chap01preview.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01preview.ipynb)
+* [chap01.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap01.ipynb)
 
 And if you want to see where we are headed, here's a preview of Chapter 10:
 
-* [chap10preview.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10preview.ipynb)
+* [chap10.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap10.ipynb)
 
 
 ## Running the code
@@ -64,28 +63,28 @@ I have recently updated most of the notebooks in this repository so they run on 
 
 You can open any of them by clicking on the links below.  If you want to modify and save any of them, you can use Colab to save a copy in a Google Drive or your own GitHub repo, or on your computer.
 
-* [chap01.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01.ipynb)
-* [chap01soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01soln.ipynb)
-* [chap02.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap02.ipynb)
-* [chap02soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap02soln.ipynb)
-* [chap03.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap03.ipynb)
-* [chap03soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap03soln.ipynb)
-* [chap04.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap04.ipynb)
-* [chap04soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap04soln.ipynb)
-* [chap05.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap05.ipynb)
-* [chap05soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap05soln.ipynb)
-* [chap06.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap06.ipynb)
-* [chap06soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap06soln.ipynb)
-* [chap07.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap07.ipynb)
-* [chap07soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap07soln.ipynb)
-* [chap08.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap08.ipynb)
-* [chap08soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap08soln.ipynb)
-* [chap09.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap09.ipynb)
-* [chap09soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap09soln.ipynb)
-* [chap10.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10.ipynb)
-* [chap10soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap10soln.ipynb)
-* [chap11.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap11.ipynb)
-* [chap11soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap11soln.ipynb)
+* [chap01.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap01.ipynb)
+* [chap01soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap01soln.ipynb)
+* [chap02.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap02.ipynb)
+* [chap02soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap02soln.ipynb)
+* [chap03.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap03.ipynb)
+* [chap03soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap03soln.ipynb)
+* [chap04.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap04.ipynb)
+* [chap04soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap04soln.ipynb)
+* [chap05.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap05.ipynb)
+* [chap05soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap05soln.ipynb)
+* [chap06.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap06.ipynb)
+* [chap06soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap06soln.ipynb)
+* [chap07.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap07.ipynb)
+* [chap07soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap07soln.ipynb)
+* [chap08.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap08.ipynb)
+* [chap08soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap08soln.ipynb)
+* [chap09.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap09.ipynb)
+* [chap09soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap09soln.ipynb)
+* [chap10.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap10.ipynb)
+* [chap10soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap10soln.ipynb)
+* [chap11.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap11.ipynb)
+* [chap11soln.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/nb/chap11soln.ipynb)
 
 
 ### Option 2: Run on Binder
@@ -94,7 +93,7 @@ To run the code for this book on Binder, press this button:
 
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/AllenDowney/ThinkDSP)
 
-It takes a minute or so to start up, but then you should see the Jupyter home page with a list of files.  Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
+It takes a minute or so to start up, but then you should see the Jupyter home page with a list of files.  Click on `nb` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
 
 ### Option 3: Install Python+Jupyter
@@ -179,7 +178,7 @@ In this case, the URL is [http://localhost:8888](http://localhost:8888).
 When you start your server, you might get a different URL.
 Whatever it is, if you paste it into a browser, you should see a home page with a list of directories.
 
-Click on `code` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
+Click on `nb` to open the folder with the notebooks, then click on one of the notebooks (with the .ipynb extension).
 
 Select the cell with the import statements and press "Shift-Enter" to run the code in the cell.
 If it works and you get no error messages, **you are all set**.

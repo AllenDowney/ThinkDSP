@@ -44,7 +44,7 @@ project; you can manage it under the project’s **Publishing** settings.
 
 ## Each release
 
-### 1. Bump version on `v2`
+### 1. Bump version on `master`
 
 Edit `pyproject.toml`:
 
@@ -59,7 +59,7 @@ Commit and push to `v2` (or whatever branch you run the workflow from).
 
 1. https://github.com/AllenDowney/ThinkDSP/actions/workflows/publish.yml
 2. **Run workflow**
-3. Choose branch `v2` (until Option E cutover)
+3. Choose branch `master` (until Option E cutover)
 4. Confirm; if the `pypi` environment has required reviewers, approve the deploy
 
 ### 3. Verify
