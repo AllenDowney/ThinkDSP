@@ -14,6 +14,17 @@ With a programming-based approach, I can go top-down, which means I can present 
 
 Think DSP is a Free Book. It is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/), which means that you are free to copy, distribute, and modify it, as long as you attribute the work and don't use it for commercial purposes.
 
+## Which repository?
+
+*Think DSP* has two GitHub homes. Use this map to pick the right one:
+
+1. **Python library** — **this repo**: install with `pip install think-dsp` (see below).
+2. **First edition (PDF/HTML) and archived `code/` tree** — **this repo**: published book links above; old layout on the [`edition-1`](https://github.com/AllenDowney/ThinkDSP/tree/edition-1) branch.
+3. **Second edition draft (book-as-notebooks)** — [**ThinkDSP2**](https://github.com/AllenDowney/ThinkDSP2): Jupyter Book WIP where each chapter notebook includes the text, code, and exercises.
+4. **Which notebooks to run?**
+   - **Separate chapter code and exercises** (classic style) — **this repo**, under `nb/`: e.g. `chap01.ipynb` for examples/exercises and `chap01soln.ipynb` for solutions.
+   - **One notebook per chapter** (full chapter text + code + exercises) — **ThinkDSP2**: use [`notebooks/`](https://github.com/AllenDowney/ThinkDSP2/tree/main/notebooks) without solutions, or [`soln/`](https://github.com/AllenDowney/ThinkDSP2/tree/main/soln) with solutions.
+
 ## Install
 
 ```bash
@@ -26,11 +37,7 @@ Then in Python:
 import thinkdsp
 ```
 
-Notebooks for the current edition live under `nb/`. The first-edition
-tree (`code/` layout) is archived on the `edition-1` branch.
-
-Shared datasets (CSV, WAV) live under `data/`. Notebooks download missing
-files into the working directory when you run them.
+Chapter notebooks in this repo live under `nb/`. Shared datasets (CSV, WAV) live under `data/`; notebooks download missing files into the working directory when you run them.
 
 Here's a notebook that previews what you will see in Chapter 1:
 
