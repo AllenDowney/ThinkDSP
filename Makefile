@@ -6,7 +6,7 @@ PROJECT_NAME = ThinkDSP
 help:
 	@echo "Available targets:"
 	@echo "  create_environment      - Create conda environment from environment.yml"
-	@echo "  create_environment_dev  - Create dev environment (base + dev packages)"
+	@echo "  create_environment_dev  - Create dev environment (base + editable think-dsp)"
 	@echo "  delete_environment      - Remove conda environment"
 	@echo "  update_environment      - Update environment from environment.yml (with --prune)"
 	@echo "  update_environment_dev  - Update dev environment"
@@ -22,12 +22,13 @@ create_environment:
 	@echo ">>> Environment created successfully!"
 	@echo ">>> Activate with: conda activate $(PROJECT_NAME)"
 
-## Create dev environment (base + dev packages)
+## Create dev environment (base + editable install of local think-dsp)
 create_environment_dev: create_environment
 	mamba env update -f environment-dev.yml --name $(PROJECT_NAME)
 	@echo ""
 	@echo ">>> Dev environment created successfully!"
 	@echo ">>> Activate with: conda activate $(PROJECT_NAME)"
+	@echo ">>> Local package is editable (-e .). CI uses: pip install -r requirements-dev.txt"
 
 ## Delete environment
 delete_environment:
