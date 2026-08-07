@@ -18,7 +18,7 @@ Think DSP is a Free Book. It is available under the [Creative Commons Attributio
 
 *Think DSP* has two GitHub homes. Use this map to pick the right one:
 
-1. **Python library** — **this repo**: install with `pip install think-dsp` (see below).
+1. **Python library** — **this repo**: optional `pip install think-dsp` if you want the package; chapter notebooks can instead download `thinkdsp.py` (see Install below).
 2. **First edition (PDF/HTML) and archived `code/` tree** — **this repo**: published book links above; old layout on the [`edition-1`](https://github.com/AllenDowney/ThinkDSP/tree/edition-1) branch.
 3. **Second edition draft (book-as-notebooks)** — [**ThinkDSP2**](https://github.com/AllenDowney/ThinkDSP2): Jupyter Book WIP where each chapter notebook includes the text, code, and exercises.
 4. **Which notebooks to run?**
@@ -27,17 +27,31 @@ Think DSP is a Free Book. It is available under the [Creative Commons Attributio
 
 ## Install
 
-```bash
-pip install think-dsp
-```
+How you get `thinkdsp` depends on what you are doing:
 
-Then in Python:
+1. **Running the chapter notebooks (default)** — you do **not** need to install the package. Notebooks download `thinkdsp.py` (and any missing data files from `data/`) into the working directory when you run them. Install only the notebook stack if you are working locally:
 
-```python
-import thinkdsp
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Chapter notebooks in this repo live under `nb/`. Shared datasets (CSV, WAV) live under `data/`; notebooks download missing files into the working directory when you run them.
+2. **Using the library in your own code (optional)** — install from PyPI:
+
+   ```bash
+   pip install think-dsp
+   ```
+
+   Then `import thinkdsp` works without a download cell.
+
+3. **Developing this repository** — install an editable checkout plus dev tools (what CI uses):
+
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+
+   Or with conda: `make create_environment_dev` (also does `pip install -e .`).
+
+Chapter notebooks live under `nb/`. Shared datasets (CSV, WAV) live under `data/`.
 
 Here's a notebook that previews what you will see in Chapter 1:
 
