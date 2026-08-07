@@ -1,7 +1,6 @@
 -r requirements.txt
-.
+-e .
 black
-nb_black==1.0.5
 flake8
 nbformat
 nbmake
