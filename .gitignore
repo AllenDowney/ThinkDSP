@@ -23,3 +23,22 @@ htmlcov/
 
 # Poetry
 poetry.lock
+
+# Editor / local
+.vscode/
+.cursor/
+
+# LaTeX / book build artifacts
+*.aux
+*.idx
+*.ilg
+*.ind
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Local scratch audio (tracked sample wavs stay tracked)
+*.wav
