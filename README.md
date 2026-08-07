@@ -26,6 +26,10 @@ Then in Python:
 import thinkdsp
 ```
 
+The installable package is maintained on the `v2` branch (GitHub’s default
+`master` still has the first-edition `code/` layout and Colab links). After
+`v2` becomes the default branch, this note can go away.
+
 Here's a notebook that previews what you will see in Chapter 1:
 
 * [chap01preview.ipynb](https://colab.research.google.com/github/AllenDowney/ThinkDSP/blob/master/code/chap01preview.ipynb)

@@ -13,7 +13,7 @@ import numpy as np
 
 class Test(unittest.TestCase):
     def assertArrayAlmostEqual(self, a, b):
-        total_error = np.sum(np.abs(a-b))
+        total_error = np.sum(np.abs(a - b))
         self.assertAlmostEqual(total_error, 0)
 
     def testMakeSpectrum(self):
@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         spectrum = wave.make_spectrum()
         self.assertAlmostEqual(spectrum.hs[0], 45)
         wave2 = spectrum.make_wave()
-        #print(wave2.ys)
+        # print(wave2.ys)
         self.assertArrayAlmostEqual(wave.ys, wave2.ys)
 
         # rfft with n odd
@@ -33,9 +33,9 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(spectrum.hs[0], 55)
 
         # TODO: make rfft invertible when n is odd
-        #wave2 = spectrum.make_wave()
-        #print(wave2.ys)
-        #self.assertArrayAlmostEqual(wave.ys, wave2.ys)
+        # wave2 = spectrum.make_wave()
+        # print(wave2.ys)
+        # self.assertArrayAlmostEqual(wave.ys, wave2.ys)
 
         # fft with n even
         ys = np.arange(10)
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         spectrum = wave.make_spectrum(full=True)
         self.assertAlmostEqual(spectrum.hs[0], 45)
         wave2 = spectrum.make_wave()
-        #print(wave2.ys)
+        # print(wave2.ys)
         self.assertArrayAlmostEqual(wave.ys, wave2.ys)
 
         # fft with n odd
@@ -52,13 +52,13 @@ class Test(unittest.TestCase):
         spectrum = wave.make_spectrum(full=True)
         self.assertAlmostEqual(spectrum.hs[0], 55)
         wave2 = spectrum.make_wave()
-        #print(wave2.ys)
+        # print(wave2.ys)
         self.assertArrayAlmostEqual(wave.ys, wave2.ys)
 
     def testComplexSinusoid(self):
         signal = thinkdsp.ComplexSinusoid(440, 0.7, 1.1)
         result = signal.evaluate(2.1) * complex(-1.5, -0.5)
-        self.assertAlmostEqual(result, -0.164353351475-1.09452637056j)
+        self.assertAlmostEqual(result, -0.164353351475 - 1.09452637056j)
 
     def testChirp(self):
         signal = thinkdsp.Chirp(100, 200, 0.5)
@@ -90,12 +90,36 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(dct.fs[0], 0.25)
 
     def testImpulses(self):
-        imp_sig = thinkdsp.Impulses([0.01, 0.4, 0.8, 1.2],
-                                    amps=[1, 0.5, 0.25, 0.1])
-        impulses = imp_sig.make_wave(start=0, duration=1.3,
-                                     framerate=11025)
+        imp_sig = thinkdsp.Impulses([0.01, 0.4, 0.8, 1.2], amps=[1, 0.5, 0.25, 0.1])
+        impulses = imp_sig.make_wave(start=0, duration=1.3, framerate=11025)
 
         self.assertEqual(len(impulses), 14332)
+
+    def testQuantizeBound(self):
+        # WavFileWriter-style bound is safe at ±1.
+        ys = np.array([-1.0, 0.0, 1.0])
+        zs = thinkdsp.quantize(ys, 32767, np.int16)
+        self.assertArrayAlmostEqual(zs, np.array([-32767, 0, 32767]))
+
+    def testReadWaveNormalizeFlag(self):
+        import os
+        import tempfile
+        import wave as wavemod
+
+        raw = np.array([-16000, 0, 16000], dtype=np.int16)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "quiet.wav")
+            with wavemod.open(path, "w") as fp:
+                fp.setnchannels(1)
+                fp.setsampwidth(2)
+                fp.setframerate(11025)
+                fp.writeframes(raw.tobytes())
+
+            peaked = thinkdsp.read_wave(path, normalize=True)
+            self.assertAlmostEqual(np.max(np.abs(peaked.ys)), 1.0)
+
+            scaled = thinkdsp.read_wave(path, normalize=False)
+            self.assertArrayAlmostEqual(scaled.ys, raw.astype(float) / 32768)
 
 
 if __name__ == "__main__":

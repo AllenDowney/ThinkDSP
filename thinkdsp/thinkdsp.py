@@ -84,10 +84,14 @@ class WavFileWriter:
         self.fp.close()
 
 
-def read_wave(filename="sound.wav"):
+def read_wave(filename="sound.wav", normalize=True):
     """Reads a wave file.
 
     filename: string
+    normalize: bool. If True (default), peak-normalize to amplitude 1
+        (convenient for book examples). If False, scale by the full-scale
+        integer range so read→write preserves amplitude better:
+        ys / 2**(sampwidth*8 - 1).
 
     returns: Wave
     """
@@ -118,14 +122,18 @@ def read_wave(filename="sound.wav"):
 
     # ts = np.arange(len(ys)) / framerate
     wave = Wave(ys, framerate=framerate)
-    wave.normalize()
+    if normalize:
+        wave.normalize()
+    else:
+        wave.ys = np.asarray(wave.ys, dtype=float) / (2 ** (sampwidth * 8 - 1))
     return wave
 
 
-def read_wave_with_scipy(filename):
+def read_wave_with_scipy(filename, normalize=True):
     """Reads a wave file.
 
     filename: string
+    normalize: bool. Same meaning as in read_wave().
 
     returns: Wave
     """
@@ -139,7 +147,12 @@ def read_wave_with_scipy(filename):
 
     # ts = np.arange(len(ys)) / framerate
     wave = Wave(ys, framerate=framerate)
-    wave.normalize()
+    if normalize:
+        wave.normalize()
+    else:
+        if np.issubdtype(ys.dtype, np.integer):
+            bound = int(np.iinfo(ys.dtype).max) + 1
+            wave.ys = np.asarray(wave.ys, dtype=float) / bound
     return wave
 
 
@@ -723,7 +736,7 @@ class Wave:
             dt = 1 / wave.framerate
             if (diff / dt) > 0.1:
                 warnings.warn(
-                    "Can't add these waveforms; their " "time arrays don't line up."
+                    "Can't add these waveforms; their time arrays don't line up."
                 )
 
             j = i + len(wave)
@@ -1155,7 +1168,11 @@ def quantize(ys, bound, dtype):
     """Maps the waveform to quanta.
 
     ys: wave array
-    bound: maximum amplitude
+    bound: maximum amplitude used for scaling. For signed integer
+        dtypes, use 2**(bits-1) - 1 (e.g. 32767 for int16), not
+        2**(bits-1). Scaling by 32768 maps ys == 1.0 to 32768, which
+        overflows int16 to -32768. WavFileWriter already uses the
+        safe bound.
     dtype: numpy data type of the result
 
     returns: quantized signal
@@ -1935,7 +1952,7 @@ def main():
     sig2 = CosSignal(freq=523.25)
     sig3 = CosSignal(freq=660)
     sig4 = CosSignal(freq=880)
-    # sig5 = CosSignal(freq=987)
+    sig5 = CosSignal(freq=987)
     sig = sig1 + sig2 + sig3 + sig4 + sig5
 
     # wave = Wave(sig, duration=0.02)
