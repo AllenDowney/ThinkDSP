@@ -107,7 +107,7 @@ def read_wave(filename="sound.wav"):
         raise ValueError("sampwidth %d unknown" % sampwidth)
 
     if sampwidth == 3:
-        xs = np.fromstring(z_str, dtype=np.int8).astype(np.int32)
+        xs = np.frombuffer(z_str, dtype=np.int8).astype(np.int32)
         ys = (xs[2::3] * 256 + xs[1::3]) * 256 + xs[0::3]
     else:
         ys = np.frombuffer(z_str, dtype=dtype_map[sampwidth])
@@ -1936,7 +1936,7 @@ def main():
     sig3 = CosSignal(freq=660)
     sig4 = CosSignal(freq=880)
     # sig5 = CosSignal(freq=987)
-    sig = sig1 + sig2 + sig3 + sig4
+    sig = sig1 + sig2 + sig3 + sig4 + sig5
 
     # wave = Wave(sig, duration=0.02)
     # wave.plot()

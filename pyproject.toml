@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "thinkdsp-kim"
-version = "0.1.1"
+name = "think-dsp"
+version = "0.2.0"
 description = "DSP utilities from the Think DSP book"
 authors = ["Allen Downey <allen.downey@olin.edu>"]
 maintainers = ["Kim Maxim <maksimkim005@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-packages = [{ include = "thinkdsp", from = "src" }]
+packages = [{ include = "thinkdsp" }]
 include = ["LICENSE"]
 exclude = ["book", "code", ".devcontainer", ".github"]
 classifiers = [
