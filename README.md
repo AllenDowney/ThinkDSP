@@ -4,22 +4,27 @@
 
 [Order *Think DSP* from Amazon.com](http://amzn.to/1naaUCN).
 
-[Download *Think DSP* in PDF](http://greenteapress.com/thinkdsp/thinkdsp.pdf).
+[Download the first edition in PDF](http://greenteapress.com/thinkdsp/thinkdsp.pdf).
 
-[Read *Think DSP* in HTML](http://greenteapress.com/thinkdsp/html/index.html).
-
-## Attribution
-
-This repository packages the `thinkdsp` code from *Think DSP* by Allen B. Downey.
-Original code and copyright remain with the author under the MIT License.
-This packaging fork is maintained by `hoppa1231` and is not affiliated with the
-original author or publisher.
+[Read the first edition in HTML](http://greenteapress.com/thinkdsp/html/index.html).
 
 The premise of this book (and the other books in the Think X series) is that if you know how to program, you can use that skill to learn other things. I am writing this book because I think the conventional approach to digital signal processing is backward: most books (and the classes that use them) present the material bottom-up, starting with mathematical abstractions like phasors.
 
 With a programming-based approach, I can go top-down, which means I can present the most important ideas right away. By the end of the first chapter, you can decompose a sound into its harmonics, modify the harmonics, and generate new sounds.
 
-Think DSP is a Free Book. It is available under the [Creative Commons Attribution-NonCommercial 3.0 Unported License](https://creativecommons.org/licenses/by-nc/3.0/), which means that you are free to copy, distribute, and modify it, as long as you attribute the work and don't use it for commercial purposes.
+Think DSP is a Free Book. It is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/), which means that you are free to copy, distribute, and modify it, as long as you attribute the work and don't use it for commercial purposes.
+
+## Install
+
+```bash
+pip install think-dsp
+```
+
+Then in Python:
+
+```python
+import thinkdsp
+```
 
 Here's a notebook that previews what you will see in Chapter 1:
 
