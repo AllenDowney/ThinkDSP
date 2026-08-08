@@ -1243,14 +1243,15 @@ class Signal:
         """
         return 0.1
 
-    def plot(self, framerate=11025):
+    def plot(self, num_periods=3, framerate=11025):
         """Plots the signal.
 
         The default behavior is to plot three periods.
 
+        num_periods: how many periods to plot
         framerate: samples per second
         """
-        duration = self.period * 3
+        duration = self.period * num_periods
         wave = self.make_wave(duration, start=0, framerate=framerate)
         wave.plot()
 
@@ -1852,6 +1853,31 @@ def decorate(**options):
 
     plt.gca().set(**options)
     plt.tight_layout()
+
+
+def decorate_time(**options):
+    """Decorate a figure in the time domain."""
+    decorate(xlabel="Time (s)", ylabel="Amplitude", **options)
+
+
+def decorate_freq(**options):
+    """Decorate a figure showing magnitude in the frequency domain."""
+    decorate(xlabel="Frequency (Hz)", ylabel="Magnitude", **options)
+
+
+def decorate_power(**options):
+    """Decorate a figure showing power in the frequency domain."""
+    decorate(xlabel="Frequency (Hz)", ylabel="Power", **options)
+
+
+def decorate_gram(**options):
+    """Decorate a figure that shows a spectrogram."""
+    decorate(xlabel="Time (s)", ylabel="Frequency (Hz)", **options)
+
+
+def decorate_corr(**options):
+    """Decorate a figure that shows an autocorrelation function."""
+    decorate(xlabel="Lag", ylabel="Correlation", **options)
 
 
 def legend(**options):
