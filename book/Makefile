@@ -110,7 +110,7 @@ $(EPUB_OUT): $(EPUB_TEX) $(EPUB_FIGS) epub/epub.css
 	    --metadata lang=en-US \
 	    --metadata date=2014 \
 	    --metadata identifier="http://think-dsp.com/thinkdsp-$(EPUB_VERSION)" \
-	    --metadata rights="Copyright 2014 Allen B. Downey. Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (http://creativecommons.org/licenses/by-nc-sa/4.0/)." \
+	    --metadata rights="Copyright 2014 Allen B. Downey. Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (https://creativecommons.org/licenses/by-nc-sa/4.0/)." \
 	    --output=$@
 	@echo ">>> $(EPUB_OUT)"
 

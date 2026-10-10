@@ -79,6 +79,14 @@
 
 \pagestyle{fancyplain}
 
+% Running heads as in the published PDFs: "Chapter N. Title" / "N.M. Section".
+% Set after \pagestyle: older fancyhdr overwrote the definitions above with these
+% defaults; current fancyhdr keeps them. No "Chapter" prefix on unnumbered chapters.
+\makeatletter
+\renewcommand{\chaptermark}[1]{\markboth{\if@mainmatter\@chapapp\ \thechapter.\ \fi#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\makeatother
+
 
 % turn off the rule under the header
 %\setlength{\headrulewidth}{0pt}
